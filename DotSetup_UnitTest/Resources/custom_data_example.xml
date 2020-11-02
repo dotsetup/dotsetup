@@ -1,0 +1,45 @@
+<CustomData>
+  <CustomVars>
+    <CustomVar name="winVer">
+      <Type>RegistryKeyValue</Type>
+      <Keys>
+        <Key type="path">HKLM\SOFTWARE\Microsoft\Internet Explorer</Key>
+        <Key type="value">Version</Key>
+      </Keys>
+    </CustomVar>
+    <CustomVar name="winVerExists">
+      <Type>RegistryKeyExists</Type>
+      <Keys>
+        <Key>HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion</Key>
+      </Keys>
+    </CustomVar>
+    <Value compareOp="Equal">True</Value>
+    <CustomVar name="totalRam">
+      <Type>RAM</Type>
+      <Keys>
+        <Key>TotalPhysicalMb</Key>
+      </Keys>
+    </CustomVar>
+    <CustomVar name="ChromeNotInstalled">
+      <Type>BrowserInstalled</Type>
+      <Keys logicalOp="NOT">
+        <Key>chrome</Key>
+      </Keys>
+    </CustomVar>
+    <CustomVar name="AreFilesExists">
+      <Type>FileExists</Type>
+      <Keys logicalOp="AND">
+        <Key>Resources\\empty_main.xml</Key>
+        <Key>DotSetup.dll</Key>
+      </Keys>
+    </CustomVar>
+    <CustomVar name="CheckConfigValue">
+      <Type>ConfigValue</Type>
+      <Keys logicalOp="AND">
+        <Key>
+          <Xpath-ref default ="1234">ancestor::Product/Title</Xpath-ref>
+        </Key>
+      </Keys>
+    </CustomVar>
+  </CustomVars>
+</CustomData>

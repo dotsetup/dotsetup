@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<Main>
+
+	<a1>
+    <a1b1>str1</a1b1>
+    <a1b2 attr0="str10">
+         <a1b2c1 attr1="str11">str2</a1b2c1>
+         <a1b2c2 attr0="str12">str3</a1b2c2>
+     </a1b2>
+     <a1b3>a1b2c1</a1b3>
+     <a1b4>a1b2c2</a1b4>     
+     <a1b5><Xpath-ref>ancestor::a1/a1b2/<Xpath-ref>//a1/a1b4</Xpath-ref></Xpath-ref></a1b5> 
+     <a1b6>Library</a1b6>     
+    </a1>
+    <a2>
+      <Xpath-ref>//a1/a1b1</Xpath-ref>
+    </a2>
+    <a3>
+      <Xpath-ref>//a1/a1b1/ </Xpath-ref>
+    </a3>
+    <a4>
+      <Xpath-ref>//a1/a1b2/<Xpath-ref>//a1/a1b3</Xpath-ref></Xpath-ref>
+    </a4>
+    <a5>
+      <Xpath-ref>//a1/a1b5</Xpath-ref>
+    </a5>
+    <a6>
+      <Xpath-ref default="str4">//a100</Xpath-ref>
+    </a6>
+    <a7>
+      <Known-path></Known-path>
+    </a7>
+    <a8>
+      <Known-path>Documents</Known-path>
+    </a8>
+    <a9>
+      <Known-path>
+        Documents<Xpath-ref>//a1/a1b6</Xpath-ref>
+      </Known-path>
+    </a9>
+    <a10>
+      <Xpath-ref>//a1/a1b2</Xpath-ref>
+      <Xpath-ref>//a1/a1b2/a1b2c2</Xpath-ref>
+    </a10>
+</Main>

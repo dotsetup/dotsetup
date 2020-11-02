@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{59902632-3D51-492F-9F02-86AC762972A2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DotSetup</RootNamespace>
+    <AssemblyName>DotSetup</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">NET35</CustomConstants>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_WithExports</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;_WithExports</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|AnyCPU'">
+    <OutputPath>bin\QA\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|x86'">
+    <OutputPath>bin\x86\QA\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BITSReference10_1">
+      <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference10_1.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="BITSReference10_2">
+      <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference10_2.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="BITSReference1_5">
+      <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference1_5.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="BITSReference4_0">
+      <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference4_0.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="BITSReference5_0">
+      <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference5_0.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Ionic.Zip">
+      <HintPath>Installation\Packages\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Infrastructure\ControlUtils.cs" />
+    <Compile Include="Infrastructure\DockingHelper.cs" />
+    <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWait.cs" />
+    <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWaitWithParamsChange.cs" />
+    <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />
+    <Compile Include="Installation\SDK\DotSetupSDK.cs" />
+    <Compile Include="Installation\SDK\Exports.cs" />
+    <Compile Include="Infrastructure\UriUtils.cs" />
+    <Compile Include="Infrastructure\CrossThreadExtensions.cs" />
+    <Compile Include="Infrastructure\CryptUtils.cs" />
+    <Compile Include="Infrastructure\FontManager.cs" />
+    <Compile Include="Infrastructure\FileUtils.cs" />
+    <Compile Include="Infrastructure\HardwareUtils.cs" />
+    <Compile Include="Infrastructure\JSONParser.cs" />
+    <Compile Include="Infrastructure\OSUtils.cs" />
+    <Compile Include="Infrastructure\RegistryUtils.cs" />
+    <Compile Include="Infrastructure\ResourcesUtils.cs" />
+    <Compile Include="Infrastructure\SingleInstance.cs" />
+    <Compile Include="Infrastructure\UserUtils.cs" />
+    <Compile Include="Installation\Configuration\CmdReader.cs" />
+    <Compile Include="Installation\Configuration\ErrorConsts.cs" />
+    <Compile Include="Installation\Configuration\ConfigConsts.cs" />
+    <Compile Include="Installation\Configuration\ConfigParser.cs" />
+    <Compile Include="Installation\Configuration\ConfigValidator.cs" />
+    <Compile Include="Installation\Events\LoadingEventArgs.cs" />
+    <Compile Include="UILayouts\ControlLayout\ButtonsSettings.cs" />
+    <Compile Include="UILayouts\ControlLayout\ControlsLayout.cs" />
+    <Compile Include="UILayouts\ControlLayout\ImageSettings.cs" />
+    <Compile Include="UILayouts\ControlLayout\TextSettings.cs" />
+    <Compile Include="UILayouts\ControlLayout\ControlSettings.cs" />
+    <Compile Include="UILayouts\ProductLayouts\ProductLayoutManager.cs" />
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout4.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout4.Designer.cs">
+      <DependentUpon>ProductLayout4.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout5.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout5.Designer.cs">
+      <DependentUpon>ProductLayout5.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout6.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout6.Designer.cs">
+      <DependentUpon>ProductLayout6.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\OptLayout.cs" />
+    <Compile Include="Installation\WinForm\ProgressBarUpdater.cs" />
+    <Compile Include="Installation\Packages\CustomPackages\CustomPackage.cs" />
+    <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRun.cs" />
+    <Compile Include="Installation\Packages\CustomPackages\PkgRunOnClose.cs" />
+    <Compile Include="Infrastructure\Logger.cs" />
+    <Compile Include="Infrastructure\EventManager.cs" />
+    <Compile Include="Infrastructure\KnownFolders.cs" />
+    <Compile Include="Infrastructure\XmlParser.cs" />
+    <Compile Include="Installation\Packages\PackageExtractor.cs" />
+    <Compile Include="Installation\Packages\RequirementUtils.cs" />
+    <Compile Include="UILayouts\ProductLayouts\ProductLayout.cs" />
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout3.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout3.Designer.cs">
+      <DependentUpon>ProductLayout3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout2.Designer.cs">
+      <DependentUpon>ProductLayout2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Installation\SDK\frmTestSDK.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Installation\SDK\frmTestSDK.Designer.cs">
+      <DependentUpon>frmTestSDK.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\PanelEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\RoundButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\PictureBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Installation\Packages\PackageDownloader.cs" />
+    <Compile Include="Installation\Configuration\ConfigLoader.cs" />
+    <Compile Include="Installation\WinForm\FormPageUtils.cs" />
+    <Compile Include="Installation\WinForm\frmParent.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Installation\WinForm\frmParent.Designer.cs">
+      <DependentUpon>frmParent.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DotSetupManager.cs" />
+    <Compile Include="Installation\Packages\InstallationPackage.cs" />
+    <Compile Include="Installation\Packages\PackageRunner.cs" />
+    <Compile Include="Installation\Packages\PackageManager.cs" />
+    <Compile Include="Installation\Events\ProgressEventArgs.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout1.Designer.cs">
+      <DependentUpon>ProductLayout1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\RichTextBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\SimplePageIndicator.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\SimplePageIndicator.Designer.cs">
+      <DependentUpon>SimplePageIndicator.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Installation\WinForm\frmParent.resx">
+      <DependentUpon>frmParent.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout4.resx">
+      <DependentUpon>ProductLayout4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout5.resx">
+      <DependentUpon>ProductLayout5.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout6.resx">
+      <DependentUpon>ProductLayout6.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Installation\SDK\frmTestSDK.resx">
+      <DependentUpon>frmTestSDK.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout3.resx">
+      <DependentUpon>ProductLayout3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout2.resx">
+      <DependentUpon>ProductLayout2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout1.resx">
+      <DependentUpon>ProductLayout1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UILayouts\UIComponents\SimplePageIndicator.resx">
+      <DependentUpon>SimplePageIndicator.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include=".editorconfig" />
+    <None Include="app.config" />
+    <None Include="ClassDiagram.cd" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <DefineConstants Condition=" '$(DefineConstants)' != '' And '$(CustomConstants)' != '' ">$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.83.1.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DllExportIdent>932479DD-A90F-4E65-B291-632BBBC6B2A0</DllExportIdent>
+    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
+    <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
+    <DllExportDDNSCecil>false</DllExportDDNSCecil>
+    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
+    <DllExportGenExpLib>true</DllExportGenExpLib>
+    <DllExportOurILAsm>true</DllExportOurILAsm>
+    <DllExportSysObjRebase>true</DllExportSysObjRebase>
+    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
+    <DllExportTimeout>30000</DllExportTimeout>
+    <DllExportPeCheck>2</DllExportPeCheck>
+    <DllExportPatches>3</DllExportPatches>
+    <DllExportPreProcType>0</DllExportPreProcType>
+    <DllExportPostProcType>0</DllExportPostProcType>
+  </PropertyGroup>
+  <ImportGroup Label=".NET DllExport">
+    <Import Project="$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
+  </ImportGroup>
+  <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="DllExport.bat is not found. Path: '$(SolutionDir)' - https://github.com/3F/DllExport" />
+    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command=".\DllExport.bat  -action Restore" WorkingDirectory="$(SolutionDir)" />
+    <MSBuild Condition="'$(DllExportModImported)' != 'true'" Projects="$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets" Targets="DllExportMetaXBaseTarget" Properties="TargetFramework=$(TargetFramework)">
+      <Output TaskParameter="TargetOutputs" PropertyName="DllExportMetaXBase" />
+    </MSBuild>
+    <ItemGroup>
+      <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
+        <HintPath>$(SolutionDir)packages\DllExport.1.7.3\gcache\$(DllExportMetaXBase)\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
+        <Private>False</Private>
+        <SpecificVersion>False</SpecificVersion>
+      </Reference>
+    </ItemGroup>
+  </Target>
+  <Target Name="DllExportRPkgDynamicImport" BeforeTargets="PostBuildEvent" DependsOnTargets="GetFrameworkPaths" Condition="'$(DllExportModImported)' != 'true' And '$(DllExportRPkgDyn)' != 'false'">
+    <MSBuild BuildInParallel="true" UseResultsCache="true" Projects="$(MSBuildProjectFullPath)" Properties="DllExportRPkgDyn=true" Targets="Build" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

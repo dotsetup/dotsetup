@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotSetup", "DotSetup\DotSetup.csproj", "{59902632-3D51-492F-9F02-86AC762972A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotSetup_UnitTest", "DotSetup_UnitTest\DotSetup_UnitTest.csproj", "{6101BC1A-81AD-4417-BDA9-A0163213A2D3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		QA|Any CPU = QA|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{59902632-3D51-492F-9F02-86AC762972A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.QA|Any CPU.ActiveCfg = QA|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.QA|Any CPU.Build.0 = QA|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.QA|Any CPU.ActiveCfg = QA|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.QA|Any CPU.Build.0 = QA|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D04F0FF3-2B23-437C-81D3-F172163E6507}
+	EndGlobalSection
+EndGlobal
