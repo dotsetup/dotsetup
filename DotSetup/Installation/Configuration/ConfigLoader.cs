@@ -13,12 +13,14 @@ namespace DotSetup
     class ConfigLoader
     {
         private readonly ConfigParser configParser;
+        private CmdReader cmdReader;
         private readonly ConfigValidator configValidator;
 
         public ConfigLoader(string[] args, Boolean ExternalParent)
         {
             try
             {
+                cmdReader = new CmdReader(args);
                 configParser = new ConfigParser();
                 if (!ExternalParent)
                 {
