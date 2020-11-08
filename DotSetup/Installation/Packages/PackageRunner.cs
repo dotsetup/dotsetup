@@ -12,7 +12,7 @@ namespace DotSetup
 {
     internal class PackageRunner
     {
-        private InstallationPackage installationPackage;
+        private readonly InstallationPackage installationPackage;
         Thread runnerThread = null;
         Mutex msiRunMutex = null;
         bool waitForRunner;
@@ -25,7 +25,7 @@ namespace DotSetup
 
         internal void Run(string runName, string runParam = "", bool waitForIt = false)
         {
-            waitForRunner = waitForIt;
+            waitForRunner = false;
             runnerThread = new Thread(() => StartRunnerProc(runName, runParam, waitForIt));
             runnerThread.Start();
         }
@@ -83,7 +83,7 @@ namespace DotSetup
                             throw new Win32Exception(ERROR_INSTALL_ALREADY_RUNNING);
                         }
                     }
-
+                        installationPackage.HandleRunStart();
                     p.Start();
                     if (waitForIt)
                         while (!p.WaitForExit(5000)) ;
@@ -93,7 +93,7 @@ namespace DotSetup
                 {
                     installationPackage.OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, "Running " + runName + " " + runParam + " - " + ex.ToString());
                 }
-                installationPackage.HandleRunFinished();
+                installationPackage.HandleRunEnd();
             }
         }
 

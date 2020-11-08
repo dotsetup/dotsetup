@@ -37,8 +37,7 @@ namespace DotSetup
 
         protected void UserControl_OnShow(object sender, EventArgs e)
         {
-            if (((UserControl)sender).Visible)
-                packageManager.SetCanReport(currntLayout.productName);
+            
         }
 
         public void SetPnlLayout(Panel pnlLayout)

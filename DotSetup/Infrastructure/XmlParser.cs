@@ -30,10 +30,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Warning(e.Message + " Source node: " + xmlNode.InnerXml);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning(e.Message + " Source node: " + xmlNode.InnerXml);
+#endif
+            }
             finally
             {
             }

@@ -50,9 +50,19 @@ namespace DotSetup
         {
             ProgressEventArgs progressEvent = (ProgressEventArgs)progressEventArgs;
             pbProgressBar?.PerformSafely(() => pbProgressBar.Value = progressEvent.downloadPercentage);
-            lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statCompleted.Replace("$percent$", progressEvent.downloadPercentage + "%"));
-            if (progressEvent.state == ProgressEventArgs.State.Done)
+            if (progressEvent.state == ProgressEventArgs.State.Run)
             {
+                pbProgressBar?.PerformSafely(() => pbProgressBar.Style = ProgressBarStyle.Marquee);
+                lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statInst);
+            }
+            else if (progressEvent.state == ProgressEventArgs.State.Download)
+            {
+                lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statCompleted.Replace("$percent$", progressEvent.downloadPercentage + "%"));
+            }
+            else if (progressEvent.state == ProgressEventArgs.State.Done)
+            {
+                pbProgressBar?.PerformSafely(() => pbProgressBar.Style = ProgressBarStyle.Continuous);
+                lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statCompleted.Replace("$percent$", "100%"));
                 lblProgressUpperText?.PerformSafely(() => lblProgressUpperText.Text = statFinished);
                 btnFinish?.PerformSafely(() => btnFinish.Show());
             }

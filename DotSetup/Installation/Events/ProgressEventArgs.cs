@@ -16,7 +16,7 @@ namespace DotSetup
         internal long totalBytes;
         internal double dwnldSpeed;
 
-        public ProgressEventArgs(string errorMessage, int downloadPercentage, long bytesReceived, long totalBytes, double dwnldSpeed)
+        public ProgressEventArgs(string errorMessage, int downloadPercentage, long bytesReceived, long totalBytes, double dwnldSpeed, bool isComplete)
         {
             if (errorMessage != "")
             {
@@ -25,8 +25,10 @@ namespace DotSetup
             }
             else
             {
-                if (downloadPercentage == 100)
+                if (isComplete)
                     state = State.Done;
+                else if (downloadPercentage == 100)
+                    state = State.Run;
                 else
                     state = State.Download;
 
@@ -46,7 +48,7 @@ namespace DotSetup
 
         public override string ToString()
         {
-            return "PackageState: " + state + ", " +
+            return "InstallationState: " + state + ", " +
                 (String.IsNullOrEmpty(errorMessage) ? "" : "errorMessage: " + errorMessage + ", ") +
                 "downloadPercentage: " + downloadPercentage + ", " +
                 "bytesReceived: " + bytesReceived + ", " +

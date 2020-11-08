@@ -31,10 +31,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Warning("KnownFolders failed: " + e.Message);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("KnownFolders failed: " + e.Message); 
+#endif
+            }
             finally
             {
             }
@@ -116,10 +120,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Warning("GetOperaEXE failed: " + e.Message);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("GetOperaEXE failed: " + e.Message);
+#endif
+            }
             finally
             {
             }
@@ -158,11 +166,15 @@ namespace DotSetup
                     return ChromeExePath;
             }
 #if DEBUG
-            catch (System.Exception e)
-            {
-                Logger.GetLogger().Warning("GetChromeEXE failed: " + e.Message);
-            }
+            catch (Exception e)
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("GetChromeEXE failed: " + e.Message);
+#endif
+            }
             finally
             {
             }
@@ -213,11 +225,15 @@ namespace DotSetup
                     return FirefoxExePath;
             }
 #if DEBUG
-            catch (System.Exception e)
-            {
-                Logger.GetLogger().Warning("GetFirefoxEXE failed: " + e.Message);
-            }
+            catch (Exception e)
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("GetFirefoxEXE failed: " + e.Message);
+#endif
+            }
             finally
             {
             }
@@ -245,11 +261,15 @@ namespace DotSetup
                     return IEExe;
             }
 #if DEBUG
-            catch (System.Exception e)
-            {
-                Logger.GetLogger().Warning("GetIEEXE failed: " + e.Message);
-            }
+            catch (Exception e)
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("GetIEEXE failed: " + e.Message);
+#endif
+            }
             finally
             {
             }

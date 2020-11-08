@@ -30,10 +30,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Error("Configuration error - " + e);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error("Configuration error - " + e);
+#endif
+            }
             finally
             {
             }

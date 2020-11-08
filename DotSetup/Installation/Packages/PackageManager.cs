@@ -75,7 +75,7 @@ namespace DotSetup
             }
         }
 
-        static public void CleanWorkDir()
+        public static void CleanWorkDir()
         {
             lock (ConfigParser.GetConfig().workDir)
             {
@@ -91,7 +91,7 @@ namespace DotSetup
             int pkgStartedCount = 0;
             foreach (KeyValuePair<string, InstallationPackage> pkg in packageDictionary)
             {
-                if (pkg.Value.PackageState == InstallationPackage.State.Init || pkg.Value.PackageState == InstallationPackage.State.Error)
+                if (pkg.Value.InstallationState == InstallationPackage.State.Init || pkg.Value.InstallationState == InstallationPackage.State.Error)
                     pkgStartedCount += (pkg.Value.DoRun()) ? 1 : 0;
             }
             return pkgStartedCount;
@@ -141,8 +141,7 @@ namespace DotSetup
                 pkg.SetDownloadInfo(prodSettings.DownloadURLs, InstallationPackage.ChooseDownloadFileName(prodSettings));
                 pkg.SetExtractInfo(prodSettings.ExtractPath);
                 pkg.SetRunInfo(prodSettings.RunPath, prodSettings.RunParams, prodSettings.MsiTimeoutMS);
-                pkg.canReport = !prodSettings.IsOptional;
-                pkg.IsOptional = prodSettings.IsOptional;
+                pkg.SetOptional(prodSettings.IsOptional);
                 productLayoutManager.AddProductLayout(prodSettings);
             }
         }
@@ -158,11 +157,6 @@ namespace DotSetup
             return true;
         }
 
-        internal void SetCanReport(string name, bool canReport = true)
-        {
-            packageDictionary[name].canReport = canReport;
-        }
-
         internal void DeclinePackge(string name)
         {
             if (packageDictionary.ContainsKey(name))
@@ -176,7 +170,7 @@ namespace DotSetup
         {
             foreach (var pkg in packageDictionary)
             {
-                if (pkg.Value.IsOptional)
+                if (pkg.Value.isOptional)
                 {
                     pkg.Value.ChangeState(InstallationPackage.State.Skipped);
                 }
@@ -187,7 +181,7 @@ namespace DotSetup
         {
             int optionalsCount = 0;
             foreach (var pkg in packageDictionary)
-                if (pkg.Value.IsOptional)
+                if (pkg.Value.isOptional)
                     optionalsCount++;
             return optionalsCount;
         }
@@ -196,7 +190,7 @@ namespace DotSetup
         {
             lock (progressLock)
             {
-                if ((pkg.PackageState > InstallationPackage.State.Init) && (pkg.dwnldBytesOffset > 0))
+                if ((pkg.InstallationState > InstallationPackage.State.Init) && (pkg.dwnldBytesOffset > 0))
                 {
                     if (!pkg.hasUpdatedTotal)
                     {
@@ -216,7 +210,7 @@ namespace DotSetup
                         pkgRunningCounter--;
                     pkg.isUpdatedProgressCompleted = true;
 #if DEBUG
-                    Logger.GetLogger().Info("[" + pkg.name + "] Package Progress completed");
+                    Logger.GetLogger().Info(String.Format("[{0}] Package Progress completed", pkg.name));
 #endif
                 }
 
@@ -233,7 +227,8 @@ namespace DotSetup
                 avgDwnldSpeed = avgDwnldSpeed * (progressSampleCnt - 1) / progressSampleCnt + CalcCurrentDownloadSpeed(dwnldBytesReceived) / progressSampleCnt;
 
                 progressSampleTime = DateTime.Now;
-                ProgressEventArgs progressEvent = new ProgressEventArgs("", Convert.ToInt32(currentProgress), dwnldBytesReceived, dwnldBytesTotal, avgDwnldSpeed);
+                ProgressEventArgs progressEvent = new ProgressEventArgs("", Convert.ToInt32(currentProgress), 
+                    dwnldBytesReceived, dwnldBytesTotal, avgDwnldSpeed, packageDictionary.Count == pkgCompletedCounter);
 
                 ProgressBarUpdater.HandleProgress(progressEvent);
             }

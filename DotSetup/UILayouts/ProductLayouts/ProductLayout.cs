@@ -32,10 +32,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (System.Exception e)
-            {
-                Logger.GetLogger().Error("Initializing product layout of " + productName + " failed with error: " + e.Message);
-            }
+#else
+            catch (System.Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error("Initializing product layout of " + productName + " failed with error: " + e.Message);
+#endif
+            }
             finally
             {
             }

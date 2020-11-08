@@ -63,6 +63,7 @@ namespace DotSetup
                 //Can be about 60 jobs with the same for a user...
                 mgr.CreateJob("DotSetup Installer", BITS.BG_JOB_TYPE.BG_JOB_TYPE_DOWNLOAD, out jobGuid, out job);
                 SetJobProperties(job);
+				outFilePath = UpdateFileNameIfExists(outFilePath);
                 job.AddFile(downloadLink, outFilePath);
 
                 //Activating events for job.

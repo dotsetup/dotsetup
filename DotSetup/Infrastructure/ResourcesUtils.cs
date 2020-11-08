@@ -1,4 +1,4 @@
-// Copyright (c) dotSetup. All Rights Reserved.
+﻿// Copyright (c) dotSetup. All Rights Reserved.
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
@@ -30,10 +30,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Error("No resource called " + resourceName + " - " + e.Message);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error("No resource called " + resourceName + " - " + e.Message);  
+#endif
+            }
             finally
             {
             }

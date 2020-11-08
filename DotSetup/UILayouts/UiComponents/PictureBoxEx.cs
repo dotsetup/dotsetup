@@ -33,10 +33,14 @@ namespace DotSetup
                     }
 #if DEBUG
                     catch (Exception e)
-                    {
-                        Logger.GetLogger().Error("Error in PictureBox " + Name + " while Loading from URL: " + e.Message);
-                    }
+#else
+                    catch (Exception)
 #endif
+                    {
+#if DEBUG
+                        Logger.GetLogger().Error("Error in PictureBox " + Name + " while Loading from URL: " + e.Message);
+#endif
+                    }
                     finally
                     {
                     }
@@ -54,11 +58,15 @@ namespace DotSetup
                     Image = System.Drawing.Image.FromStream(imageStream);
                 }
 #if DEBUG
-                catch (Exception e)
-                {
-                    Logger.GetLogger().Error("Error in PictureBox " + Name + " while Loading image from resource: " + e.Message);
-                }
+                    catch (Exception e)
+#else
+                catch (Exception)
 #endif
+                {
+#if DEBUG
+                    Logger.GetLogger().Error("Error in PictureBox " + Name + " while Loading image from resource: " + e.Message);
+#endif
+                }
                 finally
                 {
                 }

@@ -150,10 +150,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Error("Exception caught on single instance pipe server's listener: " + e.Message);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error("Exception caught on single instance pipe server's listener: " + e.Message);
+#endif
+            }
             finally
             {
                 // Close the original pipe (we will create a new one each time)

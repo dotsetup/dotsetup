@@ -30,7 +30,7 @@ namespace DotSetup
     {
         public static class State
         {
-            public const int Error = -1, Skipped = -3, Init = 0, DownloadStart = 1, DownloadEnd = 2, ExtractStart = 3, ExtractEnd = 4, RunStart = 5, RunFinish = 6, Done = 7, Confirmed = 100;
+            public const int Error = -1, Skipped = -3, Init = 0, DownloadStart = 1, DownloadEnd = 2, ExtractStart = 3, ExtractEnd = 4, RunStart = 5, RunEnd = 6, Done = 7, Confirmed = 100;
             public static string ToString(int state)
             {
                 switch (state)
@@ -52,7 +52,7 @@ namespace DotSetup
                     case 5:
                         return "RUN_START";
                     case 6:
-                        return "RUN_FINISH";
+                        return "RUN_END";
                     case 7:
                         return "DONE";
                     case 100:
@@ -62,13 +62,18 @@ namespace DotSetup
                 }
             }
         }
-        public int PackageState { get; private set; }
-        internal int dwnldProgress; //extractProgress, RunProgress;
-        internal long dwnldBytesReceived, dwnldBytesOffset, dwnldBytesTotal;
-        internal string name, dwnldLink, dwnldFileName, extractFilePath, runFileName, errorMessage, runParams;
-        internal bool hasUpdatedTotal, canReport, IsOptional, canRun, isProgressCompleted, isUpdatedProgressCompleted;
+        public int InstallationState { get; private set; }
+        private int dwnldProgress; //extractProgress, RunProgress;
+        private long dwnldBytesReceived;
+        internal long dwnldBytesOffset, dwnldBytesTotal;
+        private string dwnldLink, errorMessage;
+        protected string dwnldFileName, runFileName, extractFilePath, runParams;
+        internal string name;
+        internal bool hasUpdatedTotal, isOptional;
+        internal bool canRun, firstDownloaded, isProgressCompleted, isUpdatedProgressCompleted;
         internal int msiTimeout;
         internal Dictionary<string, string> PkgParams;
+		private Action<int> OnChangeState;
         internal Action<InstallationPackage> handleProgress;
         internal PackageDownloader downloader;
         internal PackageExtractor extractor;
@@ -81,7 +86,7 @@ namespace DotSetup
             downloader = new PackageDownloaderBits(this);
             extractor = new PackageExtractor(this);
             runner = new PackageRunner(this);
-            PackageState = State.Init;
+            InstallationState = State.Init;
 
             PkgParams = new Dictionary<string, string>();
         }
@@ -89,7 +94,7 @@ namespace DotSetup
         internal bool DoRun()
         {
             errorMessage = "";
-            PackageState = State.DownloadStart;
+            InstallationState = State.DownloadStart;
 #if DEBUG
             Logger.GetLogger().Info("[" + name + "] start downloading from " + dwnldLink + " to location " + dwnldFileName);
 #endif
@@ -122,28 +127,37 @@ namespace DotSetup
             }
 #if DEBUG
             catch (IOException e)
-            {
-                Logger.GetLogger().Warning("[" + name + "] Cannot opening " + dwnldFileName + " error message: " + e.Message);
-            }
+#else
+            catch (IOException)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("[" + name + "] Cannot opening " + dwnldFileName + " error message: " + e.Message);
+#endif
+            }
             finally
             {
             }
         }
 
-
         public virtual void HandleExtractEnded()
         {
             ChangeState(State.ExtractEnd);
-            if (canRun)
+            if (canRun && firstDownloaded)
                 Run();
         }
 
-        public virtual void HandleRunFinished()
+        internal void HandleRunStart()
         {
-            ChangeState(State.RunFinish);
+            ChangeState(State.RunStart);
+        }
+
+        public virtual void HandleRunEnd()
+        {
+            ChangeState(State.RunEnd);
             ChangeState(State.Done);
         }
+
         public virtual void Quit(bool doRunOnClose)
         {
             downloader.Terminate();
@@ -199,6 +213,40 @@ namespace DotSetup
             this.runParams = runParams;
         }
 
+        internal void SetOptional(bool isOptional)
+        {
+            this.isOptional = isOptional;
+            if (isOptional)
+            {
+                EventManager.GetManager().AddEvent(DotSetupManager.EventName.OnFirstDownloadEnd, HandleFisrtDownloadEnded);
+            }
+            else
+            {
+                firstDownloaded = true;
+                OnChangeState += (state) =>
+                {
+                    if (state == State.Error) EventManager.GetManager().DispatchEvent(DotSetupManager.EventName.OnFatalError, this);
+                    if (state == State.DownloadEnd || state == State.Error) EventManager.GetManager().DispatchEvent(DotSetupManager.EventName.OnFirstDownloadEnd, this);
+                };
+            }
+        }
+
+        private bool HandleFisrtDownloadEnded(object sender, EventArgs e)
+        {
+            if (((InstallationPackage)sender).InstallationState == State.Error)
+            {
+
+            }
+            else
+            {
+                firstDownloaded = true;
+                if (canRun && firstDownloaded && (InstallationState == State.ExtractEnd))
+                    Run();
+            }
+            return firstDownloaded;
+        }
+
+
         public virtual bool Run(bool waitForIt = false)
         {
             if (!File.Exists(runFileName))
@@ -214,10 +262,11 @@ namespace DotSetup
 
             return true;
         }
+
         public void RunDownloadedFile(bool waitForIt = false)
         {
             canRun = true;
-            if (PackageState == State.ExtractEnd)
+            if (canRun && firstDownloaded && (InstallationState == State.ExtractEnd))
                 Run(waitForIt);
         }
 
@@ -257,21 +306,19 @@ namespace DotSetup
 #endif
         }
 
-        public void ChangeState(int pkgState)
+        public void ChangeState(int newState)
         {
-            if (PackageState >= State.Init && PackageState != State.Done)
+            if (InstallationState >= State.Init && InstallationState != State.Done)
             {
 #if DEBUG
-                Logger.GetLogger().Info("[" + name + "] Package switching from PackageState " + PackageState + "(" + State.ToString(PackageState) +
-                    ") to PackageState " + pkgState + "(" + State.ToString(pkgState) + ")");
+                Logger.GetLogger().Info("[" + name + "] Package switching from InstallationState " + InstallationState + "(" + State.ToString(InstallationState) +
+                    ") to InstallationState " + newState + "(" + State.ToString(newState) + ")");
 #endif
-                PackageState = pkgState;
-                if (pkgState < State.Init || pkgState == State.Done)
+                InstallationState = newState;
+                if (newState < State.Init || newState == State.Done)
                     isProgressCompleted = true;
-                if (pkgState == State.Error && !this.IsOptional)
-                {
-                    EventManager.GetManager().DispatchEvent(DotSetupManager.EventName.OnFatalError, this);
-                }
+
+                OnChangeState?.Invoke(InstallationState);
                 handleProgress?.Invoke(this);
             }
         }

@@ -173,10 +173,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Warning("Cannot parse config value of key: " + entry.Key + ". Value set to " + entryValue + ". " + e.Message);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("Cannot parse config value of key: " + entry.Key + ". Value set to " + entryValue + ". " + e.Message);
+#endif
+            }
             finally
             {
             }

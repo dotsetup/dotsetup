@@ -14,7 +14,7 @@ namespace DotSetup
     {
         public PanelEx() : base()
         {
-
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -90,10 +90,14 @@ namespace DotSetup
                 }
 #if DEBUG
                 catch (Exception e)
-                {
-                    Logger.GetLogger().Error("PanelEx SetImage error while trying to load from URL - " + e.Message);
-                }
+#else
+                catch (Exception)
 #endif
+                {
+#if DEBUG
+                    Logger.GetLogger().Error("PanelEx SetImage error while trying to load from URL - " + e.Message);
+#endif
+                }
                 finally
                 {
                 }
@@ -112,10 +116,14 @@ namespace DotSetup
                 }
 #if DEBUG
                 catch (Exception e)
-                {
-                    Logger.GetLogger().Error("PanelEx SetImage error while loading image from resource: " + e.Message);
-                }
+#else
+                catch (Exception)
 #endif
+                {
+#if DEBUG
+                    Logger.GetLogger().Error("PanelEx SetImage error while loading image from resource: " + e.Message);
+#endif
+                }
                 finally
                 {
                 }

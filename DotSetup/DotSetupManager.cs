@@ -12,8 +12,9 @@ namespace DotSetup
         public static class EventName
         {
             public const string OnProgress = "OnProgress",
-                                OnFatalError = "OnFatalError",
-                                OnServerResponse = "OnServerResponse",
+								OnFatalError = "OnFatalError",
+								OnServerResponse = "OnServerResponse",
+                                OnFirstDownloadEnd = "OnFirstDownloadEnd",
                                 OnLoading = "OnLoading";
         }
 

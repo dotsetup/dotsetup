@@ -10,7 +10,7 @@ DotSetup/bin/*
 DotSetup/obj/*
 DotSetup_UnitTest/bin/*
 DotSetup_UnitTest/obj/*
-
+DotSetup_UnitTest/Properties/AssemblyInfo.cs
 
 
 

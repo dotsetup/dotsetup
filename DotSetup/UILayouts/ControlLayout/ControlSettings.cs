@@ -101,10 +101,14 @@ namespace DotSetup
             }
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Warning("Updateing cid " + cid + " with " + valStr + " failed: " + e.Message);
-            }
+#else
+            catch (Exception)
 #endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning("Updateing cid " + cid + " with " + valStr + " failed: " + e.Message);
+#endif
+            }
             finally
             {
             }

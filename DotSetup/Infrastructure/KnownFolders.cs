@@ -225,14 +225,19 @@ namespace DotSetup
                 KnownFolder knownFolder = (KnownFolder)Enum.Parse(typeof(KnownFolder), enumName, true);
                 res = GetPath(knownFolder);
             }
+
 #if DEBUG
             catch (Exception e)
-            {
-                Logger.GetLogger().Error("GetKnownPath of " + enumName + " failed: " + e);
-            }
+#else
+            catch (Exception)
 #endif
-            finally
             {
+#if DEBUG
+                Logger.GetLogger().Error("GetKnownPath of "+ enumName + " failed: " + e);
+#endif
+            }
+            finally
+            {                
             }
             return res;
         }

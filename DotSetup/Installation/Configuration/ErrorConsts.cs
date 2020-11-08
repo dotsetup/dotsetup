@@ -8,7 +8,7 @@ namespace DotSetup
     {
         public const int
         // --- ERROR CODES
-        ERR_NONE = 0, // no error - normal PackageState
+        ERR_NONE = 0, // no error - normal InstallationState
         // permanent errors
         ERR_DOWNLOAD_GENERAL = -1, // general download error
         ERR_EXTRACT_GENERAL = -2, // general extract error
