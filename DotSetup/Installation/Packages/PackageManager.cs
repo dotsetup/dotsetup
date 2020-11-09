@@ -200,7 +200,7 @@ namespace DotSetup
                     }
 
                     dwnldBytesReceived += pkg.dwnldBytesOffset;
-                    currentProgress = Math.Round(98.0 * dwnldBytesReceived / dwnldBytesTotal);
+                    currentProgress = Math.Round(100.0 * dwnldBytesReceived / dwnldBytesTotal);
                 }
 
                 if (pkg.isProgressCompleted && !pkg.isUpdatedProgressCompleted)

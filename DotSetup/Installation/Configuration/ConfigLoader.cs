@@ -14,19 +14,15 @@ namespace DotSetup
     {
         private readonly ConfigParser configParser;
         private CmdReader cmdReader;
-        private readonly ConfigValidator configValidator;
+        private ConfigValidator configValidator;
 
-        public ConfigLoader(string[] args, Boolean ExternalParent)
+        public ConfigLoader(string[] args)
         {
             try
             {
                 cmdReader = new CmdReader(args);
                 configParser = new ConfigParser();
-                if (!ExternalParent)
-                {
-                    configValidator = new ConfigValidator();
-                    configValidator.ValidOrExit();
-                }
+                EventManager.GetManager().AddEvent(DotSetupManager.EventName.OnLoadDynamiConfig, HandleDynamicConfig);
             }
 #if DEBUG
             catch (Exception e)
@@ -43,6 +39,19 @@ namespace DotSetup
             }
         }
 
+        internal bool HandleDynamicConfig(object sender, EventArgs e)
+        {
+            configParser.ResolveSettings();
+            configValidator = new ConfigValidator();
+            string errorMsg = configValidator.Validate();
+            if (!String.IsNullOrEmpty(errorMsg))
+            {
+#if DEBUG
+                Logger.GetLogger().Fatal("Configuration validation error - " + errorMsg);
+#endif
+            }
+            return !String.IsNullOrEmpty(errorMsg);
+        }
 
         internal Dictionary<string, Form> FormsDictionary(frmParent frmParent, IFormPageBinder pageBinder)
         {

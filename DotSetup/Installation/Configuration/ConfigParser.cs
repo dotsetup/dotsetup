@@ -100,7 +100,10 @@ namespace DotSetup
             ReadResourcesToXml();
             ReadCmdToXml();
             ReadConfigSettings();
+        }
 
+        public void ResolveSettings()
+        {
             SetFormDesign();
             SetPagesDesign();
             SetProductsSettings();
@@ -136,39 +139,42 @@ namespace DotSetup
             }
         }
 
-        private void ReadResourcesToXml()
+        internal void SetConfigValue(string entryKey, string entryValue)
         {
-            Dictionary<string, string> resourceSet = ResourcesUtils.GetPropertiesResources(ResourcesUtils.wrapperAssembly);
-#if DEBUG
-            Logger.GetLogger().Info("Adding dynmic configuration data:");
-#endif
-            foreach (var entry in resourceSet)
+            if (ConfigConsts.SensitiveConfigKeys.Contains(entryKey.ToUpper()))
             {
-                if (ConfigConsts.SensitiveConfigKeys.Contains(entry.Key.ToUpper()))
-                {
 #if DEBUG
-                    Logger.GetLogger().Error("Cannot override the key: " + entry.Key + ", this key cannot be added dynamically");
+                Logger.GetLogger().Error("Cannot override the key: " + entryKey + ", this key cannot be injected");
 #endif
-                    continue;
-                }
-
-                string xpath = entry.Key;
+            }
+            else
+            {
+                string xpath = entryKey;
                 if (!xpath.StartsWith("//"))
                     xpath = "//Config/" + xpath;
-                SetStringValue(xpath, ParseConfigValue(entry));
+                SetStringValue(xpath, ParseConfigValue(entryKey, entryValue));
             }
         }
 
-        private string ParseConfigValue(KeyValuePair<string, string> entry)
+        private void ReadResourcesToXml()
         {
-            string entryValue = entry.Value;
+            Dictionary<string, string> resourceSet = ResourcesUtils.GetPropertiesResources(ResourcesUtils.wrapperAssembly);
+            Logger.GetLogger().Info("Adding dynamic config from resources.");
+            foreach (KeyValuePair<string, string> entry in resourceSet)
+            {
+                SetConfigValue(entry.Key, entry.Value);
+            }
+        }
+
+        private string ParseConfigValue(string entryKey, string entryValue)
+        {
             try
             {
                 entryValue = System.Web.HttpUtility.HtmlDecode(entryValue);
                 entryValue = System.Text.RegularExpressions.Regex.Replace(entryValue, @"(</?\s*br\s*/?>)", " ");
                 entryValue = System.Xml.Linq.XDocument.Parse("<route>" + entryValue + "</route>").Root.Value;
 #if DEBUG
-                Logger.GetLogger().Info(entry.Key + " = " + entryValue);
+                Logger.GetLogger().Info(entryKey + " = " + entryValue);
 #endif
             }
 #if DEBUG
@@ -178,7 +184,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("Cannot parse config value of key: " + entry.Key + ". Value set to " + entryValue + ". " + e.Message);
+                Logger.GetLogger().Warning("Cannot parse config value of key: " + entryKey + ". Value set to " + entryValue + ". " + e.Message);
 #endif
             }
             finally

@@ -3,7 +3,9 @@
 // https://dotsetup.io/
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms.VisualStyles;
 
 namespace DotSetup
 {
@@ -32,8 +34,24 @@ namespace DotSetup
             }
         }
 
+        public static int UserAccountAgeInDays()
+        {
+            try
+            {
+                DateTime localappdateCreation = File.GetCreationTime(KnownFolders.GetPath(KnownFolder.LocalAppData));
+                return (DateTime.Now - localappdateCreation).Days;
+            }
+            catch (Exception e)
+            {
+#if DEBUG
+                Logger.GetLogger().Error(String.Format("Unable to retrieve the localappdata folder creation time, error: {0}",e.Message));
+#endif
+            }
+            return -1;
+        }
+
         /// <summary>
-        /// The function determins whether a method exists in the export 
+        /// The function determines whether a method exists in the export 
         /// table of a certain module.
         /// </summary>
         /// <param name="moduleName">The name of the module</param>
@@ -64,6 +82,14 @@ namespace DotSetup
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);
+        static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);        
+
+        public static int GetUpTimeInMinutes()
+        {
+            return (int)Math.Ceiling((double)GetTickCount64() / 60000);
+        }
+
+        [DllImport("kernel32")]
+        extern static UInt64 GetTickCount64();        
     }
 }

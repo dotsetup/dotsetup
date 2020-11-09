@@ -95,6 +95,7 @@ namespace DotSetup
         {
             errorMessage = "";
             InstallationState = State.DownloadStart;
+            dwnldFileName = downloader.UpdateFileNameIfExists(dwnldFileName);
 #if DEBUG
             Logger.GetLogger().Info("[" + name + "] start downloading from " + dwnldLink + " to location " + dwnldFileName);
 #endif

@@ -13,6 +13,7 @@ namespace DotSetup
             PRODUCT_TITLE = "PRODUCT_TITLE",
             URL_ANALYTICS = "URL_ANALYTICS",
             URL_REMOTE_CONFIG = "URL_REMOTE_CONFIG",
+            URL_DYNAMIC_CONFIG = "URL_DYNAMIC_CONFIG",
             PRODUCT_VARIANT = "PRODUCT_VARIANT";
 
 

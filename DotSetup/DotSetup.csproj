@@ -121,6 +121,7 @@
   <ItemGroup>
     <Compile Include="Infrastructure\ControlUtils.cs" />
     <Compile Include="Infrastructure\DockingHelper.cs" />
+    <Compile Include="Infrastructure\ProcessUtils.cs" />
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWait.cs" />
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWaitWithParamsChange.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />

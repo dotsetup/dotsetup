@@ -18,7 +18,7 @@ namespace DotSetup
         }
         public abstract bool Download(string downloadLink, string outFilePath);
 
-        protected string UpdateFileNameIfExists(string fullPath)
+        public string UpdateFileNameIfExists(string fullPath)
         {
             int count = 1;
 

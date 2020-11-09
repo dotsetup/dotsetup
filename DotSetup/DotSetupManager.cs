@@ -13,7 +13,8 @@ namespace DotSetup
         {
             public const string OnProgress = "OnProgress",
 								OnFatalError = "OnFatalError",
-								OnServerResponse = "OnServerResponse",
+                                OnLoadDynamiConfig = "OnLoadDynamiConfig",
+                                OnRemoteConfigResponse = "OnRemoteConfigResponse",
                                 OnFirstDownloadEnd = "OnFirstDownloadEnd",
                                 OnLoading = "OnLoading";
         }
@@ -26,10 +27,10 @@ namespace DotSetup
 
         public DotSetupManager(string[] args, Boolean ExternalParent = false)
         {
-            configLoader = new ConfigLoader(args, ExternalParent);
+            configLoader = new ConfigLoader(args);
             ValidateSingleInstance();
             packageManager = new PackageManager();
-            EventManager.GetManager().AddEvent(EventName.OnServerResponse, HandleServerResponse);
+			EventManager.GetManager().AddEvent(EventName.OnRemoteConfigResponse, HandleServerResponse);
         }
 
         internal void HandlePageLoad(string formName)
