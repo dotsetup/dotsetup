@@ -71,6 +71,8 @@ namespace DotSetup
                     LoadingEventArgs loadingEventArgs = new LoadingEventArgs(false);
                     EventManager.GetManager().DispatchEvent(DotSetupManager.EventName.OnLoading, this, loadingEventArgs);
                 }
+
+                ConfigParser.GetConfig().SetStringValue(SessionDataConsts.ROOT + SessionDataConsts.CURRENT_FORM, formName);
             }
         }
 

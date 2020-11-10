@@ -253,16 +253,30 @@ namespace DotSetup
 
         public bool HandlersReqResult(ProductSettings.ProductRequirement requirement)
         {
-            string[] KeysArr = RequirementToArray(requirement);
-            LogicalOperatorType logicaloperatorType = (LogicalOperatorType)Enum.Parse(typeof(LogicalOperatorType), requirement.LogicalOperator);
-            CompareOperationType operatorType = (CompareOperationType)Enum.Parse(typeof(CompareOperationType), requirement.ValueOperator);
+            bool resB = false;
+            try
+            {
+                string[] KeysArr = RequirementToArray(requirement);
+                LogicalOperatorType logicaloperatorType = (LogicalOperatorType)Enum.Parse(typeof(LogicalOperatorType), requirement.LogicalOperator);
+                CompareOperationType operatorType = (CompareOperationType)Enum.Parse(typeof(CompareOperationType), requirement.ValueOperator);
 
-            string requirementType = requirement.Type.ToLower();
-            string methodResult = EvalMethod(requirementType, KeysArr, logicaloperatorType);
-            bool resB = EvalOperator(methodResult, requirementType, requirement.Value, operatorType, logicaloperatorType);
+                string requirementType = requirement.Type.ToLower();
+                string methodResult = EvalMethod(requirementType, KeysArr, logicaloperatorType);
+                resB = EvalOperator(methodResult, requirementType, requirement.Value, operatorType, logicaloperatorType);
 #if DEBUG
-            Logger.GetLogger().Info(requirement.Type + ((KeysArr.Count() > 1) ? " {" + logicaloperatorType + "}" : "") + " (" + string.Join(", ", KeysArr) + ") <" + operatorType + "> [" + requirement.Value + "] => " + resB);
+                Logger.GetLogger().Info(requirement.Type + ((KeysArr.Count() > 1) ? " {" + logicaloperatorType + "}" : "") + " (" + string.Join(", ", KeysArr) + ") <" + operatorType + "> [" + requirement.Value + "] => " + resB);
 #endif
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error("Product Requirement " + requirement.Type + "failed with error message: " + e.Message);
+#endif
+            }
 
             return resB;
         }

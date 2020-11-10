@@ -25,7 +25,7 @@ namespace DotSetup
 
         public static string DictionaryToJson(Dictionary<string, string> dict)
         {
-            string[] entries = dict.Select(d => string.Format("\"{0}\":\"{1}\"", d.Key, d.Value)).ToArray();
+            string[] entries = dict.Select(d => string.Format("\"{0}\":{1}", d.Key, d.Value[0]=='{'?d.Value : "\""+d.Value+"\"")).ToArray();
             return "{" + string.Join(",", entries) + "}";
         }
 
