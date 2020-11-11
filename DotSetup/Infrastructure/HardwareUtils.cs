@@ -22,7 +22,7 @@ namespace DotSetup
         private readonly string osName;
         private readonly long diskTotalSpace = 0;
         private readonly long diskFreeSpace = 0;
-        private const long bytesPerMegabyte = 1024 * 1024; //million bytes in one megabyte 
+        private const long BYTES_PER_MEGABYTES = 1024 * 1024; //million bytes in one megabyte 
 
         private readonly SYSTEM_POWER_CAPABILITIES systemPowerCapabilites;
         // Explicit static constructor to tell C# compiler
@@ -52,32 +52,32 @@ namespace DotSetup
 
         public ulong TotalPhysicalRamInMB()
         {
-            return (totalPhysicalRam / bytesPerMegabyte);
+            return (totalPhysicalRam / BYTES_PER_MEGABYTES);
         }
 
         public ulong FreePhysicalRamInMB()
         {
-            return (freePhysicalRam / bytesPerMegabyte);
+            return (freePhysicalRam / BYTES_PER_MEGABYTES);
         }
 
         public ulong TotalVirtualRamInMB()
         {
-            return (totalVirtualRam / bytesPerMegabyte);
+            return (totalVirtualRam / BYTES_PER_MEGABYTES);
         }
 
         public ulong FreeVirtualRamInMB()
         {
-            return (freeVirtualRam / bytesPerMegabyte);
+            return (freeVirtualRam / BYTES_PER_MEGABYTES);
         }
 
         public long DiskTotalSpaceInMB()
         {
-            return (diskTotalSpace / bytesPerMegabyte);
+            return (diskTotalSpace / BYTES_PER_MEGABYTES);
         }
 
         public long DiskFreeSpaceInMB()
         {
-            return (diskFreeSpace / bytesPerMegabyte);
+            return (diskFreeSpace / BYTES_PER_MEGABYTES);
         }
 
         public string OsName()

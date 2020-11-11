@@ -49,7 +49,8 @@ namespace DotSetup
                 {
                     m_handle = Toolhelp32.CreateToolhelp32Snapshot(flags, processId);
                 }
-                IntPtr m_handle;
+
+                readonly IntPtr m_handle;
             }
         }
 

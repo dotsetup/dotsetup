@@ -14,7 +14,8 @@ namespace DotSetup
             URL_ANALYTICS = "URL_ANALYTICS",
             URL_REMOTE_CONFIG = "URL_REMOTE_CONFIG",
             URL_DYNAMIC_CONFIG = "URL_DYNAMIC_CONFIG",
-            PRODUCT_VARIANT = "PRODUCT_VARIANT"
+            PRODUCT_VARIANT = "PRODUCT_VARIANT",
+            ACTIVITY_ID = "ACTIVITY_ID"
             ;
             
 

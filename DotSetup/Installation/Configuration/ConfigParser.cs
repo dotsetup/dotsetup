@@ -159,7 +159,9 @@ namespace DotSetup
         private void ReadResourcesToXml()
         {
             Dictionary<string, string> resourceSet = ResourcesUtils.GetPropertiesResources(ResourcesUtils.wrapperAssembly);
+#if DEBUG
             Logger.GetLogger().Info("Adding dynamic config from resources.");
+#endif
             foreach (KeyValuePair<string, string> entry in resourceSet)
             {
                 SetConfigValue(entry.Key, entry.Value);
@@ -387,11 +389,13 @@ namespace DotSetup
 
         public ProductSettings ExtractProductSettings(XmlNode productSettingsNode)
         {
-            ProductSettings productSettings = new ProductSettings();
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Product Settings:", Logger.Level.MEDIUM_DEBUG_LEVEL);
-#endif
-            productSettings.IsOptional = XmlParser.GetBoolAttribute(productSettingsNode, "optional");
+#endif            
+            ProductSettings productSettings = new ProductSettings
+            {
+                IsOptional = XmlParser.GetBoolAttribute(productSettingsNode, "optional")
+            };
 
             XmlNode productStaticData = productSettingsNode.SelectSingleNode("StaticData");
             XmlNode productDynamicData = productSettingsNode.SelectSingleNode("DynamicData");
@@ -487,9 +491,10 @@ namespace DotSetup
             List<ProductSettings.ProductRequirements> requirementsList = new List<ProductSettings.ProductRequirements>();
             foreach (XmlNode requirementsNode in productRequirementsList)
             {
-                ProductSettings.ProductRequirements requirements = new ProductSettings.ProductRequirements();
-
-                requirements.LogicalOperator = XmlParser.GetStringAttribute(requirementsNode, "Requirements", "logicalOp");
+                ProductSettings.ProductRequirements requirements = new ProductSettings.ProductRequirements
+                {
+                    LogicalOperator = XmlParser.GetStringAttribute(requirementsNode, "Requirements", "logicalOp")
+                };
                 if (string.IsNullOrEmpty(requirements.LogicalOperator))
                     requirements.LogicalOperator = Enum.GetName(typeof(RequirementHandlers.LogicalOperatorType), RequirementHandlers.LogicalOperatorType.AND); //default value     
 

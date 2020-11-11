@@ -41,7 +41,11 @@ namespace DotSetup
                 DateTime localappdateCreation = File.GetCreationTime(KnownFolders.GetPath(KnownFolder.LocalAppData));
                 return (DateTime.Now - localappdateCreation).Days;
             }
+#if DEBUG
             catch (Exception e)
+#else
+            catch (Exception)
+#endif
             {
 #if DEBUG
                 Logger.GetLogger().Error(String.Format("Unable to retrieve the localappdata folder creation time, error: {0}",e.Message));
@@ -90,6 +94,6 @@ namespace DotSetup
         }
 
         [DllImport("kernel32")]
-        extern static UInt64 GetTickCount64();        
+        static extern UInt64 GetTickCount64();        
     }
 }
