@@ -54,7 +54,7 @@ namespace DotSetup
     public struct FormDesign
     {
         public int Height, Width, ClientHeight, ClientWidth, BottomPanelHeight;
-        public string FormName, RightSideImagePath;
+        public string FormName;
         public Color BackgroundColor;
         public Dictionary<string, string> DefaultControlDesign;
     }
@@ -63,7 +63,7 @@ namespace DotSetup
     {
         public string PageName;
         public ControlsLayout ControlsLayouts;
-        public string RightSideImagePath;
+        public int Index;
     }
 
     public class ConfigParser
@@ -78,11 +78,6 @@ namespace DotSetup
 
         private static ConfigParser _configParser;
         private static string userSelectedLocale;
-
-        public static void SetUserSelectedLocale(string locale)
-        {
-            userSelectedLocale = locale;
-        }
 
         public static ConfigParser GetConfig()
         {
@@ -100,6 +95,9 @@ namespace DotSetup
             ReadResourcesToXml();
             ReadCmdToXml();
             ReadConfigSettings();
+
+            SetFormDesign();
+            SetPagesDesign();
         }
 
         public void ResolveSettings()
@@ -196,6 +194,12 @@ namespace DotSetup
             return entryValue;
         }
 
+        public List<string> LoadLocaleList()
+        {
+            List<string> res = ResourcesUtils.GetEmbeddedResourceNames(ResourcesUtils.wrapperAssembly, ".locale");
+            return res;
+        }
+
         public string GetLocaleCode()
         {
             return localeCode;
@@ -218,7 +222,7 @@ namespace DotSetup
                         tmpLocale = localeCodeCandidate;
                     break;
                 case "userselected":
-                    tmpLocale = userSelectedLocale;
+                    tmpLocale = (String.IsNullOrEmpty(userSelectedLocale)) ? tmpLocale : userSelectedLocale;
                     break;
                 default:
                     tmpLocale = "en";
@@ -235,6 +239,18 @@ namespace DotSetup
             Logger.GetLogger().Info("Chosen locale: " + localeCode);
 #endif
             ReadXmlFiles(new Stream[] { localeXmlStream });
+        }
+
+        internal void SetUserSelectedLocale(string locale)
+        {
+            userSelectedLocale = locale;
+            if (localeCode != locale)
+            {
+                XmlNode oldLocaleNode = xmlDoc?.DocumentElement?.SelectSingleNode("//Locale");
+                oldLocaleNode?.ParentNode?.RemoveChild(oldLocaleNode);
+                SetLocaleCode();
+                SetPagesDesign();
+            }
         }
 
         private void ReadConfigSettings()
@@ -292,7 +308,7 @@ namespace DotSetup
         private void SetPagesDesign()
         {
             pagesDesign = new List<PageDesign>();
-
+            int pageIndex = 0;
             XmlNodeList PagesList = xmlDoc.SelectNodes("//Flow/Page");
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Page Flow:", Logger.Level.MEDIUM_DEBUG_LEVEL);
@@ -306,7 +322,7 @@ namespace DotSetup
 
                 XmlNodeList controlList = page["Controls"].ChildNodes;
                 pageDesign.ControlsLayouts = new ControlsLayout(new XmlNodeList[] { controlList }, formDesign.DefaultControlDesign);
-
+                pageDesign.Index = pageIndex++;
                 pagesDesign.Add(pageDesign);
             }
         }
@@ -451,7 +467,7 @@ namespace DotSetup
             ControlsLayout defLocaleControlsLayout = null;
             productSettings.ControlsLayouts = null;
 
-            XmlNodeList Locales = productSettingsNode.SelectNodes("DynamicData/Locales/Locale");
+            XmlNodeList Locales = productSettingsNode.SelectNodes("Locales/Locale");
             if (Locales.Count > 0)
             {
                 foreach (XmlNode localeNode in Locales)

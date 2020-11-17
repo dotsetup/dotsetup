@@ -39,6 +39,7 @@ namespace DotSetup
 #endif
             }
         }
+
         public void RemoveEvent(string eventName, InstallerEventHandler instEventHandler = null)
         {
             lock (eventTable)
@@ -58,7 +59,6 @@ namespace DotSetup
                     Logger.GetLogger().Info("Removing from event " + eventName + " the method " + instEventHandler.Method.DeclaringType.Name + "." + instEventHandler.Method.Name);
 #endif
                 }
-
             }
         }
 

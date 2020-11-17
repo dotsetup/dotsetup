@@ -36,8 +36,6 @@ namespace DotSetup
                 Enabled = false
             };
             aTimer.Elapsed += new ElapsedEventHandler(TimerElapsed);
-
-
         }
 
         public override bool Download(string downloadLink, string outFilePath)
@@ -70,8 +68,6 @@ namespace DotSetup
                 job.SetNotifyFlags(
                   (UInt32)BitsNotifyFlags.JOB_TRANSFERRED
                   + (UInt32)BitsNotifyFlags.JOB_ERROR);
-                //+ (UInt32)BitsNotifyFlags.JOB_MODIFICATION);
-
                 job.SetNotifyInterface(this);
                 job.Resume();  //starting the job
             }
@@ -119,7 +115,7 @@ namespace DotSetup
                 if (timeCounter >= (MAX_TIMEOUT_SECONDS / 2)) //20 seconds of timeout 
                 {
                     job.Cancel();
-                    aTimer.Enabled = false;
+                    aTimer.Stop();
                     ReportDownloadError("No Internet connection");
                 }
                 else
@@ -142,7 +138,7 @@ namespace DotSetup
 
         public void JobTransferred(BITS.IBackgroundCopyJob pJob)
         {
-            aTimer.Enabled = false;
+            aTimer.Stop();
             pJob.Complete();
             installationPackage.HandleDownloadEnded();
         }
@@ -150,7 +146,7 @@ namespace DotSetup
         public void JobError(BITS.IBackgroundCopyJob pJob, BITS.IBackgroundCopyError pError)
         {
             pJob.Cancel();
-            aTimer.Enabled = false;
+            aTimer.Stop();
             pError.GetErrorDescription((uint)System.Threading.Thread.CurrentThread.CurrentCulture.LCID, out string errdesc);
             if (errdesc != null)
             {

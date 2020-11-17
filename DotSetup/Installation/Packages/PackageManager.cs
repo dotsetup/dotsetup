@@ -86,13 +86,13 @@ namespace DotSetup
             }
         }
 
-        internal int DoRun()
+        internal int Activate()
         {
             int pkgStartedCount = 0;
             foreach (KeyValuePair<string, InstallationPackage> pkg in packageDictionary)
             {
                 if (pkg.Value.InstallationState == InstallationPackage.State.Init || pkg.Value.InstallationState == InstallationPackage.State.Error)
-                    pkgStartedCount += (pkg.Value.DoRun()) ? 1 : 0;
+                    pkgStartedCount += (pkg.Value.Activate()) ? 1 : 0;
             }
             return pkgStartedCount;
         }
@@ -108,6 +108,7 @@ namespace DotSetup
         internal void SetProductsSettings(List<ProductSettings> productsSettings)
         {
             int maxProducts = ConfigParser.GetConfig().GetIntValue("//RemoteConfiguration/FlowSettings/MaxProducts", int.MaxValue);
+            maxProducts = maxProducts == -1 ? int.MaxValue : maxProducts;
             int remainAllowedProducts = maxProducts;
 
             foreach (ProductSettings prodSettings in productsSettings)
@@ -142,7 +143,7 @@ namespace DotSetup
                 pkg.SetExtractInfo(prodSettings.ExtractPath);
                 pkg.SetRunInfo(prodSettings.RunPath, prodSettings.RunParams, prodSettings.MsiTimeoutMS);
                 pkg.SetOptional(prodSettings.IsOptional);
-                productLayoutManager.AddProductLayout(prodSettings);
+                productLayoutManager.AddProductSettings(prodSettings);
             }
         }
 

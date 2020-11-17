@@ -1,6 +1,6 @@
 ﻿namespace DotSetup
 {
-    partial class frmParent
+    partial class FrmParent
     {
         /// <summary>
         /// Required designer variable.
@@ -53,14 +53,12 @@
             this.Name = "frmParent";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "DotSetup";
-            this.Load += new System.EventHandler(this.frmParent_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Draggable_OnMouseDown);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        public System.Windows.Forms.Panel pnlContent;
     }
 }
 

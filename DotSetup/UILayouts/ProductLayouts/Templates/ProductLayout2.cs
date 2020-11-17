@@ -3,6 +3,7 @@
 // https://dotsetup.io/
 
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -17,6 +18,14 @@ namespace DotSetup
         public ProductLayout2(ControlsLayout controlsLayout)
         {
             InitializeComponent();
+
+            Color FontColor = ConfigParser.GetConfig().GetColorValue("//Main/FormDesign/FontColor");
+            if (FontColor != null)
+            {
+                txtDisclaimer.ForeColor = FontColor;
+                txtTitle.ForeColor = FontColor;
+                txtDescription.ForeColor = FontColor;
+            }
 
             controlsLayout.SetLayout(pnlLayout.Controls);
 

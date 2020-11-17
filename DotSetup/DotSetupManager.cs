@@ -3,6 +3,7 @@
 // https://dotsetup.io/
 
 using System;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace DotSetup
@@ -12,37 +13,38 @@ namespace DotSetup
         public static class EventName
         {
             public const string OnProgress = "OnProgress",
-								OnFatalError = "OnFatalError",
-                                OnLoadDynamiConfig = "OnLoadDynamiConfig",
-                                OnRemoteConfigResponse = "OnRemoteConfigResponse",
                                 OnFirstDownloadEnd = "OnFirstDownloadEnd",
-                                OnLoading = "OnLoading";
+                                OnFatalError = "OnFatalError";
         }
-
-
 
         internal ConfigLoader configLoader;
         internal PackageManager packageManager;
         private SingleInstance singleInstance;
 
-        public DotSetupManager(string[] args, Boolean ExternalParent = false)
+        private static DotSetupManager instance = null;
+        public static DotSetupManager GetManager()
         {
+            if (instance == null)
+                instance = new DotSetupManager();
+            return instance;
+        }
+
+        public DotSetupManager()
+        {
+        }
+
+        public void InitInstaller(string[] args, Assembly assembly)
+        {
+            ResourcesUtils.wrapperAssembly = assembly;
+            ResourcesUtils.libraryAssembly = Assembly.GetExecutingAssembly();
             configLoader = new ConfigLoader(args);
             ValidateSingleInstance();
             packageManager = new PackageManager();
-			EventManager.GetManager().AddEvent(EventName.OnRemoteConfigResponse, HandleServerResponse);
         }
 
-        internal void HandlePageLoad(string formName)
+        public void Activate()
         {
-            if (formName == FormPageUtils.PageName.Progress)
-                packageManager.DoRun();
-        }
-
-        internal bool HandleServerResponse(object sender, EventArgs e)
-        {
-            configLoader.UpdateInstallerManager(this);
-            return true;
+            packageManager.Activate();
         }
 
         public void FinalizeInstaller(bool runOnClose)

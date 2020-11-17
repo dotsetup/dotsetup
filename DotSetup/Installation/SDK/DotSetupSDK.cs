@@ -22,7 +22,8 @@ namespace DotSetup
                 return 0;
             InitApplication();
             string[] args = new string[] { "/log" };
-            dotSetupManager = new DotSetupManager(args, true);
+            dotSetupManager = DotSetupManager.GetManager();
+            dotSetupManager.InitInstaller(args,null);
             return 1;
         }
         [DllImport("user32.dll", SetLastError = true)]
@@ -81,7 +82,7 @@ namespace DotSetup
         {
             int pkgStartedCount = 0;
             if (dotSetupManager != null)
-                pkgStartedCount = dotSetupManager.packageManager.DoRun();
+                pkgStartedCount = dotSetupManager.packageManager.Activate();
             return (pkgStartedCount > 0) ? 1 : 0;
         }
 

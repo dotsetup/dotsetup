@@ -1,4 +1,4 @@
-// Copyright (c) dotSetup. All Rights Reserved.
+﻿// Copyright (c) dotSetup. All Rights Reserved.
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
@@ -114,6 +114,7 @@ namespace DotSetup
         private const int WM_KILLFOCUS = 0x0008;
         private const int WM_SETCURSOR = 0x20;
         private const int WM_MOUSEWHEEL = 0x020A;
+        private HorizontalAlignment _Alignment = HorizontalAlignment.Left;
 
         private struct HyperLinkText
         {
@@ -158,10 +159,10 @@ namespace DotSetup
             ScrollBars = RichTextBoxScrollBars.None;
             LinkClicked += new LinkClickedEventHandler(HandelLinkClicked);
 
-            this.SetStyle(ControlStyles.Opaque, true);
-            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.Opaque, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
-            this.TextChanged += TransparentLabel_TextChanged;
+            TextChanged += TransparentLabel_TextChanged;
         }
 
         void TransparentLabel_TextChanged(object sender, System.EventArgs e)
@@ -189,10 +190,27 @@ namespace DotSetup
             }
             set
             {
-                var OriginalSelectionAlignment = base.SelectionAlignment;
+                var OriginalSelectionAlignment = this.SelectionAlignment;
                 base.Text = RemoveLinkBrackets(value);
                 SetLinks();
+                this.SelectAll();
                 base.SelectionAlignment = OriginalSelectionAlignment;
+                this.DeselectAll();
+            }
+        }
+
+        public HorizontalAlignment Alignment
+        {
+            get
+            {
+                return _Alignment;
+            }
+            set
+            {
+                this._Alignment = value;
+                this.SelectAll();
+                this.SelectionAlignment = value;
+                this.DeselectAll();
             }
         }
 

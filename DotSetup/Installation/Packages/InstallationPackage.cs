@@ -91,7 +91,7 @@ namespace DotSetup
             PkgParams = new Dictionary<string, string>();
         }
 
-        internal bool DoRun()
+        internal bool Activate()
         {
             errorMessage = "";
             InstallationState = State.DownloadStart;

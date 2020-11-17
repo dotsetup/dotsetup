@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DotSetup
@@ -14,7 +15,6 @@ namespace DotSetup
     {
         private readonly ConfigParser configParser;
         private CmdReader cmdReader;
-        private ConfigValidator configValidator;
 
         public ConfigLoader(string[] args)
         {
@@ -22,7 +22,6 @@ namespace DotSetup
             {
                 cmdReader = new CmdReader(args);
                 configParser = new ConfigParser();
-                EventManager.GetManager().AddEvent(DotSetupManager.EventName.OnLoadDynamiConfig, HandleDynamicConfig);
             }
 #if DEBUG
             catch (Exception e)
@@ -39,84 +38,70 @@ namespace DotSetup
             }
         }
 
-        internal bool HandleDynamicConfig(object sender, EventArgs e)
-        {
-            configParser.ResolveSettings();
-            configValidator = new ConfigValidator();
-            string errorMsg = configValidator.Validate();
-            if (!String.IsNullOrEmpty(errorMsg))
-            {
-#if DEBUG
-                Logger.GetLogger().Fatal("Configuration validation error - " + errorMsg);
-#endif
-            }
-            return !String.IsNullOrEmpty(errorMsg);
-        }
-
-        internal Dictionary<string, Form> FormsDictionary(frmParent frmParent, IFormPageBinder pageBinder)
+        internal Dictionary<PageDesign, Form> FormsDictionary(FrmParent frmParent, IFormPageBinder pageBinder)
         {
             if (configParser == null)
                 return null;
             List<PageDesign> pagesDesign = configParser.GetPagesDesign();
 
-            Dictionary<string, Form> frmDictionary = new Dictionary<string, Form>();
+            Dictionary<PageDesign, Form> frmDictionary = new Dictionary<PageDesign, Form>();
 
-            for (int i = 0; i < pagesDesign.Count; i++)
+            foreach (PageDesign pageDesign in pagesDesign)
             {
-                Form page = pageBinder.GetFormPage(pagesDesign[i].PageName, frmParent);
+                Form page = pageBinder.GetFormPage(pageDesign.PageName, frmParent);
                 if (page != null)
-                    frmDictionary.Add(pagesDesign[i].PageName, DecoratePage(page, pagesDesign, i));
+                    frmDictionary.Add(pageDesign, DecoratePage(page, pageDesign));
             }
             return frmDictionary;
         }
 
-        internal List<string> PagesNames()
+        internal void DecorateForms(Dictionary<PageDesign, Form> frmDictionary)
         {
+            if (configParser == null)
+                return;
             List<PageDesign> pagesDesign = configParser.GetPagesDesign();
-            return pagesDesign.ConvertAll(x => x.PageName);
+
+            foreach (KeyValuePair<PageDesign, Form> kvp in frmDictionary)
+            {
+                PageDesign newDesign = pagesDesign.FirstOrDefault(x => x.PageName == kvp.Key.PageName);
+                PageDesign oldDesign = kvp.Key;
+                if (!String.IsNullOrEmpty(newDesign.PageName) && (newDesign.ControlsLayouts != oldDesign.ControlsLayouts))
+                {
+                    DecoratePage(kvp.Value, newDesign);
+                }
+            };
         }
 
-        private Form DecoratePage(Form page, List<PageDesign> pagesDesign, int pageIndex)
+        private Form DecoratePage(Form page, PageDesign pageDesign)
         {
-            PageDesign pageDesign = pagesDesign[pageIndex];
-
             pageDesign.ControlsLayouts.SetLayout(page.Controls);
 
             return page;
         }
 
 
-        internal void UpdateInstallerManager(DotSetupManager installerManager)
-        {
-            if (configParser != null)
-            {
-                installerManager.packageManager.SetProductsSettings(configParser.GetProductsSettings());
-            }
-        }
-
-        private void UpdateParentDesign(frmParent frmParent)
+        public void UpdateParentDesign(Form frmParent)
         {
             if (configParser == null)
                 return;
             FormDesign formDesign = configParser.GetFormDesign();
-            double scalingFactor = frmParent.CreateGraphics().DpiX / 96.0;
-            if (formDesign.Height > 0)
-                frmParent.Height = (int)Math.Round(formDesign.Height * scalingFactor);
-            if (formDesign.Width > 0)
-                frmParent.Width = (int)Math.Round(formDesign.Width * scalingFactor);
-            if (formDesign.ClientWidth > 0 && formDesign.ClientHeight > 0)
-                frmParent.ClientSize = new Size((int)Math.Round(formDesign.ClientWidth * scalingFactor), (int)Math.Round(formDesign.ClientHeight * scalingFactor));
-
-            frmParent.BackColor = formDesign.BackgroundColor;
-            if (formDesign.FormName != "")
+            frmParent.PerformSafely(() =>
             {
-                frmParent.Text = formDesign.FormName;
-            }
-        }
+                double scalingFactor = frmParent.CreateGraphics().DpiX / 96.0;
+                if (formDesign.Height > 0)
+                    frmParent.Height = (int)Math.Round(formDesign.Height * scalingFactor);
+                if (formDesign.Width > 0)
+                    frmParent.Width = (int)Math.Round(formDesign.Width * scalingFactor);
+                if (formDesign.ClientWidth > 0 && formDesign.ClientHeight > 0)
+                    frmParent.ClientSize = new Size((int)Math.Round(formDesign.ClientWidth * scalingFactor), (int)Math.Round(formDesign.ClientHeight * scalingFactor));
 
-        public void UpdateParentForm(frmParent frmParent)
-        {
-            UpdateParentDesign(frmParent);
+                frmParent.BackColor = formDesign.BackgroundColor;
+                if (formDesign.FormName != "")
+                {
+                    frmParent.Text = formDesign.FormName;
+                }
+            });
+
         }
     }
 }

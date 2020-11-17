@@ -10,17 +10,22 @@ namespace DotSetup
     {
         public static class PageName
         {
-            public const string Welcome = "welcomePage", License = "licensePage",
-                Optional = "optionalPage", Progress = "progressPage", Finish = "finishPage", Splash = "splashPage",
-                Error = "errorPage";
+            public const string Splash = "splashPage",
+                                Loading = "loadingPage",
+                                Welcome = "welcomePage",
+                                License = "licensePage",
+                                Optional = "optionalPage",
+                                Progress = "progressPage",
+                                Finish = "finishPage",
+                                DownloadError = "downloadErrorPage",
+                                ConfigurationError = "configurationErrorPage";
         }
     }
 
     public interface IFormPageBinder
     {
-        Form GetFormPage(string pageName, frmParent frmParent);
+        Form GetFormPage(string pageName, FrmParent frmParent);
         void SetProductLayouts(ProductLayoutManager productLayoutManager);
-        InstallerEventHandler GetLoadingCallBack(frmParent frmParent);
     }
 
 }

@@ -2,6 +2,7 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -9,7 +10,7 @@ using System.Xml;
 
 namespace DotSetup
 {
-    public class ControlsLayout
+    public class ControlsLayout : IComparable
     {
         readonly Dictionary<string, ControlSettings> controlSettings;
 
@@ -62,6 +63,18 @@ namespace DotSetup
                     }
                 }
             }
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj == null) return 1;
+
+            ControlsLayout otherControls = obj as ControlsLayout;
+            if (otherControls != null)
+                return Convert.ToInt32((this.controlSettings.Count == otherControls.controlSettings.Count) 
+                    && this.controlSettings.Keys.SequenceEqual(otherControls.controlSettings.Keys));
+            else
+                return 1;
         }
     }
 }

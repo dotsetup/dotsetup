@@ -51,6 +51,31 @@ namespace DotSetup
             return assembly.GetManifestResourceNames().Any(s => s.EndsWith(resourceName));
         }
 
+        public static List<string> GetEmbeddedResourceNames(Assembly assembly, string resourceNameEnding)
+        {
+            List<string> res = new List<string>();
+            try
+            {
+                if (assembly == null)
+                    assembly = Assembly.GetExecutingAssembly();
+                res = assembly.GetManifestResourceNames().Where(str => str.EndsWith(resourceNameEnding)).ToList();
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error("No resources that end with " + resourceNameEnding + " - " + e.Message);
+#endif
+            }
+            finally
+            {
+            }
+            return res;
+        }
+
         public static bool WriteResourceToFile(string resourceName, string fileName)
         {
             bool isSuccess = false;

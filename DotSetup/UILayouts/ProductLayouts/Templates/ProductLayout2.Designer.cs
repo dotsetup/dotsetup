@@ -59,12 +59,14 @@ namespace DotSetup
             this.pnlLayout.Controls.Add(this.txtDescription);
             this.pnlLayout.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlLayout.Location = new System.Drawing.Point(0, 0);
+            this.pnlLayout.Margin = new System.Windows.Forms.Padding(0);
             this.pnlLayout.Name = "pnlLayout";
             this.pnlLayout.Size = new System.Drawing.Size(600, 320);
             this.pnlLayout.TabIndex = 11;
             // 
             // txtDisclaimer
             // 
+            this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtDisclaimer.BackColor = System.Drawing.Color.White;
             this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
@@ -80,17 +82,17 @@ namespace DotSetup
             // 
             // imgBackground
             // 
-            this.imgBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.imgBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.imgBackground.Controls.Add(this.txtSmOptInY);
             this.imgBackground.Controls.Add(this.txtSmOptInN);
             this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;
             this.imgBackground.Location = new System.Drawing.Point(0, 0);
+            this.imgBackground.Margin = new System.Windows.Forms.Padding(0);
             this.imgBackground.Name = "imgBackground";
             this.imgBackground.Size = new System.Drawing.Size(600, 260);
             this.imgBackground.TabIndex = 9;
             // 
             // txtSmOptInY
-            // 
             // 
             this.txtSmOptInY.AutoSize = true;
             this.txtSmOptInY.Font = new System.Drawing.Font("Arial", 9.25F, System.Drawing.FontStyle.Bold);
@@ -118,6 +120,7 @@ namespace DotSetup
             // 
             // txtSmOptIn
             // 
+            this.txtSmOptIn.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtSmOptIn.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtSmOptIn.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Bold);
             this.txtSmOptIn.Location = new System.Drawing.Point(127, 217);
@@ -159,6 +162,7 @@ namespace DotSetup
             // 
             // txtTitle
             // 
+            this.txtTitle.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtTitle.Font = new System.Drawing.Font("Arial", 13F, System.Drawing.FontStyle.Bold);
             this.txtTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(125)))), ((int)(((byte)(173)))));
@@ -172,7 +176,8 @@ namespace DotSetup
             // 
             // txtDescription
             // 
-            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.txtDescription.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDescription.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

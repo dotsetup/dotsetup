@@ -6,15 +6,15 @@ using System;
 
 namespace DotSetup
 {
-    class ProgressEventArgs : EventArgs
+    public class ProgressEventArgs : EventArgs
     {
         public static class State { public const int Error = -1, Init = 0, Download = 1, Extract = 2, Run = 3, Done = 4; }
-        internal int state;
-        internal string errorMessage;
-        internal int downloadPercentage;
-        internal long bytesReceived;
-        internal long totalBytes;
-        internal double dwnldSpeed;
+        public int state;
+        public string errorMessage;
+        public int downloadPercentage;
+        public long bytesReceived;
+        public long totalBytes;
+        public double dwnldSpeed;
 
         public ProgressEventArgs(string errorMessage, int downloadPercentage, long bytesReceived, long totalBytes, double dwnldSpeed, bool isComplete)
         {

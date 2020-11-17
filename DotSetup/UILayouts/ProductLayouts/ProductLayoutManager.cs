@@ -11,6 +11,7 @@ namespace DotSetup
     public class ProductLayoutManager
     {
         private readonly List<ProductLayout> productLayouts;
+        private readonly List<ProductSettings> productSettings;        
         private ProductLayout currntLayout;
         private int productIndex;
         private readonly PackageManager packageManager;
@@ -23,11 +24,18 @@ namespace DotSetup
         {
             this.packageManager = packageManager;
             productLayouts = new List<ProductLayout>();
+            productSettings = new List<ProductSettings>();
         }
 
-        public void AddProductLayout(ProductSettings prodSettings)
+        public void AddProductSettings(ProductSettings prodSettings)
         {
-            if (prodSettings.IsOptional)
+            if (prodSettings.IsOptional && !(prodSettings.ControlsLayouts is null))
+               productSettings.Add(prodSettings);
+        }
+
+        public void AddProductLayouts()
+        {
+            foreach(ProductSettings prodSettings in productSettings)
             {
                 ProductLayout productLayout = new ProductLayout(prodSettings.Name, prodSettings.LayoutName, prodSettings.ControlsLayouts);
                 productLayout.productLayout.VisibleChanged += new EventHandler(UserControl_OnShow);
