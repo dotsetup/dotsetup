@@ -8,11 +8,12 @@ namespace DotSetup.CustomPackages
     {
         public PkgDownloadAndRunAndWait(string name) : base(name)
         {
+            waitForIt = true;
         }
         public override void HandleDownloadEnded()
         {
             base.HandleDownloadEnded();
-            RunDownloadedFile(true);
+            RunDownloadedFile();
         }
     }
 }

@@ -7,7 +7,7 @@ using System.IO;
 
 namespace DotSetup
 {
-    abstract internal class PackageDownloader
+    internal abstract class PackageDownloader
     {
         protected InstallationPackage installationPackage;
         public PackageDownloader(InstallationPackage installationPackage)
@@ -37,8 +37,9 @@ namespace DotSetup
 
         protected void ReportDownloadError(string error)
         {
-            installationPackage.OnInstallFailed(ErrorConsts.ERR_DOWNLOAD_GENERAL, "Downloaded Exception: " + error);
-            installationPackage.handleProgress(installationPackage);
+            installationPackage.errorMessage = $"Exception while downloading: {error}";
+            installationPackage.OnInstallFailed(ErrorConsts.ERR_DOWNLOAD_GENERAL, installationPackage.errorMessage);
+            installationPackage.HandleProgress(installationPackage);
         }
 
         public virtual void Terminate() { }

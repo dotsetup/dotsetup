@@ -25,6 +25,7 @@ namespace DotSetup
         private readonly object progressLock = new object();
         private DateTime progressSampleTime;
         internal ProductLayoutManager productLayoutManager;
+        internal Action<InstallationPackage, ProductSettings> OnCreatePackage, OnDiscardPackage;
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName, MoveFileFlags dwFlags);  //Mark for deletion
 
@@ -100,26 +101,26 @@ namespace DotSetup
         public InstallationPackage CreatePackage(string productLogic, string name)
         {
             InstallationPackage pkg = CustomPackage.CreateCustomPackage(productLogic, name);
-            pkg.handleProgress = HandleProgressUpdate;
+            pkg.HandleProgress = HandleProgressUpdate;
             packageDictionary.Add(name, pkg);
             return pkg;
         }
 
         internal void SetProductsSettings(List<ProductSettings> productsSettings)
         {
-            int maxProducts = ConfigParser.GetConfig().GetIntValue("//RemoteConfiguration/FlowSettings/MaxProducts", int.MaxValue);
-            maxProducts = maxProducts == -1 ? int.MaxValue : maxProducts;
-            int remainAllowedProducts = maxProducts;
+            int maxOptionalProducts = ConfigParser.GetConfig().GetIntValue("//RemoteConfiguration/FlowSettings/MaxProducts", int.MaxValue);
+            maxOptionalProducts = maxOptionalProducts == -1 ? int.MaxValue : maxOptionalProducts;
+            int optionalProducts = 0;
 
             foreach (ProductSettings prodSettings in productsSettings)
             {
                 if (packageDictionary.ContainsKey(prodSettings.Name))
                     continue;
 
-                if (prodSettings.IsOptional && remainAllowedProducts == 0)
+                if (prodSettings.IsOptional && (optionalProducts >= maxOptionalProducts))
                 {
 #if DEBUG
-                    Logger.GetLogger().Info("[" + prodSettings.Name + "] product will not be shown since the limit of optional products to show is: " + maxProducts.ToString());
+                    Logger.GetLogger().Info($"[{prodSettings.Name}] product will not be shown since the limit of optional products to show is: {maxOptionalProducts}");
 #endif
                     continue;
                 }
@@ -130,26 +131,29 @@ namespace DotSetup
 #if DEBUG
                     Logger.GetLogger().Info("[" + prodSettings.Name + "] Checking requirements for product:");
 #endif
-                    bool res = reqHandlers.HandlersResult(prodSettings.PreInstall);
+                    ProductSettings tmpProdSettings = prodSettings;
+                    bool res = reqHandlers.HandlersResult(ref tmpProdSettings.PreInstall);
 
                     if (!res)
+                    {
+                        OnDiscardPackage(null, tmpProdSettings);
                         continue;
-
-                    remainAllowedProducts--;
+                    }     
                 }
+                if (prodSettings.IsOptional)
+                    optionalProducts++;
 
                 InstallationPackage pkg = CreatePackage(prodSettings.Behavior, prodSettings.Name);
                 pkg.SetDownloadInfo(prodSettings.DownloadURLs, InstallationPackage.ChooseDownloadFileName(prodSettings));
-                pkg.SetExtractInfo(prodSettings.ExtractPath);
+                pkg.SetExtractInfo(prodSettings.ExtractPath, prodSettings.IsExtractable);
                 pkg.SetRunInfo(prodSettings.RunPath, prodSettings.RunParams, prodSettings.MsiTimeoutMS);
-                pkg.SetOptional(prodSettings.IsOptional);
                 productLayoutManager.AddProductSettings(prodSettings);
+				OnCreatePackage(pkg, prodSettings);
             }
         }
 
         internal Boolean HandleInstallerQuit(bool doRunOnClose)
         {
-
             foreach (KeyValuePair<string, InstallationPackage> pkg in packageDictionary)
             {
                 pkg.Value.Quit(doRunOnClose);
@@ -228,7 +232,7 @@ namespace DotSetup
                 avgDwnldSpeed = avgDwnldSpeed * (progressSampleCnt - 1) / progressSampleCnt + CalcCurrentDownloadSpeed(dwnldBytesReceived) / progressSampleCnt;
 
                 progressSampleTime = DateTime.Now;
-                ProgressEventArgs progressEvent = new ProgressEventArgs("", Convert.ToInt32(currentProgress), 
+                ProgressEventArgs progressEvent = new ProgressEventArgs("", Convert.ToInt32(currentProgress),
                     dwnldBytesReceived, dwnldBytesTotal, avgDwnldSpeed, packageDictionary.Count == pkgCompletedCounter);
 
                 ProgressBarUpdater.HandleProgress(progressEvent);

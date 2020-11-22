@@ -35,7 +35,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Error("No resource called " + resourceName + " - " + e.Message);  
+                Logger.GetLogger().Error("No resource called " + resourceName + " - " + e.Message);
 #endif
             }
             finally

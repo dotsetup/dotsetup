@@ -14,7 +14,7 @@ namespace DotSetup
 {
     public struct ProductSettings
     {
-        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior;
+        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Skin;
 
         public struct DownloadURL
         {
@@ -37,18 +37,18 @@ namespace DotSetup
         public struct ProductRequirement
         {
             public List<RequirementKey> Keys;
-            public string Type, Value, LogicalOperator, ValueOperator;
+            public string Type, Value, LogicalOperator, ValueOperator, Delta;
         }
         public struct ProductRequirements
         {
             public List<ProductRequirement> RequirementList;
             public List<ProductRequirements> RequirementsList;
-            public string LogicalOperator;
+            public string LogicalOperator, UnfulfilledRequirementType, UnfulfilledRequirementDelta;
         }
         public ProductRequirements PreInstall;
         public ProductRequirements PostInstall;
         public ControlsLayout ControlsLayouts;
-        public bool IsOptional;
+        public bool IsOptional, IsExtractable;
         public int MsiTimeoutMS;
     }
     public struct FormDesign
@@ -389,7 +389,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Error("Creating working directory " + workDir + " failed. " + e.ToString());
+                Logger.GetLogger().Error("Creating working directory " + workDir + " failed. " + e.Message);
 #endif
                 workDir = "";
             }
@@ -410,7 +410,8 @@ namespace DotSetup
 #endif            
             ProductSettings productSettings = new ProductSettings
             {
-                IsOptional = XmlParser.GetBoolAttribute(productSettingsNode, "optional")
+                IsOptional = XmlParser.GetBoolAttribute(productSettingsNode, "optional"),
+                IsExtractable = XmlParser.GetBoolAttribute(productSettingsNode, "extractable", true)
             };
 
             XmlNode productStaticData = productSettingsNode.SelectSingleNode("StaticData");
@@ -418,6 +419,7 @@ namespace DotSetup
             productSettings.Name = XmlParser.GetStringValue(productStaticData, "Title");
             if (productSettings.IsOptional)
                 productSettings.Name = "sec:" + XmlParser.GetStringValue(productDynamicData, "InternalName");
+            productSettings.Skin = XmlParser.GetStringValue(productDynamicData, "Skin");
 
             EvalCustomVariables(productStaticData.SelectSingleNode("CustomData/CustomVars"));
 
@@ -531,7 +533,8 @@ namespace DotSetup
                 ProductSettings.ProductRequirement requirement = new ProductSettings.ProductRequirement
                 {
                     Type = XmlParser.GetStringValue(requirementNode, "Type"),
-                    LogicalOperator = XmlParser.GetStringAttribute(requirementNode, "Keys", "logicalOp")
+                    LogicalOperator = XmlParser.GetStringAttribute(requirementNode, "Keys", "logicalOp"),
+                    Delta = XmlParser.GetStringValue(requirementNode, "Delta")
                 };
                 if (string.IsNullOrEmpty(requirement.LogicalOperator))
                     requirement.LogicalOperator = Enum.GetName(typeof(RequirementHandlers.LogicalOperatorType), RequirementHandlers.LogicalOperatorType.AND); //default value     

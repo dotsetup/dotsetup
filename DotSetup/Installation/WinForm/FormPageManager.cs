@@ -126,7 +126,7 @@ namespace DotSetup
                 DotSetupManager.GetManager().configLoader.DecorateForms(formsDictionary);
             });
         }
-        
+
         public void FrmParent_Load(object sender, EventArgs e)
         {
             if (formsDictionary != null)

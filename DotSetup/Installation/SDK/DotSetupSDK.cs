@@ -23,7 +23,7 @@ namespace DotSetup
             InitApplication();
             string[] args = new string[] { "/log" };
             dotSetupManager = DotSetupManager.GetManager();
-            dotSetupManager.InitInstaller(args,null);
+            dotSetupManager.InitInstaller(args, null);
             return 1;
         }
         [DllImport("user32.dll", SetLastError = true)]

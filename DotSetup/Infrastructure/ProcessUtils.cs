@@ -2,11 +2,11 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Linq;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace DotSetup
 {
@@ -88,5 +88,5 @@ namespace DotSetup
             var parentid = entries.First(x => x.th32ProcessID == p.Id).th32ParentProcessID;
             return Process.GetProcessById(parentid);
         }
-    }    
+    }
 }

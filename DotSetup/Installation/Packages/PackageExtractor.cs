@@ -24,9 +24,10 @@ namespace DotSetup
                 // call to ExtractAll assumes none of the entries are password-protected.
                 zipFile.ExtractAll(uncompresedDir, ExtractExistingFileAction.OverwriteSilently);
             }
-            catch (System.Exception ex)
+            catch (System.Exception e)
             {
-                installationPackage.OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, ex.Message);
+                installationPackage.errorMessage = e.Message;
+                installationPackage.OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, installationPackage.errorMessage);
             }
             installationPackage.HandleExtractEnded();
         }

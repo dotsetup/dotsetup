@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Windows.Forms.VisualStyles;
 
 namespace DotSetup
 {
@@ -48,7 +47,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Error(String.Format("Unable to retrieve the localappdata folder creation time, error: {0}",e.Message));
+                Logger.GetLogger().Error(String.Format("Unable to retrieve the localappdata folder creation time, error: {0}", e.Message));
 #endif
             }
             return -1;
@@ -86,7 +85,7 @@ namespace DotSetup
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);        
+        static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);
 
         public static int GetUpTimeInMinutes()
         {
@@ -94,6 +93,6 @@ namespace DotSetup
         }
 
         [DllImport("kernel32")]
-        static extern UInt64 GetTickCount64();        
+        static extern UInt64 GetTickCount64();
     }
 }

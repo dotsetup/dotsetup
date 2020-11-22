@@ -11,7 +11,6 @@ namespace DotSetup
     {
         public ConfigValidator()
         {
-            EventManager.GetManager().AddEvent(DotSetupManager.EventName.OnFatalError, HandleConfigFatalError);
         }
         public string Validate()
         {

@@ -25,15 +25,14 @@ namespace DotSetup
 
         public static string DictionaryToJson(Dictionary<string, string> dict)
         {
-            string[] entries = dict.Select(d => string.Format("\"{0}\":{1}", d.Key, d.Value[0]=='{'?d.Value : "\""+d.Value+"\"")).ToArray();
+            string[] entries = dict.Select(d => string.Format("\"{0}\":{1}", d.Key, d.Value[0] == '{' ? d.Value : "\"" + d.Value + "\"")).ToArray();
             return "{" + string.Join(",", entries) + "}";
         }
 
         // From https://stackoverflow.com/questions/1207731/how-can-i-deserialize-json-to-a-simple-dictionarystring-string-in-asp-net
         public static Dictionary<string, object> JsonToDictionary(string jsonString)
         {
-            int end;
-            return ParseJSON(jsonString, 0, out end);
+            return ParseJSON(jsonString, 0, out _);
         }
 
         private static Dictionary<string, object> ParseJSON(string json, int start, out int end)
@@ -44,7 +43,6 @@ namespace DotSetup
             bool inquotes = false;
             string key = null;
             StringBuilder sb = new StringBuilder();
-            Dictionary<string, object> child = null;
             List<object> arraylist = null;
             Regex regex = new Regex(@"\\u([0-9a-z]{4})", RegexOptions.IgnoreCase);
             int autoKey = 0;
@@ -71,8 +69,7 @@ namespace DotSetup
                             case '{':
                                 if (i != start)
                                 {
-                                    int cend;
-                                    child = ParseJSON(json, i, out cend);
+                                    var child = ParseJSON(json, i, out var cend);
                                     if (arraylist != null) arraylist.Add(child);
                                     else
                                     {

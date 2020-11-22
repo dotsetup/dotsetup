@@ -2,11 +2,6 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace DotSetup
 {
     public static class SessionDataConsts

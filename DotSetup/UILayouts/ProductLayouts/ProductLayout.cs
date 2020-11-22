@@ -15,7 +15,7 @@ namespace DotSetup
         public ProductLayout(string productName, string layoutName, ControlsLayout controlLayout)
         {
             try
-            {     
+            {
                 this.productName = productName;
                 if (layoutName == typeof(ProductLayout1).Name)
                     productLayout = new ProductLayout1(controlLayout);

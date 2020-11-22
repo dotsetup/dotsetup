@@ -16,9 +16,9 @@ namespace DotSetup
             URL_REMOTE_CONFIG = "URL_REMOTE_CONFIG",
             URL_DYNAMIC_CONFIG = "URL_DYNAMIC_CONFIG",
             PRODUCT_VARIANT = "PRODUCT_VARIANT",
-            ACTIVITY_ID = "ACTIVITY_ID"            
+            ACTIVITY_ID = "ACTIVITY_ID"
             ;
-            
+
 
 
         public static readonly string[] ReportMandatory = { ACNM, PRODUCT, PRODUCT_TITLE, URL_ANALYTICS, URL_REMOTE_CONFIG };

@@ -89,18 +89,21 @@ namespace DotSetup
             {
                 if (isActive)
                 {
-                    using (System.IO.StreamWriter writer = new System.IO.StreamWriter(logFilename, true, System.Text.Encoding.UTF8))
+                    using (var stream = GetWriteStream(logFilename, 1000))
                     {
-                        if (!string.IsNullOrEmpty(text))
+                        using (StreamWriter writer = new StreamWriter(stream, System.Text.Encoding.UTF8))
                         {
-                            writer.WriteLine(text);
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                writer.WriteLine(text);
+                            }
                         }
                     }
                 }
             }
-            catch
+            catch (Exception)
             {
-                throw;
+                
             }
         }
 
@@ -152,6 +155,24 @@ namespace DotSetup
 
             WriteLine(pretext + text);
 
+        }
+
+        private FileStream GetWriteStream(string path, int timeoutMs)
+        {
+            var time = Stopwatch.StartNew();
+            while (time.ElapsedMilliseconds < timeoutMs)
+            {
+                try
+                {
+                    return File.Open(logFilename, FileMode.Append, FileAccess.Write, FileShare.Read);                    
+                }
+                catch (IOException)
+                {
+                    
+                }
+            }
+
+            throw new TimeoutException($"Failed to get a write handle to {path} within {timeoutMs}ms.");
         }
 
         [System.Flags]

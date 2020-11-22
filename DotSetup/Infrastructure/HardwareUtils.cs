@@ -2,12 +2,12 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using Microsoft.VisualBasic.Devices;
-using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.Devices;
+using Microsoft.Win32;
 
 namespace DotSetup
 {
@@ -102,11 +102,11 @@ namespace DotSetup
             }
             return freq.Trim(charsToTrim);
 
-        }        
+        }
 
         [DllImport("powrprof.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        static extern bool GetPwrCapabilities(out SYSTEM_POWER_CAPABILITIES systemPowerCapabilites);        
+        static extern bool GetPwrCapabilities(out SYSTEM_POWER_CAPABILITIES systemPowerCapabilites);
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct SYSTEM_POWER_CAPABILITIES
@@ -195,7 +195,7 @@ namespace DotSetup
         /// <returns> true if there is a lid switch </returns>
         public bool LidPresent()
         {
-            return systemPowerCapabilites.LidPresent;            
+            return systemPowerCapabilites.LidPresent;
         }
 
         /// <summary>

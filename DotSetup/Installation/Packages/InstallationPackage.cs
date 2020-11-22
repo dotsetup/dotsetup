@@ -11,7 +11,7 @@ using DotSetup.Infrastructure;
 /**
  * Package class represents a single installation component which can be downloaded and treated in a completely autonomic way. 
  * Installation may consist of several packages. During its life-cycle Package goes through several stages: download, extraction 
- * and run. Any package should be reported as complete using one of the report...() methods.
+ * and run.
  * This is done to allow the developer to accomplish all the required manual settings for the package and verify that the package 
  * installation was indeed successful.
  * Using packages provides the developer with maximum flexibility in terms of logic, network connection utilization, data 
@@ -64,36 +64,32 @@ namespace DotSetup
         }
         public int InstallationState { get; private set; }
         private int dwnldProgress; //extractProgress, RunProgress;
-        private long dwnldBytesReceived;
-        internal long dwnldBytesOffset, dwnldBytesTotal;
-        private string dwnldLink, errorMessage;
-        protected string dwnldFileName, runFileName, extractFilePath, runParams;
-        internal string name;
-        internal bool hasUpdatedTotal, isOptional;
-        internal bool canRun, firstDownloaded, isProgressCompleted, isUpdatedProgressCompleted;
-        internal int msiTimeout;
-        internal Dictionary<string, string> PkgParams;
-		private Action<int> OnChangeState;
-        internal Action<InstallationPackage> handleProgress;
+        internal long dwnldBytesReceived, dwnldBytesOffset, dwnldBytesTotal;
+        protected string dwnldFileName, runFileName, extractFilePath;
+        internal string name, dwnldLink, fileHash, runParams, errorMessage;
+        internal bool hasUpdatedTotal, isOptional, isExtractable;
+        internal bool canRun, firstDownloaded, isProgressCompleted, isUpdatedProgressCompleted, waitForIt;
+        internal int msiTimeout, runErrorCode, runExitCode;
+        internal Action<int> OnChangeState;
+        internal Action OnInstallSuccess, OnUserQuit;
+        internal Action<int, string> OnInstallFailed;
+        internal Action<InstallationPackage> HandleProgress;
         internal PackageDownloader downloader;
         internal PackageExtractor extractor;
         internal PackageRunner runner;
 
         public InstallationPackage(string name)
         {
-            errorMessage = "";
             this.name = name;
             downloader = new PackageDownloaderBits(this);
             extractor = new PackageExtractor(this);
             runner = new PackageRunner(this);
             InstallationState = State.Init;
-
-            PkgParams = new Dictionary<string, string>();
+            OnInstallFailed += HandleInstallFailed;
         }
 
         internal bool Activate()
         {
-            errorMessage = "";
             InstallationState = State.DownloadStart;
             dwnldFileName = downloader.UpdateFileNameIfExists(dwnldFileName);
 #if DEBUG
@@ -112,15 +108,16 @@ namespace DotSetup
                 SetDownloadProgress(100);
                 using (fop = File.OpenRead(dwnldFileName))
                 {
+                    fileHash = CryptUtils.ComputeHash(fop, CryptUtils.Hash.SHA1);
+
                     ChangeState(State.DownloadEnd);
 
-                    if (FileUtils.GetMagicNumbers(dwnldFileName, 2) == "504b")  //"504b" = "PK" (zip)
+                    if (FileUtils.GetMagicNumbers(dwnldFileName, 2) == "504b" && isExtractable)  //"504b" = "PK" (zip)
                     {
                         if (String.IsNullOrEmpty(extractFilePath))
                             extractFilePath = Path.GetDirectoryName(dwnldFileName);
-                        extractor.Extract(dwnldFileName, extractFilePath);
-                        if (File.Exists(dwnldFileName))
-                            fop.Close();
+                        
+                        extractor.Extract(dwnldFileName, extractFilePath);                        
                     }
                     else
                         HandleExtractEnded();
@@ -135,10 +132,7 @@ namespace DotSetup
 #if DEBUG
                 Logger.GetLogger().Warning("[" + name + "] Cannot opening " + dwnldFileName + " error message: " + e.Message);
 #endif
-            }
-            finally
-            {
-            }
+            }            
         }
 
         public virtual void HandleExtractEnded()
@@ -156,6 +150,7 @@ namespace DotSetup
         public virtual void HandleRunEnd()
         {
             ChangeState(State.RunEnd);
+            OnInstallSuccess();
             ChangeState(State.Done);
         }
 
@@ -163,6 +158,7 @@ namespace DotSetup
         {
             downloader.Terminate();
             runner.Terminate();
+            OnUserQuit();
         }
 
         public void SetDownloadInfo(List<ProductSettings.DownloadURL> downloadLinks, string downloadFile)
@@ -194,18 +190,25 @@ namespace DotSetup
                 dwnldFileName = downloadFile;
         }
 
-        public void SetExtractInfo(string compressedFilePath)
+        public void SetExtractInfo(string compressedFilePath, bool extractable)
         {
             extractFilePath = compressedFilePath;
+            isExtractable = extractable;
             if (!String.IsNullOrEmpty(extractFilePath) && !ResourcesUtils.IsPathDirectory(compressedFilePath))
-                SetErrorMessage("Run path not valid: " + compressedFilePath);
+            {
+                errorMessage = $"Extract path not valid: {compressedFilePath}";
+                OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, errorMessage);
+            }                
         }
 
         public void SetRunInfo(string fileName, string runParams, int msiTimeout)
         {
             runFileName = fileName;
             if (!String.IsNullOrEmpty(fileName) && ResourcesUtils.IsPathDirectory(fileName))
-                SetErrorMessage("Run path not valid: " + fileName);
+            {
+                errorMessage = $"Run path not valid: {fileName}";
+                OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, errorMessage);
+            }                
 
             if (msiTimeout == 0)
                 msiTimeout = 120000; //2 min default
@@ -214,29 +217,11 @@ namespace DotSetup
             this.runParams = runParams;
         }
 
-        internal void SetOptional(bool isOptional)
-        {
-            this.isOptional = isOptional;
-            if (isOptional)
-            {
-                EventManager.GetManager().AddEvent(DotSetupManager.EventName.OnFirstDownloadEnd, HandleFisrtDownloadEnded);
-            }
-            else
-            {
-                firstDownloaded = true;
-                OnChangeState += (state) =>
-                {
-                    if (state == State.Error) EventManager.GetManager().DispatchEvent(DotSetupManager.EventName.OnFatalError, this);
-                    if (state == State.DownloadEnd || state == State.Error) EventManager.GetManager().DispatchEvent(DotSetupManager.EventName.OnFirstDownloadEnd, this);
-                };
-            }
-        }
-
-        private bool HandleFisrtDownloadEnded(object sender, EventArgs e)
+        internal bool HandleFisrtDownloadEnded(object sender, EventArgs e)
         {
             if (((InstallationPackage)sender).InstallationState == State.Error)
             {
-
+                OnUserQuit();
             }
             else
             {
@@ -247,37 +232,42 @@ namespace DotSetup
             return firstDownloaded;
         }
 
-
-        public virtual bool Run(bool waitForIt = false)
+        public virtual bool Run()
         {
             if (!File.Exists(runFileName))
-            {
+            {                
                 if (File.Exists(Path.Combine(extractFilePath, runFileName)))
                     runFileName = Path.Combine(extractFilePath, runFileName);
-                else if (dwnldFileName.EndsWith(".exe") || (dwnldFileName.EndsWith(".msi")))
+                else if (FileUtils.GetMagicNumbers(dwnldFileName, 2) != "504b" || !isExtractable)  //"504b" = "PK" (zip)
                     runFileName = dwnldFileName;
                 else
-                    OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, "No runnable file found in: " + runFileName + ", download file name: " + dwnldFileName + ", extract file path: " + extractFilePath);
+                {
+                    errorMessage = $"No runnable file found in: {runFileName}, download file name: {dwnldFileName}, extract file path: {extractFilePath}";
+                    OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, errorMessage);
+                }                   
             }
-            runner.Run(runFileName, runParams, waitForIt);
+            runner.Run(runFileName, runParams);
 
             return true;
         }
 
-        public void RunDownloadedFile(bool waitForIt = false)
+        public void RunDownloadedFile()
         {
             canRun = true;
             if (canRun && firstDownloaded && (InstallationState == State.ExtractEnd))
-                Run(waitForIt);
+                Run();
         }
+
 
         /**
         * Sets package's status to failed. Sometimes when the packages fails during download or extraction, this method can be 
         * called internally 
         */
-        public virtual void OnInstallFailed(int ErrCode, string ErrMsg = "")
+        public void HandleInstallFailed(int ErrCode, string ErrMsg = "")
         {
-            SetErrorMessage(ErrMsg);
+#if DEBUG
+            Logger.GetLogger().Error("[" + name + "]("+ ErrCode + ") " + ErrMsg);
+#endif
             ChangeState(State.Error);
         }
 
@@ -299,14 +289,6 @@ namespace DotSetup
             }
         }
 
-        internal void SetErrorMessage(string errorMessage)
-        {
-            this.errorMessage = errorMessage;
-#if DEBUG
-            Logger.GetLogger().Error("[" + name + "] " + errorMessage);
-#endif
-        }
-
         public void ChangeState(int newState)
         {
             if (InstallationState >= State.Init && InstallationState != State.Done)
@@ -320,7 +302,7 @@ namespace DotSetup
                     isProgressCompleted = true;
 
                 OnChangeState?.Invoke(InstallationState);
-                handleProgress?.Invoke(this);
+                HandleProgress?.Invoke(this);
             }
         }
 

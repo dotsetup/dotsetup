@@ -69,9 +69,8 @@ namespace DotSetup
         {
             if (obj == null) return 1;
 
-            ControlsLayout otherControls = obj as ControlsLayout;
-            if (otherControls != null)
-                return Convert.ToInt32((this.controlSettings.Count == otherControls.controlSettings.Count) 
+            if (obj is ControlsLayout otherControls)
+                return Convert.ToInt32((this.controlSettings.Count == otherControls.controlSettings.Count)
                     && this.controlSettings.Keys.SequenceEqual(otherControls.controlSettings.Keys));
             else
                 return 1;

@@ -233,11 +233,11 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Error("GetKnownPath of "+ enumName + " failed: " + e);
+                Logger.GetLogger().Error("GetKnownPath of " + enumName + " failed: " + e);
 #endif
             }
             finally
-            {                
+            {
             }
             return res;
         }

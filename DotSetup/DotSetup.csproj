@@ -82,6 +82,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|x86'">
     <OutputPath>bin\x86\QA\</OutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Demo|AnyCPU'">
+    <OutputPath>bin\Demo\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	<DefineConstants>DEMO;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Demo|x86'">
+    <OutputPath>bin\x86\Demo\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	<DefineConstants>DEMO;TRACE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BITSReference10_1">
       <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference10_1.dll</HintPath>
@@ -127,6 +141,7 @@
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWait.cs" />
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWaitWithParamsChange.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />
+    <Compile Include="Installation\Packages\RequirementHandlers.cs" />
     <Compile Include="Installation\SDK\DotSetupSDK.cs" />
     <Compile Include="Installation\SDK\Exports.cs" />
     <Compile Include="Infrastructure\UriUtils.cs" />
@@ -182,7 +197,6 @@
     <Compile Include="Infrastructure\KnownFolders.cs" />
     <Compile Include="Infrastructure\XmlParser.cs" />
     <Compile Include="Installation\Packages\PackageExtractor.cs" />
-    <Compile Include="Installation\Packages\RequirementUtils.cs" />
     <Compile Include="UILayouts\ProductLayouts\ProductLayout.cs" />
     <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout3.cs">
       <SubType>UserControl</SubType>
@@ -315,7 +329,7 @@
     <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.83.1.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.84.0.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <DllExportIdent>932479DD-A90F-4E65-B291-632BBBC6B2A0</DllExportIdent>

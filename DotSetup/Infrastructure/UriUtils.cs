@@ -36,7 +36,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("KnownFolders failed: " + e.Message); 
+                Logger.GetLogger().Warning("KnownFolders failed: " + e.Message);
 #endif
             }
             finally

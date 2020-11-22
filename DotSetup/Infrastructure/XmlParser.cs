@@ -132,10 +132,12 @@ namespace DotSetup
             return !string.IsNullOrEmpty(strRes) && Boolean.Parse(strRes);
         }
 
-        public static bool GetBoolAttribute(XmlNode xmlNode, string attribute)
+        public static bool GetBoolAttribute(XmlNode xmlNode, string attribute, bool ifEmpty = false)
         {
             string strRes = GetStringAttribute(xmlNode, attribute);
-            return !string.IsNullOrEmpty(strRes) && Boolean.Parse(strRes);
+            if (!Boolean.TryParse(strRes, out bool result))
+                result = ifEmpty;
+            return result;
         }
 
         public static string GetRecursiveStringValue(XmlNodeList xmlChildNodes, int recursiveLevel = 0)

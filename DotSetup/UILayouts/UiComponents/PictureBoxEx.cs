@@ -58,7 +58,7 @@ namespace DotSetup
                     Image = System.Drawing.Image.FromStream(imageStream);
                 }
 #if DEBUG
-                    catch (Exception e)
+                catch (Exception e)
 #else
                 catch (Exception)
 #endif

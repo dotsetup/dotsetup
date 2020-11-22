@@ -123,7 +123,7 @@ namespace DotSetup
             public int startPosition;
         }
 
-        readonly List<HyperLinkText> linkTextArray;
+        private List<HyperLinkText> linkTextArray;
 
         protected override void WndProc(ref Message m)
         {
@@ -155,7 +155,6 @@ namespace DotSetup
             // next to a non-standard link
             DetectUrls = false;
             ReadOnly = true;
-            linkTextArray = new List<HyperLinkText>();
             ScrollBars = RichTextBoxScrollBars.None;
             LinkClicked += new LinkClickedEventHandler(HandelLinkClicked);
 
@@ -185,17 +184,20 @@ namespace DotSetup
         public override string Text
         {
             get
-            {
+            {                
                 return base.Text;
             }
             set
             {
+                linkTextArray = new List<HyperLinkText>();
                 var OriginalSelectionAlignment = this.SelectionAlignment;
                 base.Text = RemoveLinkBrackets(value);
                 SetLinks();
                 this.SelectAll();
                 base.SelectionAlignment = OriginalSelectionAlignment;
                 this.DeselectAll();
+                if (linkTextArray.Count > 0)
+                    this.Visible = true;
             }
         }
 

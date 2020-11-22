@@ -11,12 +11,13 @@ namespace DotSetup
     public class ProductLayoutManager
     {
         private readonly List<ProductLayout> productLayouts;
-        private readonly List<ProductSettings> productSettings;        
+        private readonly List<ProductSettings> productSettings;
         private ProductLayout currntLayout;
         private int productIndex;
         private readonly PackageManager packageManager;
         private Panel pnlLayout;
         private OptLayout optLayout;
+        internal Action<string> OnLayoutShown;
 
         public bool HasNext { get; private set; }
 
@@ -27,25 +28,24 @@ namespace DotSetup
             productSettings = new List<ProductSettings>();
         }
 
+        public int GetIndex(string pkgName)
+        {
+            return productSettings.FindIndex(prod => prod.Name == pkgName);
+        }
+
         public void AddProductSettings(ProductSettings prodSettings)
         {
-            if (prodSettings.IsOptional && !(prodSettings.ControlsLayouts is null))
-               productSettings.Add(prodSettings);
+            if (prodSettings.IsOptional)
+                productSettings.Add(prodSettings);
         }
 
         public void AddProductLayouts()
         {
-            foreach(ProductSettings prodSettings in productSettings)
+            foreach (ProductSettings prodSettings in productSettings)
             {
                 ProductLayout productLayout = new ProductLayout(prodSettings.Name, prodSettings.LayoutName, prodSettings.ControlsLayouts);
-                productLayout.productLayout.VisibleChanged += new EventHandler(UserControl_OnShow);
                 productLayouts.Add(productLayout);
             }
-        }
-
-        protected void UserControl_OnShow(object sender, EventArgs e)
-        {
-            
         }
 
         public void SetPnlLayout(Panel pnlLayout)
@@ -83,6 +83,7 @@ namespace DotSetup
                 pnlLayout.Controls.Clear();
                 pnlLayout.Controls.Add(currntLayout.productLayout);
                 optLayout = new OptLayout(pnlLayout, 4);
+                OnLayoutShown(currntLayout.productName);
             }
             productIndex++;
             HasNext = (productLayouts == null || productIndex <= productLayouts.Count);

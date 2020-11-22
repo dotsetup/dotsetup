@@ -16,18 +16,23 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Demo|Any CPU = Demo|Any CPU
 		QA|Any CPU = QA|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{59902632-3D51-492F-9F02-86AC762972A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{59902632-3D51-492F-9F02-86AC762972A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.Demo|Any CPU.ActiveCfg = Demo|Any CPU
+		{59902632-3D51-492F-9F02-86AC762972A2}.Demo|Any CPU.Build.0 = Demo|Any CPU
 		{59902632-3D51-492F-9F02-86AC762972A2}.QA|Any CPU.ActiveCfg = QA|Any CPU
 		{59902632-3D51-492F-9F02-86AC762972A2}.QA|Any CPU.Build.0 = QA|Any CPU
 		{59902632-3D51-492F-9F02-86AC762972A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59902632-3D51-492F-9F02-86AC762972A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Demo|Any CPU.ActiveCfg = Debug|Any CPU
+		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Demo|Any CPU.Build.0 = Debug|Any CPU
 		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.QA|Any CPU.ActiveCfg = QA|Any CPU
 		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.QA|Any CPU.Build.0 = QA|Any CPU
 		{6101BC1A-81AD-4417-BDA9-A0163213A2D3}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -44,9 +44,9 @@ namespace DotSetup
             {
                 mgr = new BITS.BackgroundCopyManager1_5();
             }
-            catch (System.Runtime.InteropServices.COMException ex)
+            catch (System.Runtime.InteropServices.COMException e)
             {
-                ReportDownloadError("BackgroundCopyManager is not initialized - " + ex.Message);
+                ReportDownloadError("BackgroundCopyManager is not initialized - " + e.Message);
                 return false;
             }
 
@@ -71,12 +71,13 @@ namespace DotSetup
                 job.SetNotifyInterface(this);
                 job.Resume();  //starting the job
             }
-            catch (System.Exception ex)
+            catch (System.Exception e)
             {
-                ReportDownloadError("Download error: " + ex.Message);
-                job?.Cancel();
+                ReportDownloadError(e.Message);
+                CancelJob();
                 return false;
             }
+            
             aTimer.Start();
 
             return true;
@@ -107,6 +108,11 @@ namespace DotSetup
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
+            TimerCalled();
+        }
+
+        private void TimerCalled()
+        {
             job.GetState(out BITS.BG_JOB_STATE state);
             if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_CONNECTING ||
                 state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
@@ -114,13 +120,13 @@ namespace DotSetup
                 //job in a state that that is connecting or in no connection error
                 if (timeCounter >= (MAX_TIMEOUT_SECONDS / 2)) //20 seconds of timeout 
                 {
-                    job.Cancel();
+                    CancelJob();
                     aTimer.Stop();
                     ReportDownloadError("No Internet connection");
                 }
                 else
-                  timeCounter++;
-             }
+                    timeCounter++;
+            }
             else
             {
                 //job in a state that that can continue to download and progress
@@ -130,9 +136,9 @@ namespace DotSetup
                 if (progress.BytesTotal != ulong.MaxValue)
                 {
                     totalPercentage = (int)((double)progress.BytesTransferred / progress.BytesTotal * 100);
-                    installationPackage.SetDownloadProgress(totalPercentage, (int)progress.BytesTransferred, (int)progress.BytesTotal);
+                    installationPackage.SetDownloadProgress(totalPercentage, (long)progress.BytesTransferred, (long)progress.BytesTotal);
                 }
-                installationPackage.handleProgress(installationPackage);
+                installationPackage.HandleProgress(installationPackage);
             }
         }
 
@@ -140,6 +146,7 @@ namespace DotSetup
         {
             aTimer.Stop();
             pJob.Complete();
+            TimerCalled();
             installationPackage.HandleDownloadEnded();
         }
 
@@ -152,7 +159,7 @@ namespace DotSetup
             {
                 ReportDownloadError(errdesc);
             }
-            installationPackage.handleProgress(installationPackage);
+            installationPackage.HandleProgress(installationPackage);
         }
 
         public void JobModification(BITS.IBackgroundCopyJob pJob, uint dwReserved)
@@ -178,13 +185,29 @@ namespace DotSetup
                     case BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSFERRING:
                     case BITS.BG_JOB_STATE.BG_JOB_STATE_SUSPENDED:
                     case BITS.BG_JOB_STATE.BG_JOB_STATE_CONNECTING:
-                        job.Cancel();
+                        CancelJob();
                         break;
                     default:
                         break;
                 }
+            }
+        }
 
-
+        private void CancelJob()
+        {
+            try
+            {
+                job?.Cancel();
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"error while trying to cancel BITS job: {e.Message}");
+#endif
             }
         }
     }

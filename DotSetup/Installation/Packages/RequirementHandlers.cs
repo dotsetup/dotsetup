@@ -111,8 +111,6 @@ namespace DotSetup
             return match;
         }
 
-
-
         public static bool ToBoolean(string value)
         {
             switch (value.ToLower())
@@ -207,7 +205,7 @@ namespace DotSetup
             return match;
         }
 
-        public bool HandlersResult(ProductSettings.ProductRequirements requirements)
+        public bool HandlersResult(ref ProductSettings.ProductRequirements requirements)
         {
             bool resB = true;
             if ((requirements.RequirementList == null) || (requirements.RequirementList == null) ||
@@ -226,13 +224,19 @@ namespace DotSetup
 #if DEBUG
                     Logger.GetLogger().Info(reqCount + " Requirements {" + logicaloperatorType + "} => " + resB);
 #endif
+                    if (!resB)
+                    {
+                        requirements.UnfulfilledRequirementType = req.Type;
+                        requirements.UnfulfilledRequirementDelta = req.Delta;
+                    }
                     return resB;
                 }
                 arrBool.Add(resB);
             }
-            foreach (var reqs in requirements.RequirementsList)
+            foreach (ProductSettings.ProductRequirements reqs in requirements.RequirementsList)
             {
-                resB = HandlersResult(reqs);
+                ProductSettings.ProductRequirements reqsCopy = reqs;
+                resB = HandlersResult(ref reqsCopy);
                 if ((reqCount > 1) &&
                     ((resB && (logicaloperatorType == LogicalOperatorType.OR)) ||
                     (!resB && (logicaloperatorType == LogicalOperatorType.AND))))

@@ -34,5 +34,5 @@ using System.Runtime.InteropServices;
 //      Release Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.83.1.7626")]
-[assembly: AssemblyFileVersion("1.83.1.7626")]
+[assembly: AssemblyVersion("1.84.0.7632")]
+[assembly: AssemblyFileVersion("1.84.0.7632")]
