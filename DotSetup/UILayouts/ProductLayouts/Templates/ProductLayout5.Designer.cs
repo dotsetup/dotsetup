@@ -29,42 +29,108 @@
         private void InitializeComponent()
         {
             this.pnlLayout = new System.Windows.Forms.Panel();
+            this.imgBackground = new DotSetup.PictureBoxEx();
+            this.txtTitle = new DotSetup.RichTextBoxEx();
+            this.txtDescription = new DotSetup.RichTextBoxEx();
+            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
+            this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
             this.txtSmOptInY = new System.Windows.Forms.RadioButton();
             this.txtSmOptInN = new System.Windows.Forms.RadioButton();
             this.txtSmOptIn = new DotSetup.RichTextBoxEx();
             this.imgSmOpInBg = new DotSetup.PictureBoxEx();
             this.txtOptIn = new System.Windows.Forms.CheckBox();
-            this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
-            this.txtTitle = new DotSetup.RichTextBoxEx();
-            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
             this.imgTitle = new DotSetup.PictureBoxEx();
-            this.txtDescription = new DotSetup.RichTextBoxEx();
-            this.imgBackground = new DotSetup.PictureBoxEx();
             this.pnlLayout.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgBackground)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgSmOpInBg)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgTitle)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imgBackground)).BeginInit();
             this.SuspendLayout();
             // 
             // pnlLayout
             // 
             this.pnlLayout.BackColor = System.Drawing.Color.Transparent;
+            this.pnlLayout.Controls.Add(this.txtDescription);
+            this.pnlLayout.Controls.Add(this.imgBackground);
+            this.pnlLayout.Controls.Add(this.txtDisclaimer);
+            this.pnlLayout.Controls.Add(this.pnlDarkenOverlay);
             this.pnlLayout.Controls.Add(this.txtSmOptInY);
             this.pnlLayout.Controls.Add(this.txtSmOptInN);
             this.pnlLayout.Controls.Add(this.txtSmOptIn);
             this.pnlLayout.Controls.Add(this.imgSmOpInBg);
             this.pnlLayout.Controls.Add(this.txtOptIn);
-            this.pnlLayout.Controls.Add(this.pnlDarkenOverlay);
-            this.pnlLayout.Controls.Add(this.txtTitle);
-            this.pnlLayout.Controls.Add(this.txtDisclaimer);
             this.pnlLayout.Controls.Add(this.imgTitle);
-            this.pnlLayout.Controls.Add(this.txtDescription);
-            this.pnlLayout.Controls.Add(this.imgBackground);
+            this.pnlLayout.Controls.Add(this.txtTitle);
             this.pnlLayout.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlLayout.Location = new System.Drawing.Point(0, 0);
             this.pnlLayout.Name = "pnlLayout";
-            this.pnlLayout.Size = new System.Drawing.Size(560, 260);
+            this.pnlLayout.Size = new System.Drawing.Size(600, 320);
             this.pnlLayout.TabIndex = 11;
+            // 
+            // imgBackground
+            // 
+            this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;
+            this.imgBackground.Location = new System.Drawing.Point(0, 0);
+            this.imgBackground.Name = "imgBackground";
+            this.imgBackground.Size = new System.Drawing.Size(600, 280);
+            this.imgBackground.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.imgBackground.TabIndex = 9;
+            this.imgBackground.TabStop = false;
+            // 
+            // txtTitle
+            // 
+            this.txtTitle.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtTitle.Font = new System.Drawing.Font("Arial", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.txtTitle.Location = new System.Drawing.Point(3, 27);
+            this.txtTitle.Name = "txtTitle";
+            this.txtTitle.ReadOnly = true;
+            this.txtTitle.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtTitle.Size = new System.Drawing.Size(242, 33);
+            this.txtTitle.TabIndex = 15;
+            this.txtTitle.Text = "";
+            // 
+            // txtDescription
+            // 
+            this.txtDescription.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtDescription.Font = new System.Drawing.Font("Arial", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtDescription.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.txtDescription.Location = new System.Drawing.Point(15, 66);
+            this.txtDescription.Name = "txtDescription";
+            this.txtDescription.ReadOnly = true;
+            this.txtDescription.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtDescription.Size = new System.Drawing.Size(320, 110);
+            this.txtDescription.TabIndex = 12;
+            this.txtDescription.Text = "";
+            // 
+            // txtDisclaimer
+            // 
+            this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtDisclaimer.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.txtDisclaimer.BackColor = System.Drawing.Color.White;
+            this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
+            this.txtDisclaimer.Location = new System.Drawing.Point(10, 280);
+            this.txtDisclaimer.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.txtDisclaimer.Name = "txtDisclaimer";
+            this.txtDisclaimer.ReadOnly = true;
+            this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtDisclaimer.Size = new System.Drawing.Size(580, 40);
+            this.txtDisclaimer.TabIndex = 11;
+            this.txtDisclaimer.Text = "";
+            // 
+            // pnlDarkenOverlay
+            // 
+            this.pnlDarkenOverlay.Location = new System.Drawing.Point(0, 0);
+            this.pnlDarkenOverlay.Name = "pnlDarkenOverlay";
+            this.pnlDarkenOverlay.Size = new System.Drawing.Size(560, 260);
+            this.pnlDarkenOverlay.TabIndex = 24;
+            this.pnlDarkenOverlay.Visible = false;
             // 
             // txtSmOptInY
             // 
@@ -94,6 +160,7 @@
             // 
             // txtSmOptIn
             // 
+            this.txtSmOptIn.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtSmOptIn.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtSmOptIn.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Bold);
             this.txtSmOptIn.Location = new System.Drawing.Point(114, 200);
@@ -126,77 +193,16 @@
             this.txtOptIn.UseVisualStyleBackColor = false;
             this.txtOptIn.Visible = false;
             // 
-            // pnlDarkenOverlay
-            // 
-            this.pnlDarkenOverlay.Location = new System.Drawing.Point(0, 0);
-            this.pnlDarkenOverlay.Name = "pnlDarkenOverlay";
-            this.pnlDarkenOverlay.Size = new System.Drawing.Size(560, 260);
-            this.pnlDarkenOverlay.TabIndex = 24;
-            this.pnlDarkenOverlay.Visible = false;
-            // 
-            // txtTitle
-            // 
-            this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtTitle.Font = new System.Drawing.Font("Arial", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.txtTitle.Location = new System.Drawing.Point(3, 27);
-            this.txtTitle.Name = "txtTitle";
-            this.txtTitle.ReadOnly = true;
-            this.txtTitle.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtTitle.Size = new System.Drawing.Size(242, 33);
-            this.txtTitle.TabIndex = 15;
-            this.txtTitle.Text = "";
-            // 
-            // txtDisclaimer
-            // 
-            this.txtDisclaimer.BackColor = System.Drawing.Color.White;
-            this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.txtDisclaimer.ForeColor = System.Drawing.SystemColors.InfoText;
-            this.txtDisclaimer.Location = new System.Drawing.Point(0, 223);
-            this.txtDisclaimer.Name = "txtDisclaimer";
-            this.txtDisclaimer.ReadOnly = true;
-            this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDisclaimer.Size = new System.Drawing.Size(560, 37);
-            this.txtDisclaimer.TabIndex = 11;
-            this.txtDisclaimer.Text = "";
-            // 
             // imgTitle
             // 
             this.imgTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.imgTitle.Location = new System.Drawing.Point(3, 18);
             this.imgTitle.Name = "imgTitle";
-            this.imgTitle.Size = new System.Drawing.Size(288, 33);
+            this.imgTitle.Size = new System.Drawing.Size(328, 33);
             this.imgTitle.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.imgTitle.TabIndex = 14;
             this.imgTitle.TabStop = false;
-            // 
-            // txtDescription
-            // 
-            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDescription.Font = new System.Drawing.Font("Arial", 10F);
-            this.txtDescription.Location = new System.Drawing.Point(3, 66);
-            this.txtDescription.Name = "txtDescription";
-            this.txtDescription.ReadOnly = true;
-            this.txtDescription.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDescription.Size = new System.Drawing.Size(503, 110);
-            this.txtDescription.TabIndex = 12;
-            this.txtDescription.Text = "";
-            // 
-            // imgBackground
-            // 
-            this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;
-            this.imgBackground.Location = new System.Drawing.Point(0, 0);
-            this.imgBackground.Name = "imgBackground";
-            this.imgBackground.Size = new System.Drawing.Size(560, 260);
-            this.imgBackground.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.imgBackground.TabIndex = 9;
-            this.imgBackground.TabStop = false;
             // 
             // ProductLayout5
             // 
@@ -205,13 +211,13 @@
             this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.pnlLayout);
             this.Name = "ProductLayout5";
-            this.Size = new System.Drawing.Size(560, 260);
+            this.Size = new System.Drawing.Size(600, 320);
             this.Load += new System.EventHandler(this.ProductLayout5_Load);
             this.pnlLayout.ResumeLayout(false);
             this.pnlLayout.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgBackground)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgSmOpInBg)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgTitle)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imgBackground)).EndInit();
             this.ResumeLayout(false);
 
         }

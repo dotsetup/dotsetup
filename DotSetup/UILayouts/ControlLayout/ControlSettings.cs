@@ -64,7 +64,8 @@ namespace DotSetup
             if (location != "")
             {
                 string[] coords = location.Split(',');
-                if (coords.Count() != 2) return;
+                if (coords.Count() != 2) 
+				    return;
                 control.Location = new Point(GetRelativeValue(coords[0], control.Location.X), GetRelativeValue(coords[1], control.Location.Y));
 #if DEBUG
                 Logger.GetLogger().Info("Update cid " + cid + " location to " + location);
@@ -77,7 +78,8 @@ namespace DotSetup
             if (size != "")
             {
                 string[] coords = size.Split(',');
-                if (coords.Count() != 2) return;
+                if (coords.Count() != 2) 
+				    return;
                 control.Size = new Size(GetRelativeValue(coords[0], control.Size.Width), GetRelativeValue(coords[1], control.Size.Height));
 #if DEBUG
                 Logger.GetLogger().Info("Update cid " + cid + " size to " + size);

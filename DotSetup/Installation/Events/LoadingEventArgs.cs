@@ -11,12 +11,12 @@ namespace DotSetup
         private readonly bool started;
         public LoadingEventArgs(bool bStart)
         {
-            this.started = bStart;
+            started = bStart;
         }
 
         public override string ToString()
         {
-            return this.started.ToString();
+            return started.ToString();
         }
     }
 }

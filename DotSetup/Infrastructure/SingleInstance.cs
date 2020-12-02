@@ -20,7 +20,7 @@ namespace DotSetup
             mData = _myData;
         }
 
-        public string Data { get { return mData; } }
+        public string Data => mData;
     }
 
     public delegate void PipeCmdDelegate(PipeCmdEventArgs _args);
@@ -37,10 +37,10 @@ namespace DotSetup
         public SingleInstance(string appID)
         {
             string formattedAppID = appID.ToUpper().Replace(" ", "_");
-            formattedAppID = string.Join(String.Empty, formattedAppID.Split(Path.GetInvalidFileNameChars())); // no invalid filename characters
+            formattedAppID = string.Join(string.Empty, formattedAppID.Split(Path.GetInvalidFileNameChars())); // no invalid filename characters
             formattedAppID = formattedAppID.Substring(0, Math.Min(formattedAppID.Length, 50)); // max length 50
-            this.pipeName = "PIPE_" + formattedAppID;
-            this.mutexName = "MUTEX_" + formattedAppID;
+            pipeName = "PIPE_" + formattedAppID;
+            mutexName = "MUTEX_" + formattedAppID;
 
             // If are the first instance then we start the named pipe server listening and allow the form to load
             if (IsApplicationFirstInstance())

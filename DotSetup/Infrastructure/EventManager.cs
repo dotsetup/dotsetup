@@ -7,12 +7,12 @@ using System.Collections.Generic;
 
 namespace DotSetup
 {
-    public delegate Boolean InstallerEventHandler(object sender, EventArgs e);
+    public delegate bool InstallerEventHandler(object sender, EventArgs e);
 
     public class EventManager
     {
         private static readonly EventManager _eventManager = new EventManager();
-        private Dictionary<string, List<InstallerEventHandler>> eventTable;
+        private readonly Dictionary<string, List<InstallerEventHandler>> eventTable;
 
         public static EventManager GetManager()
         {
@@ -70,14 +70,14 @@ namespace DotSetup
             return count;
         }
 
-        public Boolean DispatchEvent(string eventName, object sender = null)
+        public bool DispatchEvent(string eventName, object sender = null)
         {
             return DispatchEvent(eventName, sender, EventArgs.Empty);
         }
 
-        public Boolean DispatchEvent(string eventName, object sender, EventArgs eventArgs)
+        public bool DispatchEvent(string eventName, object sender, EventArgs eventArgs)
         {
-            Boolean ret = true;
+            bool ret = true;
             if (eventTable.ContainsKey(eventName))
             {
                 foreach (InstallerEventHandler handler in eventTable[eventName])

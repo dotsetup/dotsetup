@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 namespace DotSetup.Infrastructure
 {
@@ -19,13 +20,7 @@ namespace DotSetup.Infrastructure
         {
         }
 
-        public static FileUtils Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static FileUtils Instance => instance;
 
         public static string GetMagicNumbers(string filepath, int bytesCount)
         {
@@ -37,7 +32,13 @@ namespace DotSetup.Infrastructure
                 buffer = reader.ReadBytes(bytesCount);
 
             var hex = BitConverter.ToString(buffer);
-            return hex.Replace("-", String.Empty).ToLower();
+            return hex.Replace("-", string.Empty).ToLower();
+        }
+
+        public static bool IsRunnableFileExtension(string fileName)
+        {
+            string[] runnableExtensions = { ".msi", ".exe" };
+            return runnableExtensions.Any(Path.GetExtension(fileName).ToLower().Equals);
         }
     }
 }

@@ -10,11 +10,11 @@ namespace DotSetup
 {
     public class FormPageManager
     {
-        Dictionary<PageDesign, Form> formsDictionary = new Dictionary<PageDesign, Form>();
-        Form currentForm;
-        int currntPageIndex;
-        FrmParent frmParent;
-        IFormPageBinder pageBinder;
+        private Dictionary<PageDesign, Form> formsDictionary = new Dictionary<PageDesign, Form>();
+        private Form currentForm;
+        private int currntPageIndex;
+        private FrmParent frmParent;
+        private IFormPageBinder pageBinder;
 
         private static FormPageManager instance = null;
         public static FormPageManager GetManager()
@@ -95,7 +95,7 @@ namespace DotSetup
                 };
 #if DEBUG
                 if (nextPageIndex == -1)
-                    Logger.GetLogger().Error("No Form called " + currentForm.Name + " found in [" + String.Join(" ", formsDictionary) + " ]");
+                    Logger.GetLogger().Error("No Form called " + currentForm.Name + " found in [" + string.Join(" ", formsDictionary) + " ]");
 #endif
                 currntPageIndex = nextPageIndex + 1;
             }

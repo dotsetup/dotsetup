@@ -5,8 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace DotSetup
@@ -17,23 +19,23 @@ namespace DotSetup
         [StructLayout(LayoutKind.Sequential)]
         private struct CHARFORMAT2_STRUCT
         {
-            public UInt32 cbSize;
-            public UInt32 dwMask;
-            public UInt32 dwEffects;
-            public Int32 yHeight;
-            public Int32 yOffset;
-            public Int32 crTextColor;
+            public uint cbSize;
+            public uint dwMask;
+            public uint dwEffects;
+            public int yHeight;
+            public int yOffset;
+            public int crTextColor;
             public byte bCharSet;
             public byte bPitchAndFamily;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
             public char[] szFaceName;
-            public UInt16 wWeight;
-            public UInt16 sSpacing;
+            public ushort wWeight;
+            public ushort sSpacing;
             public int crBackColor; // Color.ToArgb() -> int
             public int lcid;
             public int dwReserved;
-            public Int16 sStyle;
-            public Int16 wKerning;
+            public short sStyle;
+            public short wKerning;
             public byte bUnderlineType;
             public byte bAnimation;
             public byte bRevAuthor;
@@ -57,7 +59,7 @@ namespace DotSetup
         //private const UInt32 CFE_UNDERLINE = 0x0004;
         //private const UInt32 CFE_STRIKEOUT = 0x0008;
         //private const UInt32 CFE_PROTECTED = 0x0010;
-        private const UInt32 CFE_LINK = 0x0020;
+        private const uint CFE_LINK = 0x0020;
         //private const UInt32 CFE_AUTOCOLOR = 0x40000000;
         //private const UInt32 CFE_SUBSCRIPT = 0x00010000;        /* Superscript and subscript are */
         //private const UInt32 CFE_SUPERSCRIPT = 0x00020000;      /*  mutually exclusive			 */
@@ -88,7 +90,7 @@ namespace DotSetup
         //private const UInt32 CFM_UNDERLINE = 0x00000004;
         //private const UInt32 CFM_STRIKEOUT = 0x00000008;
         //private const UInt32 CFM_PROTECTED = 0x00000010;
-        private const UInt32 CFM_LINK = 0x00000020;
+        private const uint CFM_LINK = 0x00000020;
         //private const UInt32 CFM_SIZE = 0x80000000;
         //private const UInt32 CFM_COLOR = 0x40000000;
         //private const UInt32 CFM_FACE = 0x20000000;
@@ -118,12 +120,21 @@ namespace DotSetup
 
         private struct HyperLinkText
         {
-            public string text;
-            public string hyperlink;
-            public int startPosition;
+            public string Text;
+            public string HyperLink;
+            public int StartPosition;
         }
 
         private List<HyperLinkText> linkTextArray;
+
+        private struct StyledText
+        {
+            public string Text;
+            public int StartPosition;
+            public FontStyle FontStyle;
+        }
+
+        private List<StyledText> styledTextArray;
 
         protected override void WndProc(ref Message m)
         {
@@ -133,7 +144,7 @@ namespace DotSetup
                     m.Msg = WM_KILLFOCUS;
                     break;
                 case WM_SETCURSOR: // stops the flickering on hover
-                    m.Result = new IntPtr(1); //Signify that we dealt with the message. We should be returning "true", but I can't figure out how to do that.
+                    Cursor.Current = Cursor;
                     return;
                 case WM_MOUSEWHEEL:
                     if (Control.ModifierKeys == Keys.Control)
@@ -160,62 +171,83 @@ namespace DotSetup
 
             SetStyle(ControlStyles.Opaque, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-
-            TextChanged += TransparentLabel_TextChanged;
         }
 
-        void TransparentLabel_TextChanged(object sender, System.EventArgs e)
+        protected override void OnTextChanged(EventArgs e)
         {
-            this.ForceRefresh();
+            base.OnTextChanged(e);
+            UpdateStyles();
         }
 
-        public void ForceRefresh()
+        protected override void OnMouseMove(MouseEventArgs e)
         {
-            this.UpdateStyles();
+            base.OnMouseMove(e);
+
+            var charIndex = GetCharIndexFromPosition(e.Location);
+            var charPosition = GetPositionFromCharIndex(charIndex);
+            if (e.Location.X > charPosition.X)
+            {
+                charIndex++;
+            }
+
+            HyperLinkText LinkText = linkTextArray.FirstOrDefault(x =>
+            {
+                int StartTextPosition = x.StartPosition;
+                int EndTextposition = x.StartPosition + x.Text.Length - 1;
+                return charIndex >= StartTextPosition && charIndex <= EndTextposition;
+            });
+
+            if (!string.IsNullOrEmpty(LinkText.HyperLink))
+            {
+                Cursor = Cursors.Hand;
+            }
+            else
+            {
+                Cursor = Cursors.Default;
+            }
+
         }
 
         [DefaultValue(false)]
         public new bool DetectUrls
         {
-            get { return base.DetectUrls; }
-            set { base.DetectUrls = value; }
+            get => base.DetectUrls;
+            set => base.DetectUrls = value;
         }
 
         public override string Text
         {
-            get
-            {                
-                return base.Text;
-            }
+            get => base.Text;
             set
             {
                 linkTextArray = new List<HyperLinkText>();
-                var OriginalSelectionAlignment = this.SelectionAlignment;
+                styledTextArray = new List<StyledText>();
+
                 base.Text = RemoveLinkBrackets(value);
+                base.Text = ReplaceTags(base.Text, @"\*(.*?)\*", FontStyle.Bold);
+                base.Text = ReplaceTags(base.Text, @"_(.*?)_", FontStyle.Underline);
+                base.Text = ReplaceTags(base.Text, @"\^(.*?)\^", FontStyle.Italic);
+
                 SetLinks();
-                this.SelectAll();
-                base.SelectionAlignment = OriginalSelectionAlignment;
-                this.DeselectAll();
+                SetFonts();
+                SetAlignment();
+
                 if (linkTextArray.Count > 0)
-                    this.Visible = true;
+                {
+                    Visible = true;
+                }
             }
         }
 
         public HorizontalAlignment Alignment
         {
-            get
-            {
-                return _Alignment;
-            }
+            get => _Alignment;
             set
             {
-                this._Alignment = value;
-                this.SelectAll();
-                this.SelectionAlignment = value;
-                this.DeselectAll();
+                _Alignment = value;
+                SetAlignment();
             }
         }
-
 
         /// <summary>
         /// Given that in the text there are hyperlink in the stucture 
@@ -235,24 +267,77 @@ namespace DotSetup
                     break;
                 HyperLinkText hyperLinkText;
 
-                hyperLinkText.startPosition = startPos;
-                hyperLinkText.text = value.Substring(startPos + 1, seporatorPos - startPos - 1);
-                hyperLinkText.hyperlink = value.Substring(seporatorPos + 1, endPos - seporatorPos - 1).Trim();
+                hyperLinkText.StartPosition = startPos;
+                hyperLinkText.Text = value.Substring(startPos + 1, seporatorPos - startPos - 1);
+                hyperLinkText.HyperLink = value.Substring(seporatorPos + 1, endPos - seporatorPos - 1).Trim();
                 linkTextArray.Add(hyperLinkText);
 
-                value = value.Remove(startPos, endPos - startPos + 1).Insert(startPos, hyperLinkText.text);
+                value = value.Remove(startPos, endPos - startPos + 1).Insert(startPos, hyperLinkText.Text);
             }
             return value;
         }
-
 
         private void SetLinks()
         {
             foreach (HyperLinkText hyperLinkText in linkTextArray)
             {
-                Select(hyperLinkText.startPosition, hyperLinkText.text.Length);
+                Select(hyperLinkText.StartPosition, hyperLinkText.Text.Length);
                 SetSelectionLink(true);
             }
+        }
+
+        private string ReplaceTags(string text, string pattern, FontStyle fontStyle)
+        {
+            RegexOptions options = RegexOptions.Multiline;
+
+            foreach (Match m in Regex.Matches(text, pattern, options))
+            {
+                int newIndex = m.Index;
+                while (newIndex > 0 && text.ElementAt(newIndex - 1) != ' ')
+                    newIndex--;
+
+                string sub = m.Value.Substring(1, m.Value.Length - 2);
+                Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+
+                StyledText styledText;
+                styledText.StartPosition = newIndex;
+                styledText.Text = rgx.Replace(sub, "");
+                styledText.FontStyle = fontStyle;
+
+                text = text.Remove(newIndex, m.Value.Length).Insert(newIndex, sub);
+
+                for (int index = 0; index < styledTextArray.Count; index++)
+                {
+                    if (styledTextArray[index].StartPosition > newIndex)
+                    {
+                        styledTextArray[index] = new StyledText()
+                        {
+                            StartPosition = styledTextArray[index].StartPosition - 2,
+                            Text = styledTextArray[index].Text,
+                            FontStyle = styledTextArray[index].FontStyle
+                        };
+                    }
+                }
+
+                styledTextArray.Add(styledText);
+            }
+            return text;
+        }
+
+        private void SetFonts()
+        {
+            foreach (StyledText styledText in styledTextArray)
+            {
+                Select(styledText.StartPosition, styledText.Text.Length);
+                SelectionFont = new Font(SelectionFont, SelectionFont.Style | styledText.FontStyle);
+            }
+        }
+
+        private void SetAlignment()
+        {
+            SelectAll();
+            base.SelectionAlignment = _Alignment;
+            DeselectAll();
         }
 
         /// <summary>
@@ -276,7 +361,7 @@ namespace DotSetup
         private void SetSelectionStyle(UInt32 mask, UInt32 effect)
         {
             CHARFORMAT2_STRUCT cf = new CHARFORMAT2_STRUCT();
-            cf.cbSize = (UInt32)Marshal.SizeOf(cf);
+            cf.cbSize = (uint)Marshal.SizeOf(cf);
             cf.dwMask = mask;
             cf.dwEffects = effect;
 
@@ -289,10 +374,10 @@ namespace DotSetup
             Marshal.FreeCoTaskMem(lpar);
         }
 
-        private int GetSelectionStyle(UInt32 mask, UInt32 effect)
+        private int GetSelectionStyle(uint mask, uint effect)
         {
             CHARFORMAT2_STRUCT cf = new CHARFORMAT2_STRUCT();
-            cf.cbSize = (UInt32)Marshal.SizeOf(cf);
+            cf.cbSize = (uint)Marshal.SizeOf(cf);
             cf.szFaceName = new char[32];
 
             IntPtr wpar = new IntPtr(SCF_SELECTION);
@@ -349,12 +434,12 @@ namespace DotSetup
 
         internal void HandelLinkClicked(object sender, LinkClickedEventArgs e)
         {
-            HyperLinkText linkText = linkTextArray.FirstOrDefault(x => x.text == e.LinkText);
-            if (!String.IsNullOrEmpty(linkText.hyperlink))
+            HyperLinkText linkText = linkTextArray.FirstOrDefault(x => x.Text == e.LinkText);
+            if (!string.IsNullOrEmpty(linkText.HyperLink))
             {
                 System.Threading.Thread thread = new System.Threading.Thread(() =>
                 {
-                    System.Diagnostics.Process.Start(linkText.hyperlink);
+                    System.Diagnostics.Process.Start(linkText.HyperLink);
                 });
                 thread.Start();
             }

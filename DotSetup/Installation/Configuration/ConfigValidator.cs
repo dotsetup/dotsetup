@@ -19,7 +19,7 @@ namespace DotSetup
 
             foreach (string mandatoryConst in ConfigConsts.ReportMandatory)
             {
-                if (String.IsNullOrEmpty(configParser.GetConfigValue(mandatoryConst)))
+                if (string.IsNullOrEmpty(configParser.GetConfigValue(mandatoryConst)))
                     errorMsg += "No config param called " + mandatoryConst + ", ";
             }
 
@@ -29,7 +29,7 @@ namespace DotSetup
         public void ValidOrExit()
         {
             string errorMsg = Validate();
-            if (!String.IsNullOrEmpty(errorMsg))
+            if (!string.IsNullOrEmpty(errorMsg))
             {
 #if DEBUG
                 Logger.GetLogger().Fatal("Configuration validation error - " + errorMsg);

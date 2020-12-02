@@ -49,7 +49,7 @@ namespace DotSetup
         public override string ToString()
         {
             return "InstallationState: " + state + ", " +
-                (String.IsNullOrEmpty(errorMessage) ? "" : "errorMessage: " + errorMessage + ", ") +
+                (string.IsNullOrEmpty(errorMessage) ? "" : "errorMessage: " + errorMessage + ", ") +
                 "downloadPercentage: " + downloadPercentage + ", " +
                 "bytesReceived: " + bytesReceived + ", " +
                 "totalBytes: " + totalBytes;

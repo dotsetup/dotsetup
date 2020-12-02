@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace DotSetup
 {
-    class ButtonsSettings : ControlSettings
+    internal class ButtonsSettings : ControlSettings
     {
         public ButtonsSettings(string cid, XmlNode node, Dictionary<string, string> defaultAttributes) : base(cid, node, defaultAttributes)
         {

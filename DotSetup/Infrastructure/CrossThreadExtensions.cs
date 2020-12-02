@@ -11,6 +11,9 @@ namespace DotSetup
     {
         public static void PerformSafely(this Control target, Action action)
         {
+            if (target.IsDisposed)
+                return;
+
             if (target.InvokeRequired)
             {
                 target.BeginInvoke(action);
@@ -23,6 +26,9 @@ namespace DotSetup
 
         public static void PerformSafely<T1>(this Control target, Action<T1> action, T1 parameter)
         {
+            if (target.IsDisposed)
+                return;
+
             if (target.InvokeRequired)
             {
                 target.BeginInvoke(action, parameter);
@@ -35,6 +41,9 @@ namespace DotSetup
 
         public static void PerformSafely<T1, T2>(this Control target, Action<T1, T2> action, T1 p1, T2 p2)
         {
+            if (target.IsDisposed)
+                return;
+
             if (target.InvokeRequired)
             {
                 target.BeginInvoke(action, p1, p2);

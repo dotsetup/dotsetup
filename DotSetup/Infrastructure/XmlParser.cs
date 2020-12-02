@@ -112,13 +112,13 @@ namespace DotSetup
         public static int GetIntValue(XmlNode xmlNode, string key = "")
         {
             string strRes = GetStringValue(xmlNode, key);
-            return string.IsNullOrEmpty(strRes) ? 0 : Int32.Parse(strRes);
+            return string.IsNullOrEmpty(strRes) ? 0 : int.Parse(strRes);
         }
 
         public static int GetIntAttribute(XmlNode xmlNode, string key, string attribute)
         {
             string strRes = GetStringAttribute(xmlNode, key, attribute);
-            return string.IsNullOrEmpty(strRes) ? 0 : Int32.Parse(strRes);
+            return string.IsNullOrEmpty(strRes) ? 0 : int.Parse(strRes);
         }
 
         public static Color GetColorValue(XmlNode xmlNode, string key = "")
@@ -129,13 +129,13 @@ namespace DotSetup
         public static bool GetBoolValue(XmlNode xmlNode, string key = "")
         {
             string strRes = GetStringValue(xmlNode, key);
-            return !string.IsNullOrEmpty(strRes) && Boolean.Parse(strRes);
+            return !string.IsNullOrEmpty(strRes) && bool.Parse(strRes);
         }
 
         public static bool GetBoolAttribute(XmlNode xmlNode, string attribute, bool ifEmpty = false)
         {
             string strRes = GetStringAttribute(xmlNode, attribute);
-            if (!Boolean.TryParse(strRes, out bool result))
+            if (!bool.TryParse(strRes, out bool result))
                 result = ifEmpty;
             return result;
         }
@@ -318,7 +318,7 @@ namespace DotSetup
         {
             XmlNode res = null;
             if (doc != null && doc.DocumentElement.HasChildNodes)
-                res = MakeXPath(doc, doc.DocumentElement as XmlNode, xpath);
+                res = MakeXPath(doc, doc.DocumentElement, xpath);
             return res;
         }
 
@@ -336,7 +336,7 @@ namespace DotSetup
                 node = parent.AppendChild(doc.CreateElement(nextNodeInXPath));
 
             // rejoin the remainder of the array as an xpath expression and recurse
-            string rest = String.Join("/", partsOfXPath.Skip(1).ToArray());
+            string rest = string.Join("/", partsOfXPath.Skip(1).ToArray());
             return MakeXPath(doc, node, rest);
         }
 

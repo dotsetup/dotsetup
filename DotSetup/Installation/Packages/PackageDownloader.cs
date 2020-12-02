@@ -35,7 +35,7 @@ namespace DotSetup
             return newFullPath;
         }
 
-        protected void ReportDownloadError(string error)
+        protected void HandleDownloadError(string error)
         {
             installationPackage.errorMessage = $"Exception while downloading: {error}";
             installationPackage.OnInstallFailed(ErrorConsts.ERR_DOWNLOAD_GENERAL, installationPackage.errorMessage);

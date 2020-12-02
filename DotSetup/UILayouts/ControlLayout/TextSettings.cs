@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace DotSetup
 {
-    class TextSettings : ControlSettings
+    internal class TextSettings : ControlSettings
     {
         public TextSettings(string cid, XmlNode node, Dictionary<string, string> defaultAttributes) : base(cid, node, defaultAttributes)
         {

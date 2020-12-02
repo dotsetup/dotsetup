@@ -2,7 +2,6 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +16,7 @@ namespace DotSetup
         internal static string ObjToJSON(object obj)
         {
             string json = (obj != null) ? obj.ToString() : "";
-            if (String.IsNullOrEmpty(json) || (json[0] != '{'))
+            if (string.IsNullOrEmpty(json) || (json[0] != '{'))
                 json = "{" + json + "}";
             json = json.Replace(" =", "\":").Replace(", ", ",\"").Replace("{ ", "{\"");
             return json;
@@ -49,7 +48,8 @@ namespace DotSetup
             for (int i = start; i < json.Length; i++)
             {
                 char c = json[i];
-                if (c == '\\') escbegin = !escbegin;
+                if (c == '\\') 
+				    escbegin = !escbegin;
                 if (!escbegin)
                 {
                     if (c == '"')
@@ -70,7 +70,8 @@ namespace DotSetup
                                 if (i != start)
                                 {
                                     var child = ParseJSON(json, i, out var cend);
-                                    if (arraylist != null) arraylist.Add(child);
+                                    if (arraylist != null) 
+									    arraylist.Add(child);
                                     else
                                     {
                                         dict.Add(key, child);
@@ -83,8 +84,10 @@ namespace DotSetup
                                 end = i;
                                 if (key != null)
                                 {
-                                    if (arraylist != null) dict.Add(key, arraylist);
-                                    else dict.Add(key, DecodeString(regex, sb.ToString()));
+                                    if (arraylist != null) 
+									    dict.Add(key, arraylist);
+                                    else 
+									    dict.Add(key, DecodeString(regex, sb.ToString()));
                                 }
                                 return dict;
                             case '[':
@@ -126,16 +129,19 @@ namespace DotSetup
                     }
                 }
                 sb.Append(c);
-                if (escend) escbegin = false;
-                if (escbegin) escend = true;
-                else escend = false;
+                if (escend) 
+				    escbegin = false;
+                if (escbegin) 
+				    escend = true;
+                else 
+				    escend = false;
             }
             end = json.Length - 1;
             return dict; //theoretically shouldn't ever get here
         }
         private static string DecodeString(Regex regex, string str)
         {
-            return Regex.Unescape(regex.Replace(str, match => char.ConvertFromUtf32(Int32.Parse(match.Groups[1].Value, System.Globalization.NumberStyles.HexNumber))));
+            return Regex.Unescape(regex.Replace(str, match => char.ConvertFromUtf32(int.Parse(match.Groups[1].Value, System.Globalization.NumberStyles.HexNumber))));
         }
     }
 }

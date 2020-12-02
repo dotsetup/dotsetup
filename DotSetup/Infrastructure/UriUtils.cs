@@ -44,13 +44,7 @@ namespace DotSetup
             }
         }
 
-        public static UriUtils Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static UriUtils Instance => instance;
 
         public void OpenUrl()
         {
@@ -104,14 +98,14 @@ namespace DotSetup
                     return OperaExePath;
 
 
-                if (!String.IsNullOrEmpty(programFiles))
+                if (!string.IsNullOrEmpty(programFiles))
                 {
                     OperaExePath = programFiles.ToString() + "\\Opera\\opera.exe";
                     if (File.Exists(OperaExePath))
                         return OperaExePath;
                 }
 
-                if (!String.IsNullOrEmpty(programFilesX86))
+                if (!string.IsNullOrEmpty(programFilesX86))
                 {
                     OperaExePath = programFilesX86.ToString() + "\\Opera\\opera.exe";
                     if (File.Exists(OperaExePath))
@@ -329,7 +323,7 @@ namespace DotSetup
             {
                 if (userChoiceKey != null)
                 {
-                    object progIdValue = userChoiceKey.GetValue("Progid");
+                    var progIdValue = userChoiceKey.GetValue("Progid");
                     if (progIdValue != null)
                     {
                         progId = progIdValue.ToString();
@@ -348,15 +342,6 @@ namespace DotSetup
                     defaultBrowser = "Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge";
             }
             return defaultBrowser;
-        }
-    }
-
-    static class UriInfoProvider
-    {
-        public static string GetUA()
-        {
-            string os = Environment.OSVersion.Version.ToString();
-            return $"Mozilla/5.0 (Windows NT {os.Substring(0, os.IndexOf('.', 3))}; {((Environment.Is64BitOperatingSystem) ? "WOW64; " : "")}Trident/7.0; rv:11.0) like Gecko";
         }
     }
 }

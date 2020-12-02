@@ -47,7 +47,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Error(String.Format("Unable to retrieve the localappdata folder creation time, error: {0}", e.Message));
+                Logger.GetLogger().Error(string.Format("Unable to retrieve the localappdata folder creation time, error: {0}", e.Message));
 #endif
             }
             return -1;
@@ -74,18 +74,18 @@ namespace DotSetup
         }
 
         [DllImport("kernel32.dll")]
-        static extern IntPtr GetCurrentProcess();
+        private static extern IntPtr GetCurrentProcess();
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        static extern IntPtr GetModuleHandle(string moduleName);
+        private static extern IntPtr GetModuleHandle(string moduleName);
 
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern IntPtr GetProcAddress(IntPtr hModule,
+        private static extern IntPtr GetProcAddress(IntPtr hModule,
             [MarshalAs(UnmanagedType.LPStr)] string procName);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);
+        private static extern bool IsWow64Process(IntPtr hProcess, out bool wow64Process);
 
         public static int GetUpTimeInMinutes()
         {
@@ -93,6 +93,6 @@ namespace DotSetup
         }
 
         [DllImport("kernel32")]
-        static extern UInt64 GetTickCount64();
+        private static extern ulong GetTickCount64();
     }
 }

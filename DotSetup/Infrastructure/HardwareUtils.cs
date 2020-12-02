@@ -106,7 +106,7 @@ namespace DotSetup
 
         [DllImport("powrprof.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.U1)]
-        static extern bool GetPwrCapabilities(out SYSTEM_POWER_CAPABILITIES systemPowerCapabilites);
+        private static extern bool GetPwrCapabilities(out SYSTEM_POWER_CAPABILITIES systemPowerCapabilites);
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct SYSTEM_POWER_CAPABILITIES
@@ -177,7 +177,7 @@ namespace DotSetup
             public uint Capacity;
         }
 
-        enum SYSTEM_POWER_STATE
+        private enum SYSTEM_POWER_STATE
         {
             PowerSystemUnspecified = 0,
             PowerSystemWorking = 1,
@@ -219,12 +219,6 @@ namespace DotSetup
             return -1;
         }
 
-        public static HardwareUtils Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static HardwareUtils Instance => instance;
     }
 }

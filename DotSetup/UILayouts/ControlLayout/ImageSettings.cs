@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace DotSetup
 {
-    class ImageSettings : ControlSettings
+    internal class ImageSettings : ControlSettings
     {
         public ImageSettings(string cid, XmlNode node, Dictionary<string, string> defaultAttributes) : base(cid, node, defaultAttributes)
         {

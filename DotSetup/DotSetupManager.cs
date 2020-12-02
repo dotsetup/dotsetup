@@ -5,6 +5,7 @@
 using System;
 using System.Reflection;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
 
 namespace DotSetup
 {
@@ -31,6 +32,7 @@ namespace DotSetup
 
         public DotSetupManager()
         {
+            CommunicationUtils.EnableHighestTlsVersion();
         }
 
         public void InitInstaller(string[] args, Assembly assembly)

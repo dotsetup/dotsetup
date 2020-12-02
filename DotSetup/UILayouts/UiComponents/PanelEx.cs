@@ -14,7 +14,7 @@ namespace DotSetup
     {
         public PanelEx() : base()
         {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
@@ -22,7 +22,7 @@ namespace DotSetup
         {
             base.OnPaintBackground(e);
 
-            if (this.BackColor == System.Drawing.Color.Transparent)
+            if (BackColor == System.Drawing.Color.Transparent)
             {
                 Graphics g = e.Graphics;
 

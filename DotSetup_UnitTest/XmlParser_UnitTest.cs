@@ -12,7 +12,7 @@ namespace DotSetup_UnitTest
         XmlDocument textDoc;
 
         [TestInitialize]
-        public void testInit()
+        public void TestInit()
         {
             textDoc = new XmlDocument();
             textDoc.Load(File.OpenRead(@"Resources\\XmlParser_Tests.xml"));

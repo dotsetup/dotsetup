@@ -4,7 +4,7 @@
 
 namespace DotSetup.CustomPackages
 {
-    class PkgDownloadAndRun : InstallationPackage
+    internal class PkgDownloadAndRun : InstallationPackage
     {
         public PkgDownloadAndRun(string name) : base(name)
         {

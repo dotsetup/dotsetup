@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace DotSetup
 {
-    class OptLayout
+    internal class OptLayout
     {
         public static class OptType { public const string IN = "IN", OUT = "OUT", SMART = "SMART"; }
 
@@ -53,7 +53,7 @@ namespace DotSetup
                 TabStop = false,
                 Visible = false
             };
-            pnlLayout.Controls.Add(this.imgDarkenOverlay);
+            pnlLayout.Controls.Add(imgDarkenOverlay);
 
             string opt = ConfigParser.GetConfig().GetStringValue("//RemoteConfiguration/FlowSettings/OptType", OptType.IN);
             if (opt == OptType.SMART && (smOptInText == null || String.IsNullOrEmpty(smOptInText.Text))) // Fallback if the remote config not relevant
@@ -134,7 +134,7 @@ namespace DotSetup
         }
 
         // This is the method that will run on every timer tick
-        public void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
+        public void TimerEventProcessor(object myObject, EventArgs myEventArgs)
         {
             timer.Stop();
 

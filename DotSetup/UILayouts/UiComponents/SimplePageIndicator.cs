@@ -9,10 +9,10 @@ namespace DotSetup.UIComponents
 {
     public partial class SimplePageIndicator : UserControl
     {
-        readonly Graphics graphics;
-        Pen checkedPen, uncheckedPen;
-        Brush checkedBrush, uncheckedBrush;
-        int totalPageCount, currntPageIndex;
+        private readonly Graphics graphics;
+        private Pen checkedPen, uncheckedPen;
+        private Brush checkedBrush, uncheckedBrush;
+        private int totalPageCount, currntPageIndex;
 
         public SimplePageIndicator()
         {

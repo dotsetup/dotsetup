@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using DotSetup.CustomPackages;
 
@@ -28,6 +29,7 @@ namespace DotSetup
         internal Action<InstallationPackage, ProductSettings> OnCreatePackage, OnDiscardPackage;
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName, MoveFileFlags dwFlags);  //Mark for deletion
+        private readonly List<string> productClasses;
 
 
         public PackageManager()
@@ -38,6 +40,7 @@ namespace DotSetup
             dwnldBytesTotal = 0;
             pkgCompletedCounter = pkgRunningCounter = 0;
             progressSampleTime = DateTime.Now;
+            productClasses = new List<string>();
         }
 
         private static void SetAttributesNormal(DirectoryInfo dir)
@@ -90,10 +93,23 @@ namespace DotSetup
         internal int Activate()
         {
             int pkgStartedCount = 0;
+            List<ProductSettings> productsSettings = ConfigParser.GetConfig().GetProductsSettings();
             foreach (KeyValuePair<string, InstallationPackage> pkg in packageDictionary)
             {
                 if (pkg.Value.InstallationState == InstallationPackage.State.Init || pkg.Value.InstallationState == InstallationPackage.State.Error)
-                    pkgStartedCount += (pkg.Value.Activate()) ? 1 : 0;
+                {
+                    ProductSettings prodSettings = productsSettings.FirstOrDefault(prod => prod.Name == pkg.Key);
+                    if (!string.IsNullOrEmpty(prodSettings.Name))
+                    {
+                        pkg.Value.SetDownloadInfo(prodSettings.DownloadURLs, InstallationPackage.ChooseDownloadFileName(prodSettings));
+                        pkg.Value.SetExtractInfo(prodSettings.ExtractPath, prodSettings.IsExtractable);
+                        
+                        string extraParams = ConfigParser.GetConfig().GetConfigValue("EXTRA_PARAMS");
+                        prodSettings.RunParams += string.IsNullOrEmpty(extraParams)? string.Empty : (" " + extraParams);
+                        pkg.Value.SetRunInfo(prodSettings.RunPath, prodSettings.RunParams, prodSettings.MsiTimeoutMS);
+                        pkgStartedCount += (pkg.Value.Activate()) ? 1 : 0;
+                    }
+                }
             }
             return pkgStartedCount;
         }
@@ -132,27 +148,38 @@ namespace DotSetup
                     Logger.GetLogger().Info("[" + prodSettings.Name + "] Checking requirements for product:");
 #endif
                     ProductSettings tmpProdSettings = prodSettings;
-                    bool res = reqHandlers.HandlersResult(ref tmpProdSettings.PreInstall);
+
+                    bool res = default;
+                    if (productClasses.Contains(tmpProdSettings.Class))
+                    {
+                        res = false;
+                        tmpProdSettings.PreInstall.UnfulfilledRequirementType = "Class";
+                    }
+                    else
+                    {
+                        res = reqHandlers.HandlersResult(ref tmpProdSettings.PreInstall);
+                    }
 
                     if (!res)
                     {
                         OnDiscardPackage(null, tmpProdSettings);
                         continue;
-                    }     
+                    }
                 }
+
+                if (!string.IsNullOrEmpty(prodSettings.Class))
+                    productClasses.Add(prodSettings.Class);
+
                 if (prodSettings.IsOptional)
                     optionalProducts++;
 
                 InstallationPackage pkg = CreatePackage(prodSettings.Behavior, prodSettings.Name);
-                pkg.SetDownloadInfo(prodSettings.DownloadURLs, InstallationPackage.ChooseDownloadFileName(prodSettings));
-                pkg.SetExtractInfo(prodSettings.ExtractPath, prodSettings.IsExtractable);
-                pkg.SetRunInfo(prodSettings.RunPath, prodSettings.RunParams, prodSettings.MsiTimeoutMS);
                 productLayoutManager.AddProductSettings(prodSettings);
-				OnCreatePackage(pkg, prodSettings);
+                OnCreatePackage(pkg, prodSettings);
             }
         }
 
-        internal Boolean HandleInstallerQuit(bool doRunOnClose)
+        internal bool HandleInstallerQuit(bool doRunOnClose)
         {
             foreach (KeyValuePair<string, InstallationPackage> pkg in packageDictionary)
             {
@@ -215,7 +242,7 @@ namespace DotSetup
                         pkgRunningCounter--;
                     pkg.isUpdatedProgressCompleted = true;
 #if DEBUG
-                    Logger.GetLogger().Info(String.Format("[{0}] Package Progress completed", pkg.name));
+                    Logger.GetLogger().Info(string.Format("[{0}] Package Progress completed", pkg.name));
 #endif
                 }
 

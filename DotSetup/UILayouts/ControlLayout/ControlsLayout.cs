@@ -12,7 +12,7 @@ namespace DotSetup
 {
     public class ControlsLayout : IComparable
     {
-        readonly Dictionary<string, ControlSettings> controlSettings;
+        private readonly Dictionary<string, ControlSettings> controlSettings;
 
         public ControlsLayout(XmlNodeList[] xmlNodeList, Dictionary<string, string> defaultControlDesign)
         {
@@ -67,11 +67,12 @@ namespace DotSetup
 
         public int CompareTo(object obj)
         {
-            if (obj == null) return 1;
+            if (obj == null) 
+			    return -1;
 
             if (obj is ControlsLayout otherControls)
-                return Convert.ToInt32((this.controlSettings.Count == otherControls.controlSettings.Count)
-                    && this.controlSettings.Keys.SequenceEqual(otherControls.controlSettings.Keys));
+                return ((controlSettings.Count == otherControls.controlSettings.Count)
+                    && controlSettings.Values.SequenceEqual(otherControls.controlSettings.Values))?0:1;
             else
                 return 1;
         }

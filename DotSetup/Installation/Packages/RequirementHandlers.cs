@@ -51,7 +51,7 @@ namespace DotSetup
             NOT
         }
 
-        static readonly Dictionary<string, Func<string[], string>> methodsMap = new Dictionary<string, Func<string[], string>>
+        private static readonly Dictionary<string, Func<string[], string>> methodsMap = new Dictionary<string, Func<string[], string>>
         {
             { RequirementType.Disk, DiskHandler },
             { RequirementType.Processor, ProcessorHandler },
@@ -179,7 +179,7 @@ namespace DotSetup
                 return false;
             foreach (var strPart in partsOfString)
             {
-                if (!strPart.All(Char.IsDigit))
+                if (!strPart.All(char.IsDigit))
                     return false;
             }
 
@@ -248,7 +248,7 @@ namespace DotSetup
                 }
                 arrBool.Add(resB);
             }
-            resB = Boolean.Parse(CompareLogicalOper(arrBool.ToArray(), logicaloperatorType));
+            resB = bool.Parse(CompareLogicalOper(arrBool.ToArray(), logicaloperatorType));
 #if DEBUG
             Logger.GetLogger().Info(((reqCount > 1) ? reqCount.ToString() + " " : "") + "Requirements {" + logicaloperatorType + "} => " + resB);
 #endif
@@ -353,7 +353,7 @@ namespace DotSetup
                     {
                         resB = (LogicalOperatorType.NOT == logicalOperatorType);
                     }
-                    else if (operatorType >= CompareOperationType.Contains || Double.TryParse(methodResult, out _))
+                    else if (operatorType >= CompareOperationType.Contains || double.TryParse(methodResult, out _))
                     //True if it succeeds in parsing, false if it fails
                     {
                         resB = CompareOperation(methodResult, requirementValue, operatorType, logicalOperatorType);

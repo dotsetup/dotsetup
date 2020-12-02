@@ -10,14 +10,14 @@ using Microsoft.Win32;
 
 namespace DotSetup
 {
-    enum RegWow64Options
+    internal enum RegWow64Options
     {
         None = 0,
         KEY_WOW64_64KEY = 0x0100,
         KEY_WOW64_32KEY = 0x0200
     }
 
-    enum RegistryRights
+    internal enum RegistryRights
     {
         ReadKey = 131097,
         WriteKey = 131078
@@ -31,7 +31,7 @@ namespace DotSetup
         public static extern int RegOpenKeyEx(IntPtr hKey, string subKey, int ulOptions, int samDesired, out int phkResult);
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern uint RegEnumValueW(IntPtr hKey, uint dwIndex, StringBuilder lpValueName, ref uint lpcValueName, IntPtr lpReserved, ref uint lpType, StringBuilder lpData, ref uint lpcbData);
+        private static extern uint RegEnumValueW(IntPtr hKey, uint dwIndex, StringBuilder lpValueName, ref uint lpcValueName, IntPtr lpReserved, ref uint lpType, StringBuilder lpData, ref uint lpcbData);
 
         static RegistryUtils()
         {
@@ -41,15 +41,9 @@ namespace DotSetup
         {
         }
 
-        public static RegistryUtils Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        public static RegistryUtils Instance => instance;
 
-        static RegistryKey OpenSubKey(RegistryKey hkey, string subKeyName, RegWow64Options options)
+        private static RegistryKey OpenSubKey(RegistryKey hkey, string subKeyName, RegWow64Options options)
         {
 
             //Sanity check
@@ -189,10 +183,10 @@ namespace DotSetup
 
         public bool IsRegKeyExists(string[] arg)
         {
-            string hive = String.Empty;
-            string rootSubKey = String.Empty;
-            string relativeSubKey = String.Empty;
-            string subKeyName = String.Empty;
+            string hive = string.Empty;
+            string rootSubKey = string.Empty;
+            string relativeSubKey = string.Empty;
+            string subKeyName = string.Empty;
 
             ParseRegistryPath(arg, ref hive, ref rootSubKey, ref subKeyName, ref relativeSubKey);
 
@@ -226,15 +220,16 @@ namespace DotSetup
                 rootSubKey = rootSubKey.Substring(0, rootSubKey.Length - relativeSubKey.Length - 1);
             }
         }
-        const uint ERROR_SUCCESS = 0;
-        const uint ERROR_MORE_DATA = 234;
+
+        private const uint ERROR_SUCCESS = 0;
+        private const uint ERROR_MORE_DATA = 234;
         public string GetRegKeyValue(string[] arg) //string hkey, string subKey, string subKeyName)
         {
             string res = "";
-            string hive = String.Empty;
-            string subKey = String.Empty;
-            string relativeSubKey = String.Empty;
-            string subKeyName = String.Empty;
+            string hive = string.Empty;
+            string subKey = string.Empty;
+            string relativeSubKey = string.Empty;
+            string subKeyName = string.Empty;
             try
             {
                 ParseRegistryPath(arg, ref hive, ref subKey, ref subKeyName);

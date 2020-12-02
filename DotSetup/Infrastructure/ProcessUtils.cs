@@ -23,9 +23,9 @@ namespace DotSetup
             public const uint SnapModule = 0x00000008;
 
             [DllImport("kernel32.dll")]
-            static extern bool CloseHandle(IntPtr handle);
+            private static extern bool CloseHandle(IntPtr handle);
             [DllImport("kernel32.dll")]
-            static extern IntPtr CreateToolhelp32Snapshot(uint flags, int processId);
+            private static extern IntPtr CreateToolhelp32Snapshot(uint flags, int processId);
 
             public static IEnumerable<T> TakeSnapshot<T>(uint flags, int id) where T : IEntry, new()
             {
@@ -50,7 +50,7 @@ namespace DotSetup
                     m_handle = Toolhelp32.CreateToolhelp32Snapshot(flags, processId);
                 }
 
-                readonly IntPtr m_handle;
+                private readonly IntPtr m_handle;
             }
         }
 
@@ -78,7 +78,7 @@ namespace DotSetup
             public int pcPriClassBase;
             public int dwFlags;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public String fileName;
+            public string fileName;
             //byte fileName[260];
             //public const int sizeofFileName = 260;
         }

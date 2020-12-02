@@ -9,7 +9,7 @@ using System.Text;
 
 namespace DotSetup
 {
-    class CryptUtils
+    internal class CryptUtils
     {
         public static class Hash { public const string SHA1 = "SHA1", MD5 = "MD5"; }
         public static class EncDec { public const string BASE64 = "base64"; }
@@ -24,7 +24,7 @@ namespace DotSetup
         public static string ComputeHash(Stream stream, string hashName)
         {
             byte[] strHashed = HashAlgorithm.Create(hashName).ComputeHash(stream);
-            return BitConverter.ToString(strHashed).Replace("-", String.Empty).ToLower();
+            return BitConverter.ToString(strHashed).Replace("-", string.Empty).ToLower();
         }
 
         public static Stream Decode(string str, string decode)
@@ -33,7 +33,7 @@ namespace DotSetup
             switch (decode.ToLower())
             {
                 case EncDec.BASE64:
-                    str = str.Replace("\r\n", String.Empty).Replace(" ", String.Empty);
+                    str = str.Replace("\r\n", string.Empty).Replace(" ", string.Empty);
                     res = new System.IO.MemoryStream(Convert.FromBase64String(str));
                     break;
 

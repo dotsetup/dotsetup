@@ -10,17 +10,15 @@ using System.Windows.Forms;
 
 namespace DotSetup
 {
-
-    class ConfigLoader
+    internal class ConfigLoader
     {
         private readonly ConfigParser configParser;
-        private CmdReader cmdReader;
 
         public ConfigLoader(string[] args)
         {
             try
             {
-                cmdReader = new CmdReader(args);
+                CmdReader.GetReader(args);
                 configParser = new ConfigParser();
             }
 #if DEBUG
@@ -65,7 +63,7 @@ namespace DotSetup
             {
                 PageDesign newDesign = pagesDesign.FirstOrDefault(x => x.PageName == kvp.Key.PageName);
                 PageDesign oldDesign = kvp.Key;
-                if (!String.IsNullOrEmpty(newDesign.PageName) && (newDesign.ControlsLayouts != oldDesign.ControlsLayouts))
+                if (!string.IsNullOrEmpty(newDesign.PageName) && newDesign.ControlsLayouts.CompareTo(oldDesign.ControlsLayouts)==1)
                 {
                     DecoratePage(kvp.Value, newDesign);
                 }

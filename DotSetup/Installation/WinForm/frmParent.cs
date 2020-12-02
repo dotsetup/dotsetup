@@ -35,8 +35,8 @@ namespace DotSetup
             }
         }
 
-        const int WS_MINIMIZEBOX = 0x20000;
-        const int CS_DBLCLKS = 0x8;
+        private const int WS_MINIMIZEBOX = 0x20000;
+        private const int CS_DBLCLKS = 0x8;
         protected override CreateParams CreateParams
         {
             get
@@ -55,7 +55,7 @@ namespace DotSetup
             else
             {
 #if DEBUG
-                Logger.GetLogger().Warning("Set at least one icon as embedded resource so that it will be found by " + this.GetType().Name);
+                Logger.GetLogger().Warning("Set at least one icon as embedded resource so that it will be found by " + GetType().Name);
 #endif
             }
         }

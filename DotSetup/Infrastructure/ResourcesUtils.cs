@@ -150,7 +150,9 @@ namespace DotSetup
 
         public static bool IsPathDirectory(string path)
         {
-            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException("path");
+            if (string.IsNullOrEmpty(path)) 
+			   throw new ArgumentNullException("path");
+			   
             path = path.Trim();
 
             // if has trailing slash then it's a directory

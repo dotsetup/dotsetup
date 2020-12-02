@@ -2,7 +2,6 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,7 +10,19 @@ namespace DotSetup
     public class CmdReader
     {
         public static Dictionary<string, string> CmdParams;
-        public CmdReader(string[] args)
+
+        private static CmdReader instance = null;
+
+        public static CmdReader GetReader(string[] args = null)
+        {
+            if (instance == null && args != null)
+            {
+                instance = new CmdReader(args);
+            }
+
+            return instance;
+        }
+        private CmdReader(string[] args)
         {
             CmdParams = ResourcesUtils.GetCmdAsDictionary(args);
             if (CmdParams.ContainsKey("log"))
@@ -21,7 +32,7 @@ namespace DotSetup
                     Logger.GetLogger().ActivateLogger(CmdParams["log"], CmdParams["verbose"]);
                 else
                     Logger.GetLogger().ActivateLogger(CmdParams["log"]);
-                Logger.GetLogger().Info("--- Command line args: " + String.Join(" ", args.ToArray()));
+                Logger.GetLogger().Info("--- Command line args: " + string.Join(" ", args.ToArray()));
 #endif
             }
 

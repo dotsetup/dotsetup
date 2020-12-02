@@ -4,7 +4,7 @@
 
 namespace DotSetup.CustomPackages
 {
-    class PkgRunOnClose : InstallationPackage
+    internal class PkgRunOnClose : InstallationPackage
     {
 
         public PkgRunOnClose(string name) : base(name)

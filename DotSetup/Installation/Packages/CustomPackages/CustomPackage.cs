@@ -2,16 +2,14 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using System;
-
 namespace DotSetup.CustomPackages
 {
-    class CustomPackage
+    internal class CustomPackage
     {
         public static InstallationPackage CreateCustomPackage(string productLogic, string name)
         {
             InstallationPackage pkg;
-            if (String.IsNullOrEmpty(productLogic))
+            if (string.IsNullOrEmpty(productLogic))
                 pkg = new InstallationPackage(name);
             else if (typeof(PkgDownloadAndRun).Name.Equals(productLogic))
                 pkg = new PkgDownloadAndRun(name);

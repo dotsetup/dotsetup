@@ -3,11 +3,12 @@
 // https://dotsetup.io/
 
 using System;
+using System.Globalization;
 using System.Timers;
 using BITS = BITSReference1_5;
 using BITS5 = BITSReference5_0;
 
-public enum BitsNotifyFlags : UInt32
+public enum BitsNotifyFlags : uint
 {
     JOB_TRANSFERRED = 0x0001,
     JOB_ERROR = 0x0002,
@@ -27,12 +28,15 @@ namespace DotSetup
         private int totalPercentage = 0;
         private static BITS.BackgroundCopyManager1_5 mgr;
         private int timeCounter = 0;
-        private const int MAX_TIMEOUT_SECONDS = 20;
+        private const int MAX_TIMEOUT_MS = 30_000;
+        private const int RETRY_DELAY_SECONDS = 5;
+        private const int TIMER_INTERVAL_MS = 500;
+
         public PackageDownloaderBits(InstallationPackage installationPackage) : base(installationPackage)
         {
             aTimer = new Timer
             {
-                Interval = 500,
+                Interval = TIMER_INTERVAL_MS,
                 Enabled = false
             };
             aTimer.Elapsed += new ElapsedEventHandler(TimerElapsed);
@@ -46,38 +50,45 @@ namespace DotSetup
             }
             catch (System.Runtime.InteropServices.COMException e)
             {
-                ReportDownloadError("BackgroundCopyManager is not initialized - " + e.Message);
+                HandleDownloadError("BackgroundCopyManager is not initialized - " + e.Message);
                 return false;
             }
 
             if (mgr == null)
             {
-                ReportDownloadError("BackgroundCopyManager is not initialized");
+                HandleDownloadError("BackgroundCopyManager is not initialized");
                 return false;
             }
 
             try
             {
-                //Can be about 60 jobs with the same for a user...
+                // A single user can create a maximum of 60 jobs at one time...
                 mgr.CreateJob("DotSetup Installer", BITS.BG_JOB_TYPE.BG_JOB_TYPE_DOWNLOAD, out jobGuid, out job);
                 SetJobProperties(job);
 
                 job.AddFile(downloadLink, outFilePath);
 
+                if (job is BITS5.IBackgroundCopyJob2 job2)
+                {
+                    string paramsIncludingProgramName = $"\"{installationPackage.runFileName}\" {installationPackage.runParams}";
+                    job2.SetNotifyCmdLine(installationPackage.runFileName, paramsIncludingProgramName);
+                }
+
                 //Activating events for job.
                 job.SetNotifyFlags(
-                  (UInt32)BitsNotifyFlags.JOB_TRANSFERRED
-                  + (UInt32)BitsNotifyFlags.JOB_ERROR);
+                  (uint)BitsNotifyFlags.JOB_TRANSFERRED
+                  + (uint)BitsNotifyFlags.JOB_ERROR);
                 job.SetNotifyInterface(this);
+
                 job.Resume();  //starting the job
             }
             catch (System.Exception e)
             {
-                ReportDownloadError(e.Message);
+                HandleDownloadError(e.Message);
                 CancelJob();
                 return false;
             }
-            
+
             aTimer.Start();
 
             return true;
@@ -104,6 +115,7 @@ namespace DotSetup
             }
 
             job.SetPriority(BITS.BG_JOB_PRIORITY.BG_JOB_PRIORITY_FOREGROUND);
+            job.SetMinimumRetryDelay(RETRY_DELAY_SECONDS);
         }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
@@ -113,51 +125,90 @@ namespace DotSetup
 
         private void TimerCalled()
         {
-            job.GetState(out BITS.BG_JOB_STATE state);
-            if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_CONNECTING ||
-                state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
+            try
             {
-                //job in a state that that is connecting or in no connection error
-                if (timeCounter >= (MAX_TIMEOUT_SECONDS / 2)) //20 seconds of timeout 
+                job.GetState(out BITS.BG_JOB_STATE state);
+                if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_CONNECTING ||
+                    state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
                 {
-                    CancelJob();
-                    aTimer.Stop();
-                    ReportDownloadError("No Internet connection");
+                    //job in a state that that is connecting or in no connection error
+                    if (timeCounter >= MAX_TIMEOUT_MS) //30 seconds of timeout 
+                    {
+                        string errdesc = string.Empty;
+                        if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
+                        {
+                            job.GetError(out BITS.IBackgroundCopyError pError);
+                            pError.GetErrorDescription((uint)CultureInfo.GetCultureInfo("en-US").LCID, out errdesc);
+                        }
+
+                        CancelJob();
+                        aTimer.Stop();
+                        HandleDownloadError("No Internet connection" + (string.IsNullOrEmpty(errdesc) ? "" : $", error: {errdesc}"));
+                    }
+                    else
+                    {
+                        if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
+                            job.Resume();
+
+                        timeCounter += TIMER_INTERVAL_MS;
+                    }
                 }
                 else
-                    timeCounter++;
-            }
-            else
-            {
-                //job in a state that that can continue to download and progress
-                timeCounter = 0;
-                job.GetProgress(out BITS._BG_JOB_PROGRESS progress);
-
-                if (progress.BytesTotal != ulong.MaxValue)
                 {
-                    totalPercentage = (int)((double)progress.BytesTransferred / progress.BytesTotal * 100);
-                    installationPackage.SetDownloadProgress(totalPercentage, (long)progress.BytesTransferred, (long)progress.BytesTotal);
+                    //job in a state that that can continue to download and progress
+                    timeCounter = 0;
+                    job.GetProgress(out BITS._BG_JOB_PROGRESS progress);
+
+                    if (progress.BytesTotal != ulong.MaxValue)
+                    {
+                        totalPercentage = (int)((double)progress.BytesTransferred / progress.BytesTotal * 100);
+                        installationPackage.SetDownloadProgress(totalPercentage, (long)progress.BytesTransferred, (long)progress.BytesTotal);
+                    }
+                    installationPackage.HandleProgress(installationPackage);
                 }
-                installationPackage.HandleProgress(installationPackage);
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"error on TimerCalled: {e.Message}");
+#endif
             }
         }
 
         public void JobTransferred(BITS.IBackgroundCopyJob pJob)
         {
+            // 0. SetNotifyCmdLine
+            // 1. complete
+            // 2. HandleDownloadEnded
+            // 3. wait for run event
+            // 4. Run
+
             aTimer.Stop();
+
             pJob.Complete();
             TimerCalled();
             installationPackage.HandleDownloadEnded();
+
+            //wait on event from runner    
+            if (installationPackage.onRunWithBits.WaitOne() && installationPackage.runner.RunWithBits)
+            {
+                // Throwing with E_FAIL error-code so BITS will also execute the command line
+                throw new System.Runtime.InteropServices.COMException("", int.Parse("80004005", System.Globalization.NumberStyles.HexNumber));
+            }
         }
 
         public void JobError(BITS.IBackgroundCopyJob pJob, BITS.IBackgroundCopyError pError)
         {
             pJob.Cancel();
             aTimer.Stop();
-            pError.GetErrorDescription((uint)System.Threading.Thread.CurrentThread.CurrentCulture.LCID, out string errdesc);
+            pError.GetErrorDescription((uint)CultureInfo.GetCultureInfo("en-US").LCID, out string errdesc);
             if (errdesc != null)
             {
-                ReportDownloadError(errdesc);
+                HandleDownloadError(errdesc);
             }
             installationPackage.HandleProgress(installationPackage);
         }
@@ -191,6 +242,10 @@ namespace DotSetup
                         break;
                 }
             }
+
+            // release run event
+            if (!installationPackage.runner.RunWithBits)
+                installationPackage.onRunWithBits.Set();
         }
 
         private void CancelJob()

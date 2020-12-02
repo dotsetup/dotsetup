@@ -14,7 +14,7 @@ namespace DotSetup
 {
     public struct ProductSettings
     {
-        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Skin;
+        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Skin, Class;
 
         public struct DownloadURL
         {
@@ -104,7 +104,7 @@ namespace DotSetup
         {
             SetFormDesign();
             SetPagesDesign();
-            SetProductsSettings();
+            ReadProductsSettings();
 
             if (CmdReader.CmdParams.ContainsKey("saveconfig"))
                 xmlDoc.Save(CmdReader.CmdParams["saveconfig"]);
@@ -222,7 +222,7 @@ namespace DotSetup
                         tmpLocale = localeCodeCandidate;
                     break;
                 case "userselected":
-                    tmpLocale = (String.IsNullOrEmpty(userSelectedLocale)) ? tmpLocale : userSelectedLocale;
+                    tmpLocale = (string.IsNullOrEmpty(userSelectedLocale)) ? tmpLocale : userSelectedLocale;
                     break;
                 default:
                     tmpLocale = "en";
@@ -334,7 +334,8 @@ namespace DotSetup
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Form Design:", Logger.Level.MEDIUM_DEBUG_LEVEL);
 #endif
-            if (formDesignNode == null) return;
+            if (formDesignNode == null) 
+			    return;
 
             formDesign.Height = XmlParser.GetIntValue(formDesignNode, "Height");
             formDesign.Width = XmlParser.GetIntValue(formDesignNode, "Width");
@@ -352,12 +353,12 @@ namespace DotSetup
         {
             try
             {
-                if (String.IsNullOrEmpty(workDir))
+                if (string.IsNullOrEmpty(workDir))
                 {
-                    if (String.IsNullOrEmpty(installerWorkDir))
+                    if (string.IsNullOrEmpty(installerWorkDir))
                     {
                         string mainProdName = GetConfigValue(ConfigConsts.PRODUCT_TITLE);
-                        mainProdName = string.Join(String.Empty, mainProdName.Split(Path.GetInvalidFileNameChars())); // no invalid filename characters
+                        mainProdName = string.Join(string.Empty, mainProdName.Split(Path.GetInvalidFileNameChars())); // no invalid filename characters
                         mainProdName = mainProdName.Replace(" ", "_"); // no spaces
                         mainProdName = mainProdName.Substring(0, Math.Min(mainProdName.Length, 15)); // max length 15
 
@@ -393,10 +394,10 @@ namespace DotSetup
 #endif
                 workDir = "";
             }
-            return !String.IsNullOrEmpty(workDir);
+            return !string.IsNullOrEmpty(workDir);
         }
 
-        private void SetProductsSettings()
+        private void ReadProductsSettings()
         {
             productsSettings = new List<ProductSettings>();
             foreach (XmlNode productSettingsNode in xmlDoc.SelectNodes("//Products/Product"))
@@ -408,7 +409,7 @@ namespace DotSetup
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Product Settings:", Logger.Level.MEDIUM_DEBUG_LEVEL);
 #endif            
-            ProductSettings productSettings = new ProductSettings
+            var productSettings = new ProductSettings
             {
                 IsOptional = XmlParser.GetBoolAttribute(productSettingsNode, "optional"),
                 IsExtractable = XmlParser.GetBoolAttribute(productSettingsNode, "extractable", true)
@@ -420,6 +421,7 @@ namespace DotSetup
             if (productSettings.IsOptional)
                 productSettings.Name = "sec:" + XmlParser.GetStringValue(productDynamicData, "InternalName");
             productSettings.Skin = XmlParser.GetStringValue(productDynamicData, "Skin");
+            productSettings.Class = XmlParser.GetStringValue(productDynamicData, "Class");
 
             EvalCustomVariables(productStaticData.SelectSingleNode("CustomData/CustomVars"));
 
@@ -459,7 +461,7 @@ namespace DotSetup
             {
                 string RunParam = XmlParser.GetStringValue(runParamsNode).Trim();
 
-                productSettings.RunParams += (String.IsNullOrEmpty(productSettings.RunParams) ? RunParam : " " + RunParam);
+                productSettings.RunParams += (string.IsNullOrEmpty(productSettings.RunParams) ? RunParam : " " + RunParam);
             }
             productSettings.PreInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PreInstall/Requirements"));
             productSettings.PostInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PostInstall/Requirements"));
@@ -602,11 +604,11 @@ namespace DotSetup
 
         public List<ProductSettings> GetProductsSettings()
         {
-            SetProductsSettings();
+            ReadProductsSettings();
             return productsSettings;
         }
 
-        public String GetStringValue(string Xpath, string defaultValue = "")
+        public string GetStringValue(string Xpath, string defaultValue = "")
         {
             string res = defaultValue;
             if (xmlDoc != null)
@@ -641,10 +643,10 @@ namespace DotSetup
         {
             XmlNode configNode = xmlDoc.SelectSingleNode("//Config");
             string res = XmlParser.GetStringValue(configNode, key);
-            if (String.IsNullOrEmpty(res))
+            if (string.IsNullOrEmpty(res))
             {
 #if DEBUG
-                if (!String.IsNullOrEmpty(defaultValue))
+                if (!string.IsNullOrEmpty(defaultValue))
                     Logger.GetLogger().Info("Missing config key (//Config/" + key + "). Setting default value " + defaultValue);
 #endif
                 res = defaultValue;

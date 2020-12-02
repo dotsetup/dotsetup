@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace DotSetup
 {
-    class DockingHelper
+    internal class DockingHelper
     {
         private readonly uint processId, threadId;
         private readonly IntPtr targetWnd;

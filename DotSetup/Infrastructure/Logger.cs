@@ -49,7 +49,7 @@ namespace DotSetup
                     Error(ex.Message);
                 }
             }
-            if (!String.IsNullOrEmpty(logLevelStr))
+            if (!string.IsNullOrEmpty(logLevelStr))
                 logLevel = Convert.ToInt32(logLevelStr);
         }
 
@@ -103,7 +103,7 @@ namespace DotSetup
             }
             catch (Exception)
             {
-                
+
             }
         }
 
@@ -164,11 +164,11 @@ namespace DotSetup
             {
                 try
                 {
-                    return File.Open(logFilename, FileMode.Append, FileAccess.Write, FileShare.Read);                    
+                    return File.Open(logFilename, FileMode.Append, FileAccess.Write, FileShare.Read);
                 }
                 catch (IOException)
                 {
-                    
+
                 }
             }
 

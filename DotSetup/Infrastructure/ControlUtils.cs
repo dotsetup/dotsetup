@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace DotSetup
 {
-    class ControlUtils
+    internal class ControlUtils
     {
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT
@@ -24,10 +24,9 @@ namespace DotSetup
 
         public static Size GetControlSize(IntPtr hWnd)
         {
-            RECT pRect;
-            Size cSize = new Size();
+            var cSize = new Size();
             // get coordinates relative to window
-            GetWindowRect(hWnd, out pRect);
+            GetWindowRect(hWnd, out var pRect);
 
             cSize.Width = pRect.Right - pRect.Left;
             cSize.Height = pRect.Bottom - pRect.Top;
