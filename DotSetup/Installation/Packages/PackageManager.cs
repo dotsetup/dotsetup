@@ -27,6 +27,8 @@ namespace DotSetup
         private DateTime progressSampleTime;
         internal ProductLayoutManager productLayoutManager;
         internal Action<InstallationPackage, ProductSettings> OnCreatePackage, OnDiscardPackage;
+        private bool isActivated = false;
+        public bool Activated { get => isActivated; }
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName, MoveFileFlags dwFlags);  //Mark for deletion
         private readonly List<string> productClasses;
@@ -111,6 +113,7 @@ namespace DotSetup
                     }
                 }
             }
+            isActivated = true;
             return pkgStartedCount;
         }
 
@@ -153,6 +156,9 @@ namespace DotSetup
                     if (productClasses.Contains(tmpProdSettings.Class))
                     {
                         res = false;
+#if DEBUG
+                        Logger.GetLogger().Info($"Class ({tmpProdSettings.Class}) <Exists> [{string.Join(", ", productClasses)}] => False");
+#endif
                         tmpProdSettings.PreInstall.UnfulfilledRequirementType = "Class";
                     }
                     else
@@ -218,6 +224,11 @@ namespace DotSetup
             return optionalsCount;
         }
 
+        internal bool Started()
+        {
+            return (packageDictionary.Count == pkgRunningCounter + pkgCompletedCounter);
+        }
+
         internal void HandleProgressUpdate(InstallationPackage pkg)
         {
             lock (progressLock)
@@ -264,11 +275,6 @@ namespace DotSetup
 
                 ProgressBarUpdater.HandleProgress(progressEvent);
             }
-        }
-
-        internal int GetCurrentProgress()
-        {
-            return Convert.ToInt32(currentProgress);
         }
 
         private double CalcCurrentDownloadSpeed(long dwnldBytesReceived)

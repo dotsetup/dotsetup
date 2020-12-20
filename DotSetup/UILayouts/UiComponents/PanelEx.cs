@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Windows.Forms;
+using DotSetup.UILayouts.UIComponents;
 
 namespace DotSetup
 {
@@ -104,29 +105,7 @@ namespace DotSetup
             }
             else
             {
-                try
-                {
-                    Stream imageStream;
-                    if (decode.ToLower() == CryptUtils.EncDec.BASE64)
-                        imageStream = CryptUtils.Decode(imageName, decode);
-                    else
-                        imageStream = ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, imageName);
-
-                    BackgroundImage = System.Drawing.Image.FromStream(imageStream);
-                }
-#if DEBUG
-                catch (Exception e)
-#else
-                catch (Exception)
-#endif
-                {
-#if DEBUG
-                    Logger.GetLogger().Error("PanelEx SetImage error while loading image from resource: " + e.Message);
-#endif
-                }
-                finally
-                {
-                }
+                BackgroundImage = UICommon.LoadImage(imageName, decode);
             }
         }
     }

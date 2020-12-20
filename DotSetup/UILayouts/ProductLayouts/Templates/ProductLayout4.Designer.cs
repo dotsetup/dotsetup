@@ -33,10 +33,10 @@
             this.txtSmOptInN = new System.Windows.Forms.RadioButton();
             this.txtOptIn = new System.Windows.Forms.CheckBox();
             this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
+            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
             this.txtDescription = new DotSetup.RichTextBoxEx();
             this.txtTitle = new DotSetup.RichTextBoxEx();
             this.imgTitle = new DotSetup.PictureBoxEx();
-            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
             this.txtSmOptIn = new DotSetup.RichTextBoxEx();
             this.imgSmOpInBg = new DotSetup.PictureBoxEx();
             this.imgBackground = new DotSetup.PictureBoxEx();
@@ -111,14 +111,35 @@
             this.pnlDarkenOverlay.TabIndex = 24;
             this.pnlDarkenOverlay.Visible = false;
             // 
+            // txtDisclaimer
+            // 
+            this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtDisclaimer.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.txtDisclaimer.BackColor = System.Drawing.Color.White;
+            this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
+            this.txtDisclaimer.LineSpacing = 160;
+            this.txtDisclaimer.Location = new System.Drawing.Point(10, 270);
+            this.txtDisclaimer.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.txtDisclaimer.Name = "txtDisclaimer";
+            this.txtDisclaimer.ReadOnly = true;
+            this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtDisclaimer.Size = new System.Drawing.Size(580, 37);
+            this.txtDisclaimer.TabIndex = 11;
+            this.txtDisclaimer.Text = "";
+            // 
             // txtDescription
             // 
+            this.txtDescription.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDescription.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDescription.ForeColor = System.Drawing.Color.White;
-            this.txtDescription.Location = new System.Drawing.Point(10, 44);
+            this.txtDescription.LineSpacing = 300;
+            this.txtDescription.Location = new System.Drawing.Point(10, 46);
             this.txtDescription.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
             this.txtDescription.Name = "txtDescription";
             this.txtDescription.ReadOnly = true;
@@ -132,7 +153,8 @@
             this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtTitle.ForeColor = System.Drawing.Color.White;
-            this.txtTitle.Location = new System.Drawing.Point(10, 6);
+            this.txtTitle.LineSpacing = 300;
+            this.txtTitle.Location = new System.Drawing.Point(10, 15);
             this.txtTitle.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.ReadOnly = true;
@@ -145,7 +167,7 @@
             // 
             this.imgTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.imgTitle.Location = new System.Drawing.Point(220, 8);
+            this.imgTitle.Location = new System.Drawing.Point(220, 10);
             this.imgTitle.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
             this.imgTitle.Name = "imgTitle";
             this.imgTitle.Size = new System.Drawing.Size(25, 28);
@@ -153,27 +175,12 @@
             this.imgTitle.TabIndex = 14;
             this.imgTitle.TabStop = false;
             // 
-            // txtDisclaimer
-            // 
-            this.txtDisclaimer.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.txtDisclaimer.BackColor = System.Drawing.Color.White;
-            this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
-            this.txtDisclaimer.Location = new System.Drawing.Point(10, 270);
-            this.txtDisclaimer.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.txtDisclaimer.Name = "txtDisclaimer";
-            this.txtDisclaimer.ReadOnly = true;
-            this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDisclaimer.Size = new System.Drawing.Size(580, 37);
-            this.txtDisclaimer.TabIndex = 11;
-            this.txtDisclaimer.Text = "";
-            // 
             // txtSmOptIn
             // 
+            this.txtSmOptIn.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtSmOptIn.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtSmOptIn.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Bold);
+            this.txtSmOptIn.LineSpacing = 300;
             this.txtSmOptIn.Location = new System.Drawing.Point(114, 214);
             this.txtSmOptIn.Name = "txtSmOptIn";
             this.txtSmOptIn.ReadOnly = true;

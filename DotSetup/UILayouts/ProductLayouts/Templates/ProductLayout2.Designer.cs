@@ -70,19 +70,20 @@ namespace DotSetup
             this.txtDisclaimer.BackColor = System.Drawing.Color.White;
             this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
             this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
-            this.txtDisclaimer.Location = new System.Drawing.Point(10, 270);
+            this.txtDisclaimer.Location = new System.Drawing.Point(0, 280);
             this.txtDisclaimer.Name = "txtDisclaimer";
             this.txtDisclaimer.ReadOnly = true;
             this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDisclaimer.Size = new System.Drawing.Size(580, 40);
+            this.txtDisclaimer.Size = new System.Drawing.Size(600, 40);
             this.txtDisclaimer.TabIndex = 11;
             this.txtDisclaimer.Text = "";
             // 
             // imgBackground
             // 
-            this.imgBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.imgBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.imgBackground.Controls.Add(this.txtSmOptInY);
             this.imgBackground.Controls.Add(this.txtSmOptInN);
             this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;

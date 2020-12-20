@@ -39,13 +39,28 @@ namespace DotSetup
                 productSettings.Add(prodSettings);
         }
 
-        public void AddProductLayouts()
+        public bool AddProductLayouts()
         {
-            foreach (ProductSettings prodSettings in productSettings)
+            bool isSuccess = true;
+            try
             {
-                ProductLayout productLayout = new ProductLayout(prodSettings.Name, prodSettings.LayoutName, prodSettings.ControlsLayouts);
-                productLayouts.Add(productLayout);
+                foreach (ProductSettings prodSettings in productSettings)
+                {
+                    ProductLayout productLayout = new ProductLayout(prodSettings.Name, prodSettings.LayoutName, prodSettings.ControlsLayouts);
+                    if (productLayout.productLayout != null)
+                        productLayouts.Add(productLayout);
+                    else
+                        isSuccess = false;
+                }
             }
+            catch (Exception e)
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"AddProductLayouts failed, error: {e.Message}");
+#endif
+                isSuccess = false;
+            }
+            return isSuccess;
         }
 
         public void SetPnlLayout(Panel pnlLayout)

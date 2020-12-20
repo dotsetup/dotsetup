@@ -1,5 +1,6 @@
 ﻿using DotSetup;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 using System.Xml;
 
@@ -23,9 +24,17 @@ namespace DotSetup_UnitTest
 
             Assert.AreEqual(configValidator.Validate(), "", "Config should be valid");
 
+            CheckSetConfig(configParser, "abc", "123");
+            CheckSetConfig(configParser, "Url", @"https://uri.com.br/api/v1/installer?userId=0&programId=49730&status=init");
+
             configParser.SetStringValue("//Config/" + ConfigConsts.URL_ANALYTICS, "");
             Assert.AreNotEqual(configValidator.Validate(), "", "Config should not be valid");
         }
 
+        private void CheckSetConfig(ConfigParser configParser, string key, string value)
+        {
+            configParser.SetConfigValue(key, value);
+            Assert.AreEqual(configParser.GetConfigValue(key), value, "Config not set correctly");
+        }
     }
 }

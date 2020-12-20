@@ -56,11 +56,12 @@ namespace DotSetup
                 if (controlSettings.ContainsKey(control.Name))
                 {
                     controlSettings[control.Name].SetLayout(control);
-                    if (control.HasChildren)
-                    {
-                        // Recursively call this method for each child control.
-                        SetLayout(control.Controls.Cast<Control>());
-                    }
+                }
+
+                if (control.HasChildren)
+                {
+                    // Recursively call this method for each child control.
+                    SetLayout(control.Controls.Cast<Control>());
                 }
             }
         }

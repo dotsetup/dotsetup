@@ -31,7 +31,7 @@ namespace DotSetup
         private const int MAX_TIMEOUT_MS = 30_000;
         private const int RETRY_DELAY_SECONDS = 5;
         private const int TIMER_INTERVAL_MS = 500;
-
+       
         public PackageDownloaderBits(InstallationPackage installationPackage) : base(installationPackage)
         {
             aTimer = new Timer
@@ -44,6 +44,41 @@ namespace DotSetup
 
         public override bool Download(string downloadLink, string outFilePath)
         {
+            // Already on an MTA thread, so just go for it
+            if (System.Threading.Thread.CurrentThread.GetApartmentState() == System.Threading.ApartmentState.MTA)
+                return DownloadMTA(downloadLink, outFilePath);
+
+#if DEBUG
+            Logger.GetLogger().Info("Download was called in STA apartment state. Moving to MTA apartment so BITS com object will be marshaled in a thread safe mode");
+#endif
+            // Local variable to hold the caught exception until the caller can rethrow
+            Exception downloadException = null;
+            bool downloadMTARes = false;
+
+            System.Threading.ThreadStart mtaThreadStart = new System.Threading.ThreadStart(() =>
+            {
+                try
+                {
+                    downloadMTARes = DownloadMTA(downloadLink, outFilePath);
+                }
+                catch (Exception ex)
+                {
+                    downloadException = ex;
+                }
+            });
+
+            System.Threading.Thread mtaThread = new System.Threading.Thread(mtaThreadStart);
+            mtaThread.SetApartmentState(System.Threading.ApartmentState.MTA);
+            mtaThread.Start();
+            mtaThread.Join();
+
+            if (downloadException != null) throw downloadException;
+
+            return downloadMTARes;
+        }
+
+        private bool DownloadMTA(string downloadLink, string outFilePath)
+        {          
             try
             {
                 mgr = new BITS.BackgroundCopyManager1_5();
@@ -82,7 +117,7 @@ namespace DotSetup
 
                 job.Resume();  //starting the job
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 HandleDownloadError(e.Message);
                 CancelJob();
@@ -174,11 +209,13 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Error($"error on TimerCalled: {e.Message}");
+                Logger.GetLogger().Error($"error on TimerCalled: {e.Message}, \ntrace:\n {e.StackTrace}");
 #endif
             }
         }
 
+        // remove this attribute in order to debug this notification
+        [System.Diagnostics.DebuggerHidden()]
         public void JobTransferred(BITS.IBackgroundCopyJob pJob)
         {
             // 0. SetNotifyCmdLine

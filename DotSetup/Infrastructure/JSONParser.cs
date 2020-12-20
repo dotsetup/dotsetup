@@ -13,7 +13,7 @@ namespace DotSetup
 {
     public static class JSONParser
     {
-        internal static string ObjToJSON(object obj)
+        public static string ObjToJSON(object obj)
         {
             string json = (obj != null) ? obj.ToString() : "";
             if (string.IsNullOrEmpty(json) || (json[0] != '{'))
@@ -26,6 +26,11 @@ namespace DotSetup
         {
             string[] entries = dict.Select(d => string.Format("\"{0}\":{1}", d.Key, d.Value[0] == '{' ? d.Value : "\"" + d.Value + "\"")).ToArray();
             return "{" + string.Join(",", entries) + "}";
+        }
+
+        public static string Escape(string json)
+        {
+            return json.Replace("\b", @"\b").Replace("\f", @"\f").Replace("\n", @"\n").Replace("\r", @"\r").Replace("\t", @"\t").Replace("\"", "\\\"");
         }
 
         // From https://stackoverflow.com/questions/1207731/how-can-i-deserialize-json-to-a-simple-dictionarystring-string-in-asp-net

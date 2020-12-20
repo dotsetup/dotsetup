@@ -16,48 +16,43 @@ namespace DotSetup
     public class ResourcesUtils
     {
         public static Assembly wrapperAssembly;
-        public static Assembly libraryAssembly;
+        public static Assembly libraryAssembly = Assembly.GetExecutingAssembly();
+        
         public static Stream GetEmbeddedResourceStream(Assembly assembly, string resourceName)
         {
+            if (assembly == null && wrapperAssembly != null && libraryAssembly != null)
+                return GetEmbeddedResourceStream(wrapperAssembly, resourceName) ?? GetEmbeddedResourceStream(libraryAssembly, resourceName);
+            
             Stream res = null;
             try
             {
-                if (assembly == null)
-                    assembly = Assembly.GetExecutingAssembly();
                 string reasourceFileName = assembly.GetManifestResourceNames().Single(str => str.EndsWith(resourceName));
-
                 res = assembly.GetManifestResourceStream(reasourceFileName);
             }
-#if DEBUG
-            catch (Exception e)
-#else
             catch (Exception)
-#endif
             {
-#if DEBUG
-                Logger.GetLogger().Error("No resource called " + resourceName + " - " + e.Message);
-#endif
+
             }
-            finally
-            {
-            }
+                        
             return res;
         }
 
         public static bool EmbeddedResourceExists(Assembly assembly, string resourceName)
         {
-            if (assembly == null)
-                assembly = Assembly.GetExecutingAssembly();
+            if (assembly == null && wrapperAssembly != null && libraryAssembly != null)
+                return EmbeddedResourceExists(wrapperAssembly, resourceName) || EmbeddedResourceExists(libraryAssembly, resourceName);
+           
             return assembly.GetManifestResourceNames().Any(s => s.EndsWith(resourceName));
         }
 
         public static List<string> GetEmbeddedResourceNames(Assembly assembly, string resourceNameEnding)
         {
+            if (assembly == null && wrapperAssembly != null && libraryAssembly != null)
+                return (List<string>)GetEmbeddedResourceNames(wrapperAssembly, resourceNameEnding).Concat(GetEmbeddedResourceNames(libraryAssembly, resourceNameEnding));
+
             List<string> res = new List<string>();
             try
-            {
-                if (assembly == null)
-                    assembly = Assembly.GetExecutingAssembly();
+            {                
                 res = assembly.GetManifestResourceNames().Where(str => str.EndsWith(resourceNameEnding)).ToList();
             }
 #if DEBUG
@@ -79,7 +74,7 @@ namespace DotSetup
         public static bool WriteResourceToFile(string resourceName, string fileName)
         {
             bool isSuccess = false;
-            Stream ttfStream = ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, resourceName);
+            Stream ttfStream = GetEmbeddedResourceStream(wrapperAssembly, resourceName);
 
             if (ttfStream != null)
             {
@@ -99,7 +94,19 @@ namespace DotSetup
 
         public static Dictionary<string, string> GetPropertiesResources(Assembly assembly)
         {
+            if (assembly == null && wrapperAssembly != null && libraryAssembly != null)
+            {
+                var wrapperProperties = GetPropertiesResources(wrapperAssembly);
+                var libraryProperties = GetPropertiesResources(libraryAssembly);
+                foreach (var item in libraryProperties)
+                {
+                    wrapperProperties[item.Key] = item.Value;
+                }
+                return wrapperProperties;
+            }               
+
             Dictionary<string, string> res = new Dictionary<string, string>();
+            
             if (assembly == null)
                 return res;
 

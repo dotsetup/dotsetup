@@ -112,15 +112,9 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="txtDisclaimer.Text" xml:space="preserve">
-    <value>By clicking Accept, you have read the Privacy policy and hereby agree to the End User Licesnse Agreement and the installation of the Brave Browser. You may uninstall the product using "Add/Remove Programs"</value>
-  </data>
-  <data name="txtDescription.Text" xml:space="preserve">
-    <value>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse vel cursus dolor. Ut massa augue, laoreet nec ante nec, porttitor dapibus turpis. In molestie eleifend tortor condimentum malesuada. Maecenas ligula quam, consectetur eu ultrices quis, ornare nec dolor. Nam cursus tortor id consectetur tempus. Aliquam tempus diam imperdiet ligula ultricies cursus. Proin gravida elit nec sagittis hendrerit. Nullam et felis nec velit lobortis interdum at ut ante. Cras auctor volutpat sapien mattis tristique. Donec vulputate consequat viverra. Vestibulum viverra justo sed erat finibus, et dapibus lectus pharetra. Etiam consequat efficitur nulla, et egestas tortor ultrices sit amet. Phasellus fringilla est vel ex mollis, at vulputate nisi semper. Nam pulvinar tempus malesuada. Quisque a eros sit amet lorem posuere vehicula.</value>
-  </data>
 </root>

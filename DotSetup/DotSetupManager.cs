@@ -38,15 +38,14 @@ namespace DotSetup
         public void InitInstaller(string[] args, Assembly assembly)
         {
             ResourcesUtils.wrapperAssembly = assembly;
-            ResourcesUtils.libraryAssembly = Assembly.GetExecutingAssembly();
             configLoader = new ConfigLoader(args);
             ValidateSingleInstance();
             packageManager = new PackageManager();
         }
 
-        public void Activate()
+        public int Activate()
         {
-            packageManager.Activate();
+            return packageManager.Activate();
         }
 
         public void FinalizeInstaller(bool runOnClose)
@@ -96,6 +95,5 @@ namespace DotSetup
                     break;
             }
         }
-
     }
 }

@@ -3,6 +3,7 @@
 // https://dotsetup.io/
 
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -18,6 +19,13 @@ namespace DotSetup
         {
             InitializeComponent();
 
+            Color FontColor = ConfigParser.GetConfig().GetColorValue("//Main/FormDesign/FontColor");
+            if (FontColor != null)
+            {
+                txtDisclaimer.ForeColor = FontColor;
+                txtDescription.ForeColor = FontColor;
+            }
+
             controlsLayout.SetLayout(pnlLayout.Controls);
 
             Dock = DockStyle.Fill;
@@ -26,7 +34,17 @@ namespace DotSetup
         private void ProductLayout6_Load(object sender, EventArgs e)
         {
             txtDisclaimer.Focus(); //prevents a need to click twice on a link
-        }
 
+            if (imgTitle.Image == null)
+            {
+                pnlLayout.Controls.Remove(imgTitle);
+                imgTitle.Dispose();
+            }
+            else
+            {
+                imgTitle.BackColor = System.Drawing.Color.Transparent;
+                imgTitle.Parent = imgBackground;
+            }
+        }
     }
 }

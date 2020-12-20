@@ -50,8 +50,8 @@ namespace DotSetup
 
         public void SetTaskbarIcon()
         {
-            if (ResourcesUtils.EmbeddedResourceExists(ResourcesUtils.wrapperAssembly, ".ico"))
-                Icon = new System.Drawing.Icon(ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, ".ico"));
+            if (ResourcesUtils.EmbeddedResourceExists(null, ".ico"))
+                Icon = new System.Drawing.Icon(ResourcesUtils.GetEmbeddedResourceStream(null, ".ico"));
             else
             {
 #if DEBUG

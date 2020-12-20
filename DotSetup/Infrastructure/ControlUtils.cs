@@ -24,9 +24,9 @@ namespace DotSetup
 
         public static Size GetControlSize(IntPtr hWnd)
         {
-            var cSize = new Size();
+            Size cSize = new Size();
             // get coordinates relative to window
-            GetWindowRect(hWnd, out var pRect);
+            GetWindowRect(hWnd, out RECT pRect);
 
             cSize.Width = pRect.Right - pRect.Left;
             cSize.Height = pRect.Bottom - pRect.Top;

@@ -144,17 +144,19 @@ namespace DotSetup
             }
             StackFrame frame;
 
-            frame = new StackTrace().GetFrame(2);
+            frame = new StackTrace(true).GetFrame(2);
             if (frame == null)
             {
-                frame = new StackTrace().GetFrame(1);
+                frame = new StackTrace(true).GetFrame(1);
             }
 
             if (frame != null)
-                pretext += "\t[" + (frame.GetMethod()).ReflectedType.Name + "]\t";
-
+            {
+                string frameFileName = frame.GetFileName();
+                frameFileName = string.IsNullOrWhiteSpace(frameFileName) ? (frame.GetMethod()).ReflectedType.Name : $"{Path.GetFileNameWithoutExtension(frameFileName)}({frame.GetFileLineNumber()})";
+                pretext += $"\t[{frameFileName}]\t";
+            }   
             WriteLine(pretext + text);
-
         }
 
         private FileStream GetWriteStream(string path, int timeoutMs)
@@ -175,7 +177,7 @@ namespace DotSetup
             throw new TimeoutException($"Failed to get a write handle to {path} within {timeoutMs}ms.");
         }
 
-        [System.Flags]
+        [Flags]
         private enum LogType
         {
             TRACE,

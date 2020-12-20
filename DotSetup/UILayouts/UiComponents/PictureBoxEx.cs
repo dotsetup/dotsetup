@@ -4,6 +4,7 @@
 
 using System;
 using System.Windows.Forms;
+using DotSetup.UILayouts.UIComponents;
 
 namespace DotSetup
 {
@@ -48,28 +49,7 @@ namespace DotSetup
             }
             else
             {
-                try
-                {
-                    System.IO.Stream imageStream;
-                    if (decode.ToLower() == CryptUtils.EncDec.BASE64)
-                        imageStream = CryptUtils.Decode(imageName, decode);
-                    else
-                        imageStream = ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, imageName);
-                    Image = System.Drawing.Image.FromStream(imageStream);
-                }
-#if DEBUG
-                catch (Exception e)
-#else
-                catch (Exception)
-#endif
-                {
-#if DEBUG
-                    Logger.GetLogger().Error("Error in PictureBox " + Name + " while Loading image from resource: " + e.Message);
-#endif
-                }
-                finally
-                {
-                }
+                Image = UICommon.LoadImage(imageName, decode);
             }
         }
     }

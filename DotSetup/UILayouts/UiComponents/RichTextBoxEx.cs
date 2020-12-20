@@ -1,4 +1,4 @@
-﻿// Copyright (c) dotSetup. All Rights Reserved.
+// Copyright (c) dotSetup. All Rights Reserved.
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -223,10 +224,12 @@ namespace DotSetup
                 linkTextArray = new List<HyperLinkText>();
                 styledTextArray = new List<StyledText>();
 
+                string[] IgnoreList = { "*", "^", "_" };
+
                 base.Text = RemoveLinkBrackets(value);
-                base.Text = ReplaceTags(base.Text, @"\*(.*?)\*", FontStyle.Bold);
-                base.Text = ReplaceTags(base.Text, @"_(.*?)_", FontStyle.Underline);
-                base.Text = ReplaceTags(base.Text, @"\^(.*?)\^", FontStyle.Italic);
+                base.Text = ReplaceTags(base.Text, @"\*", FontStyle.Bold, IgnoreList);
+                base.Text = ReplaceTags(base.Text, @"_", FontStyle.Underline, IgnoreList);
+                base.Text = ReplaceTags(base.Text, @"\^", FontStyle.Italic, IgnoreList);
 
                 SetLinks();
                 SetFonts();
@@ -286,40 +289,44 @@ namespace DotSetup
             }
         }
 
-        private string ReplaceTags(string text, string pattern, FontStyle fontStyle)
+        private string ReplaceTags(string text, string indicator, FontStyle fontStyle, string[] IgnoreList)
         {
             RegexOptions options = RegexOptions.Multiline;
-
+            int buffer = 0;
+            int prevIndex = 0;
+            string pattern = indicator + @"(.*?)" + indicator; //@"\*(.*?)\*"
             foreach (Match m in Regex.Matches(text, pattern, options))
             {
-                int newIndex = m.Index;
-                while (newIndex > 0 && text.ElementAt(newIndex - 1) != ' ')
-                    newIndex--;
+                int unbuffedIndex = (m.Index > prevIndex) ? m.Index - buffer : m.Index;
+                int baseIndex = unbuffedIndex;
+                while (baseIndex > 0 && IgnoreList.Any(s => (text.ElementAt(baseIndex - 1)).ToString().Contains(s)))
+                    baseIndex--;
 
                 string sub = m.Value.Substring(1, m.Value.Length - 2);
-                Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+
+                int exists = styledTextArray.FindIndex((StyledText sT) => sT.StartPosition == baseIndex);
 
                 StyledText styledText;
-                styledText.StartPosition = newIndex;
-                styledText.Text = rgx.Replace(sub, "");
-                styledText.FontStyle = fontStyle;
+                styledText.StartPosition = baseIndex;
+                styledText.Text = sub.Replace(indicator, "");
+                styledText.FontStyle = (exists > -1) ? fontStyle | styledTextArray[exists].FontStyle : fontStyle;
 
-                text = text.Remove(newIndex, m.Value.Length).Insert(newIndex, sub);
+                text = text.Remove(unbuffedIndex, m.Value.Length).Insert(unbuffedIndex, sub);
 
                 for (int index = 0; index < styledTextArray.Count; index++)
                 {
-                    if (styledTextArray[index].StartPosition > newIndex)
+                    styledTextArray[index] = new StyledText()
                     {
-                        styledTextArray[index] = new StyledText()
-                        {
-                            StartPosition = styledTextArray[index].StartPosition - 2,
-                            Text = styledTextArray[index].Text,
-                            FontStyle = styledTextArray[index].FontStyle
-                        };
-                    }
+                        StartPosition = (styledTextArray[index].StartPosition > baseIndex) ? styledTextArray[index].StartPosition - 2 : styledTextArray[index].StartPosition,
+                        Text = (styledTextArray[index].StartPosition == styledText.StartPosition) ? styledText.Text : styledTextArray[index].Text,
+                        FontStyle = styledTextArray[index].FontStyle
+                    };
                 }
 
                 styledTextArray.Add(styledText);
+
+                prevIndex = unbuffedIndex;
+                buffer += 2;
             }
             return text;
         }
@@ -443,6 +450,64 @@ namespace DotSetup
                 });
                 thread.Start();
             }
+        }
+
+        [DllImport("user32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, Int32 msg, Int32 wParam, ref PARAFORMAT2 lParam);
+
+        public const int PFM_LINESPACING = 256;
+        public const int EM_SETPARAFORMAT = 1095;
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct PARAFORMAT2
+        {
+            public int cbSize;
+            public uint dwMask;
+            public Int16 wNumbering;
+            public Int16 wReserved;
+            public int dxStartIndent;
+            public int dxRightIndent;
+            public int dxOffset;
+            public Int16 wAlignment;
+            public Int16 cTabCount;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public int[] rgxTabs;
+            public int dySpaceBefore;
+            public int dySpaceAfter;
+            public int dyLineSpacing;
+            public Int16 sStyle;
+            public byte bLineSpacingRule;
+            public byte bOutlineLevel;
+            public Int16 wShadingWeight;
+            public Int16 wShadingStyle;
+            public Int16 wNumberingStart;
+            public Int16 wNumberingStyle;
+            public Int16 wNumberingTab;
+            public Int16 wBorderSpace;
+            public Int16 wBorderWidth;
+            public Int16 wBorders;
+        }
+
+        private int _LineSpacing = 300;
+
+        public int LineSpacing
+        {
+            get => _LineSpacing;
+            set
+            {
+                _LineSpacing = value;
+                SetSelectionLineSpacing(4, value);
+            }
+        }
+
+        public void SetSelectionLineSpacing(byte bLineSpacingRule, int dyLineSpacing)
+        {
+            PARAFORMAT2 format = new PARAFORMAT2();
+            format.cbSize = Marshal.SizeOf(format);
+            format.dwMask = PFM_LINESPACING;
+            format.dyLineSpacing = dyLineSpacing;
+            format.bLineSpacingRule = bLineSpacingRule;
+            SendMessage(this.Handle, EM_SETPARAFORMAT, SCF_SELECTION, ref format);
         }
     }
 }

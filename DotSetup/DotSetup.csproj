@@ -35,20 +35,22 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;_WithExports</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;_WithExports</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>
@@ -65,6 +67,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -73,25 +76,29 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|AnyCPU'">
     <OutputPath>bin\QA\</OutputPath>
     <DefineConstants>DEBUG</DefineConstants>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'QA|x86'">
     <OutputPath>bin\x86\QA\</OutputPath>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Demo|AnyCPU'">
     <OutputPath>bin\Demo\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>DEMO;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Demo|x86'">
     <OutputPath>bin\x86\Demo\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>DEMO;TRACE</DefineConstants>
   </PropertyGroup>
@@ -117,9 +124,6 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Ionic.Zip">
-      <HintPath>Installation\Packages\Ionic.Zip.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.DirectoryServices" />
@@ -142,8 +146,6 @@
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWaitWithParamsChange.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />
     <Compile Include="Installation\Packages\RequirementHandlers.cs" />
-    <Compile Include="Installation\SDK\DotSetupSDK.cs" />
-    <Compile Include="Installation\SDK\Exports.cs" />
     <Compile Include="Infrastructure\UriUtils.cs" />
     <Compile Include="Infrastructure\CrossThreadExtensions.cs" />
     <Compile Include="Infrastructure\CryptUtils.cs" />
@@ -162,6 +164,7 @@
     <Compile Include="Installation\Configuration\ConfigParser.cs" />
     <Compile Include="Installation\Configuration\ConfigValidator.cs" />
     <Compile Include="Installation\Events\LoadingEventArgs.cs" />
+    <Compile Include="Installation\SDK\DotSetupInterface.cs" />
     <Compile Include="Installation\WinForm\FormPageManager.cs" />
     <Compile Include="UILayouts\ControlLayout\ButtonsSettings.cs" />
     <Compile Include="UILayouts\ControlLayout\ControlsLayout.cs" />
@@ -210,12 +213,6 @@
     <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout2.Designer.cs">
       <DependentUpon>ProductLayout2.cs</DependentUpon>
     </Compile>
-    <Compile Include="Installation\SDK\frmTestSDK.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Installation\SDK\frmTestSDK.Designer.cs">
-      <DependentUpon>frmTestSDK.cs</DependentUpon>
-    </Compile>
     <Compile Include="UILayouts\UIComponents\PanelEx.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -255,6 +252,7 @@
     <Compile Include="UILayouts\UIComponents\SimplePageIndicator.Designer.cs">
       <DependentUpon>SimplePageIndicator.cs</DependentUpon>
     </Compile>
+    <Compile Include="UILayouts\UIComponents\UICommon.cs" />
     <EmbeddedResource Include="Installation\WinForm\frmParent.resx">
       <DependentUpon>frmParent.cs</DependentUpon>
     </EmbeddedResource>
@@ -266,9 +264,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout6.resx">
       <DependentUpon>ProductLayout6.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Installation\SDK\frmTestSDK.resx">
-      <DependentUpon>frmTestSDK.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -295,7 +290,6 @@
     <None Include=".editorconfig" />
     <None Include="app.config" />
     <None Include="ClassDiagram.cd" />
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -323,52 +317,28 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Shell32">
+      <Guid>{50A7E9B0-70EF-11D1-B75A-00A0C90564FE}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <DefineConstants Condition=" '$(DefineConstants)' != '' And '$(CustomConstants)' != '' ">$(DefineConstants);</DefineConstants>
     <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.85.0.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.85.1.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <DllExportIdent>932479DD-A90F-4E65-B291-632BBBC6B2A0</DllExportIdent>
-    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
-    <DllExportNamespace>System.Runtime.InteropServices</DllExportNamespace>
-    <DllExportDDNSCecil>false</DllExportDDNSCecil>
-    <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
-    <DllExportGenExpLib>true</DllExportGenExpLib>
-    <DllExportOurILAsm>true</DllExportOurILAsm>
-    <DllExportSysObjRebase>true</DllExportSysObjRebase>
-    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
-    <DllExportTimeout>30000</DllExportTimeout>
-    <DllExportPeCheck>2</DllExportPeCheck>
-    <DllExportPatches>3</DllExportPatches>
-    <DllExportPreProcType>0</DllExportPreProcType>
-    <DllExportPostProcType>0</DllExportPostProcType>
-  </PropertyGroup>
-  <ImportGroup Label=".NET DllExport">
-    <Import Project="$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
-  </ImportGroup>
-  <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
-    <Error Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="DllExport.bat is not found. Path: '$(SolutionDir)' - https://github.com/3F/DllExport" />
-    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command=".\DllExport.bat  -action Restore" WorkingDirectory="$(SolutionDir)" />
-    <MSBuild Condition="'$(DllExportModImported)' != 'true'" Projects="$(SolutionDir)packages\DllExport.1.7.3\tools\net.r_eg.DllExport.targets" Targets="DllExportMetaXBaseTarget" Properties="TargetFramework=$(TargetFramework)">
-      <Output TaskParameter="TargetOutputs" PropertyName="DllExportMetaXBase" />
-    </MSBuild>
-    <ItemGroup>
-      <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
-        <HintPath>$(SolutionDir)packages\DllExport.1.7.3\gcache\$(DllExportMetaXBase)\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
-        <Private>False</Private>
-        <SpecificVersion>False</SpecificVersion>
-      </Reference>
-    </ItemGroup>
-  </Target>
-  <Target Name="DllExportRPkgDynamicImport" BeforeTargets="PostBuildEvent" DependsOnTargets="GetFrameworkPaths" Condition="'$(DllExportModImported)' != 'true' And '$(DllExportRPkgDyn)' != 'false'">
-    <MSBuild BuildInParallel="true" UseResultsCache="true" Projects="$(MSBuildProjectFullPath)" Properties="DllExportRPkgDyn=true" Targets="Build" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

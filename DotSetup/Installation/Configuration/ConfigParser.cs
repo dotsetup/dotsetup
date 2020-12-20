@@ -73,7 +73,7 @@ namespace DotSetup
         private List<PageDesign> pagesDesign;
         private List<ProductSettings> productsSettings;
 
-        public string localeCode;
+        public string LocaleCode { get; private set; }
         public string workDir;
 
         private static ConfigParser _configParser;
@@ -87,8 +87,18 @@ namespace DotSetup
         public ConfigParser()
         {
             _configParser = this;
-            Stream mainXmlStream = ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, "main.xml");
-            Stream configXmlStream = ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, "config.xml");
+            Stream mainXmlStream = ResourcesUtils.GetEmbeddedResourceStream(null, "main.xml");
+            if (mainXmlStream == null)
+                mainXmlStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("<Main><Products></Products></Main>"));
+
+            Stream configXmlStream = ResourcesUtils.GetEmbeddedResourceStream(null, "config.xml");
+            
+            if (configXmlStream == null)
+            {
+#if DEBUG
+                Logger.GetLogger().Error("No resource called config.xml");
+#endif
+            }
 
             ReadXmlFiles(new Stream[] { mainXmlStream, configXmlStream });
 
@@ -137,7 +147,7 @@ namespace DotSetup
             }
         }
 
-        internal void SetConfigValue(string entryKey, string entryValue)
+        public void SetConfigValue(string entryKey, string entryValue)
         {
             if (ConfigConsts.SensitiveConfigKeys.Contains(entryKey.ToUpper()))
             {
@@ -156,7 +166,7 @@ namespace DotSetup
 
         private void ReadResourcesToXml()
         {
-            Dictionary<string, string> resourceSet = ResourcesUtils.GetPropertiesResources(ResourcesUtils.wrapperAssembly);
+            Dictionary<string, string> resourceSet = ResourcesUtils.GetPropertiesResources(null);
 #if DEBUG
             Logger.GetLogger().Info("Adding dynamic config from resources.");
 #endif
@@ -196,19 +206,19 @@ namespace DotSetup
 
         public List<string> LoadLocaleList()
         {
-            List<string> res = ResourcesUtils.GetEmbeddedResourceNames(ResourcesUtils.wrapperAssembly, ".locale");
+            List<string> res = ResourcesUtils.GetEmbeddedResourceNames(null, ".locale");
             return res;
         }
 
         public string GetLocaleCode()
         {
-            return localeCode;
+            return LocaleCode;
         }
 
         private void SetLocaleCode()
         {
-            localeCode = GetConfigValue("DEFAULT_LOCALE", "en");
-            string tmpLocale = localeCode;
+            LocaleCode = GetConfigValue("DEFAULT_LOCALE", "en");
+            string tmpLocale = LocaleCode;
 
             switch (GetConfigValue("LOCALE").ToLower())
             {
@@ -218,25 +228,28 @@ namespace DotSetup
 #if DEBUG
                     Logger.GetLogger().Info("Detected OS display language code: " + localeCodeCandidate);
 #endif
-                    if (ResourcesUtils.EmbeddedResourceExists(ResourcesUtils.wrapperAssembly, localeCodeCandidate + ".locale"))
+                    if (ResourcesUtils.EmbeddedResourceExists(null, localeCodeCandidate + ".locale"))
                         tmpLocale = localeCodeCandidate;
                     break;
                 case "userselected":
                     tmpLocale = (string.IsNullOrEmpty(userSelectedLocale)) ? tmpLocale : userSelectedLocale;
-                    break;
-                default:
-                    tmpLocale = "en";
-                    break;
+                    break;                
             }
 
-            if (!ResourcesUtils.EmbeddedResourceExists(ResourcesUtils.wrapperAssembly, tmpLocale + ".locale"))
+            if (!ResourcesUtils.EmbeddedResourceExists(null, tmpLocale + ".locale"))
             {
-                tmpLocale = "en";
-            }
-            localeCode = tmpLocale;
-            Stream localeXmlStream = ResourcesUtils.GetEmbeddedResourceStream(ResourcesUtils.wrapperAssembly, localeCode + ".locale");
 #if DEBUG
-            Logger.GetLogger().Info("Chosen locale: " + localeCode);
+                Logger.GetLogger().Info($"requested locale ({tmpLocale}) is missing from resources. default locale will be taken: {LocaleCode}");    
+#endif
+                tmpLocale = LocaleCode;
+            }
+            LocaleCode = tmpLocale;
+            Stream localeXmlStream = ResourcesUtils.GetEmbeddedResourceStream(null, LocaleCode + ".locale");
+#if DEBUG            
+            Logger.GetLogger().Info($"Chosen locale: {LocaleCode}");
+            if (localeXmlStream == null)
+                Logger.GetLogger().Fatal($"Chosen locale: {LocaleCode} is missing from resources");
+
 #endif
             ReadXmlFiles(new Stream[] { localeXmlStream });
         }
@@ -244,12 +257,39 @@ namespace DotSetup
         internal void SetUserSelectedLocale(string locale)
         {
             userSelectedLocale = locale;
-            if (localeCode != locale)
+#if DEBUG
+            Logger.GetLogger().Info($"user selected locale: {locale}");
+#endif
+            if (LocaleCode != locale)
             {
                 XmlNode oldLocaleNode = xmlDoc?.DocumentElement?.SelectSingleNode("//Locale");
                 oldLocaleNode?.ParentNode?.RemoveChild(oldLocaleNode);
                 SetLocaleCode();
                 SetPagesDesign();
+            }
+        }
+
+        internal void SetClientSelectedLocale(string locale)
+        {
+            locale = locale.Trim().ToLower();
+
+            if (int.TryParse(locale, out int localeCode))
+            {
+                try
+                {
+                    locale = new CultureInfo(localeCode).TwoLetterISOLanguageName;
+                }
+                catch (CultureNotFoundException)
+                {
+#if DEBUG
+                    Logger.GetLogger().Error($"SetClientSelectedLocale: {locale} is not a invalid LCID");
+#endif
+                }
+
+            }
+            if (!string.IsNullOrWhiteSpace(locale))
+            {
+                SetUserSelectedLocale(locale);
             }
         }
 
@@ -479,7 +519,7 @@ namespace DotSetup
                     if (XmlParser.GetBoolAttribute(localeNode, "default"))
                         defLocaleControlsLayout = new ControlsLayout(new XmlNodeList[] { localeNode.SelectNodes("Texts/Text"), localeNode.SelectNodes("Images/Image"), localeNode.SelectNodes("UILayouts") }, formDesign.DefaultControlDesign);
                     string localeLanguage = XmlParser.GetStringAttribute(localeNode, "name");
-                    if (localeLanguage == localeCode)
+                    if (localeLanguage == LocaleCode)
                         productSettings.ControlsLayouts = new ControlsLayout(new XmlNodeList[] { localeNode.SelectNodes("Texts/Text"), localeNode.SelectNodes("Images/Image"), localeNode.SelectNodes("UILayouts") }, formDesign.DefaultControlDesign);
                 }
 
@@ -488,7 +528,7 @@ namespace DotSetup
 
 #if DEBUG
                 if (productSettings.ControlsLayouts == null)
-                    Logger.GetLogger().Error("Missing locale for product: " + productSettings.Name + " language code: " + localeCode);
+                    Logger.GetLogger().Error("Missing locale for product: " + productSettings.Name + " language code: " + LocaleCode);
 #endif
             }
 

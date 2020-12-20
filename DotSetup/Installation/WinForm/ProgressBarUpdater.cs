@@ -17,6 +17,7 @@ namespace DotSetup
         public static Button btnRetry;
         public static Button btnFinish;
         public static event Action<ProgressEventArgs> OnProgressUpdate;
+        public static int currentState, currentProgress = -1;
 
         public static void SetComponents(ProgressBar _pbProgressBar, Control _lblProgressValue, Control _lblProgressUpperText, Button _btnRetry, Button _btnFinish)
         {
@@ -50,6 +51,8 @@ namespace DotSetup
         public static void HandleProgress(EventArgs progressEventArgs)
         {
             ProgressEventArgs progressEvent = (ProgressEventArgs)progressEventArgs;
+            currentState = progressEvent.state;
+            currentProgress = progressEvent.downloadPercentage;
             OnProgressUpdate?.Invoke(progressEvent);
             pbProgressBar?.PerformSafely(() => pbProgressBar.Value = progressEvent.downloadPercentage);
             if (progressEvent.state == ProgressEventArgs.State.Run)

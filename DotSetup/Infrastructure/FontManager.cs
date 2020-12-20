@@ -42,7 +42,7 @@ namespace DotSetup
 
         private bool IsFontEmbeddedResource(string resourceName)
         {
-            return ResourcesUtils.EmbeddedResourceExists(ResourcesUtils.wrapperAssembly, resourceName);
+            return ResourcesUtils.EmbeddedResourceExists(null, resourceName);
         }
 
         private void LoadEmbeddedResourceFont(string resourceName)
