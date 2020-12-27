@@ -89,15 +89,11 @@ namespace DotSetup
             {
                 if (isActive)
                 {
-                    using (var stream = GetWriteStream(logFilename, 1000))
+                    using var stream = GetWriteStream(logFilename, 1000);
+                    using StreamWriter writer = new StreamWriter(stream, System.Text.Encoding.UTF8);
+                    if (!string.IsNullOrEmpty(text))
                     {
-                        using (StreamWriter writer = new StreamWriter(stream, System.Text.Encoding.UTF8))
-                        {
-                            if (!string.IsNullOrEmpty(text))
-                            {
-                                writer.WriteLine(text);
-                            }
-                        }
+                        writer.WriteLine(text);
                     }
                 }
             }
@@ -155,7 +151,7 @@ namespace DotSetup
                 string frameFileName = frame.GetFileName();
                 frameFileName = string.IsNullOrWhiteSpace(frameFileName) ? (frame.GetMethod()).ReflectedType.Name : $"{Path.GetFileNameWithoutExtension(frameFileName)}({frame.GetFileLineNumber()})";
                 pretext += $"\t[{frameFileName}]\t";
-            }   
+            }
             WriteLine(pretext + text);
         }
 

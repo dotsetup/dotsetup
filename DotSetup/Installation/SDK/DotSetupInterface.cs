@@ -62,7 +62,7 @@ namespace DotSetup
                 return 0;
             if (ProgressBarUpdater.currentState == ProgressEventArgs.State.Done)
                 return 100;
-            return (int)System.Math.Round(ProgressBarUpdater.currentProgress*0.98);
+            return (int)System.Math.Round(ProgressBarUpdater.currentProgress * 0.98);
         }
 
         public void Unload(bool exitGracefully)

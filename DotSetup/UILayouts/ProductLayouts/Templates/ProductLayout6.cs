@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace DotSetup
 {
-    public partial class ProductLayout6 : UserControl
+    public partial class ProductLayout6 : ProductControl
     {
         [DllImport("user32.dll", EntryPoint = "ShowCaret")]
         public static extern long ShowCaret(IntPtr hwnd);
@@ -24,6 +24,7 @@ namespace DotSetup
             {
                 txtDisclaimer.ForeColor = FontColor;
                 txtDescription.ForeColor = FontColor;
+                txtTitle.ForeColor = FontColor;
             }
 
             controlsLayout.SetLayout(pnlLayout.Controls);

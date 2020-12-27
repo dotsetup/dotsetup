@@ -14,7 +14,7 @@ namespace DotSetup
 {
     public struct ProductSettings
     {
-        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Skin, Class;
+        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Skin, Class, DownloadMethod, SecondaryDownloadMethod;
 
         public struct DownloadURL
         {
@@ -48,8 +48,9 @@ namespace DotSetup
         public ProductRequirements PreInstall;
         public ProductRequirements PostInstall;
         public ControlsLayout ControlsLayouts;
-        public bool IsOptional, IsExtractable;
+        public bool IsOptional, IsExtractable, RunWithBits;
         public int MsiTimeoutMS;
+        public Dictionary<string, string> AnalyticsParams;
     }
     public struct FormDesign
     {
@@ -92,7 +93,7 @@ namespace DotSetup
                 mainXmlStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("<Main><Products></Products></Main>"));
 
             Stream configXmlStream = ResourcesUtils.GetEmbeddedResourceStream(null, "config.xml");
-            
+
             if (configXmlStream == null)
             {
 #if DEBUG
@@ -233,13 +234,13 @@ namespace DotSetup
                     break;
                 case "userselected":
                     tmpLocale = (string.IsNullOrEmpty(userSelectedLocale)) ? tmpLocale : userSelectedLocale;
-                    break;                
+                    break;
             }
 
             if (!ResourcesUtils.EmbeddedResourceExists(null, tmpLocale + ".locale"))
             {
 #if DEBUG
-                Logger.GetLogger().Info($"requested locale ({tmpLocale}) is missing from resources. default locale will be taken: {LocaleCode}");    
+                Logger.GetLogger().Info($"requested locale ({tmpLocale}) is missing from resources. default locale will be taken: {LocaleCode}");
 #endif
                 tmpLocale = LocaleCode;
             }
@@ -327,7 +328,7 @@ namespace DotSetup
 
                 // add RemoteConfiguration without the products list
                 XmlDocument remoteConfigHeader = (XmlDocument)remoteConfig.CloneNode(true);
-                remoteConfigHeader.SelectSingleNode("//RemoteConfiguration").RemoveChild(remoteConfigHeader.SelectSingleNode("//RemoteConfiguration/Products"));
+                remoteConfigHeader?.SelectSingleNode("//RemoteConfiguration")?.RemoveChild(remoteConfigHeader?.SelectSingleNode("//RemoteConfiguration/Products"));
 
                 XmlParser.SetNode(xmlDoc, remoteConfigHeader.DocumentElement);
                 XmlNodeList remoteProducts = remoteConfig.SelectNodes("//RemoteConfiguration/Products/Product");
@@ -374,8 +375,8 @@ namespace DotSetup
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Form Design:", Logger.Level.MEDIUM_DEBUG_LEVEL);
 #endif
-            if (formDesignNode == null) 
-			    return;
+            if (formDesignNode == null)
+                return;
 
             formDesign.Height = XmlParser.GetIntValue(formDesignNode, "Height");
             formDesign.Width = XmlParser.GetIntValue(formDesignNode, "Width");
@@ -480,9 +481,18 @@ namespace DotSetup
                 productSettings.DownloadURLs.Add(downloadURL);
             }
 
+            bool runWithBitsDefault = XmlParser.GetBoolValue(xmlDoc.SelectSingleNode("//Config"), ConfigConsts.RUN_WITH_BITS, true);
+
             foreach (XmlNode productLogicNode in productStaticData.SelectNodes("Logic"))
             {
                 productSettings.Behavior = XmlParser.GetStringValue(productLogicNode, "Behavior");
+                productSettings.RunWithBits = XmlParser.GetBoolValue(productLogicNode, "RunWithBits", runWithBitsDefault);								
+                productSettings.DownloadMethod = XmlParser.GetStringValue(productLogicNode, "DownloadMethod");
+                if (String.IsNullOrEmpty(productSettings.DownloadMethod))
+                    productSettings.DownloadMethod = GetConfigValue("DOWNLOAD_METHOD");
+                productSettings.SecondaryDownloadMethod = XmlParser.GetStringValue(productLogicNode, "SecondaryDownloadMethod");
+                if (String.IsNullOrEmpty(productSettings.SecondaryDownloadMethod))
+                    productSettings.SecondaryDownloadMethod = GetConfigValue("SECONDARY_DOWNLOAD_METHOD");
                 productSettings.MsiTimeoutMS = XmlParser.GetIntValue(productLogicNode, "MsiTimeoutMs");
                 productSettings.ProductEvents = new List<ProductSettings.ProductEvent>();
                 foreach (XmlNode EventNode in productLogicNode.SelectNodes("Events/Event"))
@@ -505,7 +515,7 @@ namespace DotSetup
             }
             productSettings.PreInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PreInstall/Requirements"));
             productSettings.PostInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PostInstall/Requirements"));
-
+            productSettings.AnalyticsParams = ExtractProductAnalyticsParams(productStaticData.SelectNodes("AnalyticsParams/Param"));
             productSettings.LayoutName = XmlParser.GetStringValue(productStaticData, "Layout");
 
             ControlsLayout defLocaleControlsLayout = null;
@@ -544,7 +554,6 @@ namespace DotSetup
             }
             return requirementsRoot;
         }
-
 
         private List<ProductSettings.ProductRequirements> ExtractProductRequirements(XmlNodeList productRequirementsList)
         {
@@ -597,6 +606,18 @@ namespace DotSetup
             }
 
             return requirementList;
+        }
+
+        private Dictionary<string, string> ExtractProductAnalyticsParams(XmlNodeList paramsNodeList)
+        {
+            Dictionary<string, string> Params = new Dictionary<string, string>();
+            foreach (XmlNode paramNode in paramsNodeList)
+            {
+                string key = XmlParser.GetStringValue(paramNode, "Key");
+                string value = XmlParser.GetStringValue(paramNode, "Value");
+                Params.Add(key, value);
+            }
+            return Params;
         }
 
         public void EvalCustomVariables(XmlNode productCustomVars)

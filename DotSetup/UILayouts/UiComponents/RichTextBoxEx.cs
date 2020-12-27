@@ -8,7 +8,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -118,6 +117,7 @@ namespace DotSetup
         private const int WM_SETCURSOR = 0x20;
         private const int WM_MOUSEWHEEL = 0x020A;
         private HorizontalAlignment _Alignment = HorizontalAlignment.Left;
+        private int _Padding = 0;
 
         private struct HyperLinkText
         {
@@ -234,6 +234,7 @@ namespace DotSetup
                 SetLinks();
                 SetFonts();
                 SetAlignment();
+                SetPadding();
 
                 if (linkTextArray.Count > 0)
                 {
@@ -250,6 +251,24 @@ namespace DotSetup
                 _Alignment = value;
                 SetAlignment();
             }
+        }
+
+        public new int Padding
+        {
+            get => _Padding;
+            set
+            {
+                _Padding = value;
+                SetPadding();
+            }
+        }
+
+        private void SetPadding()
+        {
+            SelectAll();
+            SelectionIndent += _Padding;
+            SelectionRightIndent += _Padding;
+            DeselectAll();
         }
 
         /// <summary>
@@ -365,7 +384,7 @@ namespace DotSetup
         }
 
 
-        private void SetSelectionStyle(UInt32 mask, UInt32 effect)
+        private void SetSelectionStyle(uint mask, uint effect)
         {
             CHARFORMAT2_STRUCT cf = new CHARFORMAT2_STRUCT();
             cf.cbSize = (uint)Marshal.SizeOf(cf);
@@ -453,7 +472,7 @@ namespace DotSetup
         }
 
         [DllImport("user32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Auto)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, Int32 msg, Int32 wParam, ref PARAFORMAT2 lParam);
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, ref PARAFORMAT2 lParam);
 
         public const int PFM_LINESPACING = 256;
         public const int EM_SETPARAFORMAT = 1095;
@@ -463,29 +482,29 @@ namespace DotSetup
         {
             public int cbSize;
             public uint dwMask;
-            public Int16 wNumbering;
-            public Int16 wReserved;
+            public short wNumbering;
+            public short wReserved;
             public int dxStartIndent;
             public int dxRightIndent;
             public int dxOffset;
-            public Int16 wAlignment;
-            public Int16 cTabCount;
+            public short wAlignment;
+            public short cTabCount;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
             public int[] rgxTabs;
             public int dySpaceBefore;
             public int dySpaceAfter;
             public int dyLineSpacing;
-            public Int16 sStyle;
+            public short sStyle;
             public byte bLineSpacingRule;
             public byte bOutlineLevel;
-            public Int16 wShadingWeight;
-            public Int16 wShadingStyle;
-            public Int16 wNumberingStart;
-            public Int16 wNumberingStyle;
-            public Int16 wNumberingTab;
-            public Int16 wBorderSpace;
-            public Int16 wBorderWidth;
-            public Int16 wBorders;
+            public short wShadingWeight;
+            public short wShadingStyle;
+            public short wNumberingStart;
+            public short wNumberingStyle;
+            public short wNumberingTab;
+            public short wBorderSpace;
+            public short wBorderWidth;
+            public short wBorders;
         }
 
         private int _LineSpacing = 300;
@@ -507,7 +526,7 @@ namespace DotSetup
             format.dwMask = PFM_LINESPACING;
             format.dyLineSpacing = dyLineSpacing;
             format.bLineSpacingRule = bLineSpacingRule;
-            SendMessage(this.Handle, EM_SETPARAFORMAT, SCF_SELECTION, ref format);
+            SendMessage(Handle, EM_SETPARAFORMAT, SCF_SELECTION, ref format);
         }
     }
 }

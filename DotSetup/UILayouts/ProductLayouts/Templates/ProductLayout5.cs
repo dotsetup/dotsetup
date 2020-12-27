@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace DotSetup
 {
-    public partial class ProductLayout5 : UserControl
+    public partial class ProductLayout5 : ProductControl
     {
         [DllImport("user32.dll", EntryPoint = "ShowCaret")]
         public static extern long ShowCaret(IntPtr hwnd);

@@ -24,6 +24,6 @@ namespace DotSetup_UnitTest
             foreach (string fileName in zippedContents)
                 Assert.IsTrue(File.Exists(fileName), "No file named " + fileName);
         }
-        
+
     }
 }

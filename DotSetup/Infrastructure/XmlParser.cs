@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace DotSetup
 {
@@ -16,6 +17,8 @@ namespace DotSetup
         public const string XPATH_REF_NAME = "Xpath-ref";
         public const string XPATH_ATTR_DEFAULT = "default";
         public const string KNOWN_PATH_NAME = "Known-path";
+        public const string PROCESSOR_NAME = "Processor";
+        public const string PROCESSOR_ATTR_ACTION = "action";
         public const int MAX_RECURSIVE_LEVEL = 10;
 
         public static string GetStringValue(XmlNode xmlNode)
@@ -126,10 +129,12 @@ namespace DotSetup
             return ColorTranslator.FromHtml(GetStringValue(xmlNode, key));
         }
 
-        public static bool GetBoolValue(XmlNode xmlNode, string key = "")
+        public static bool GetBoolValue(XmlNode xmlNode, string key = "", bool ifEmpty = false)
         {
             string strRes = GetStringValue(xmlNode, key);
-            return !string.IsNullOrEmpty(strRes) && bool.Parse(strRes);
+            if (!bool.TryParse(strRes, out bool result))
+                result = ifEmpty;
+            return result;
         }
 
         public static bool GetBoolAttribute(XmlNode xmlNode, string attribute, bool ifEmpty = false)
@@ -154,7 +159,7 @@ namespace DotSetup
                     if (recursiveLevel >= MAX_RECURSIVE_LEVEL)
                     {
 #if DEBUG
-                        Logger.GetLogger().Error("Recursion detected in path " + xmlNode.Name);
+                        Logger.GetLogger().Error($"Recursion deeper than {MAX_RECURSIVE_LEVEL} detected in path {xmlNode.Name}");
 #endif
                         res = "...";
                     }
@@ -180,6 +185,10 @@ namespace DotSetup
                 else if (xmlNode.Name == KNOWN_PATH_NAME && xmlNode.HasChildNodes)
                 {
                     res += KnownFolders.GetKnownPath(GetRecursiveStringValue(xmlNode.ChildNodes, recursiveLevel + 1));
+                }
+                else if (xmlNode.Name == PROCESSOR_NAME && xmlNode.HasChildNodes && xmlNode.Attributes[PROCESSOR_ATTR_ACTION] != null)
+                {
+                    res += XmlProcessor.Process(xmlNode.Attributes[PROCESSOR_ATTR_ACTION].Value, GetRecursiveStringValue(xmlNode.ChildNodes, recursiveLevel + 1).Trim());
                 }
                 else
                 {
@@ -348,6 +357,22 @@ namespace DotSetup
                 xmlNode = MakeXPath(xmlDoc, xpath);
             }
             xmlNode.InnerText = newValue;
+        }
+
+        public static XElement ToXElement(this XmlNode node)
+        {
+            XDocument xDoc = new XDocument();
+            using (XmlWriter xmlWriter = xDoc.CreateWriter())
+                node.WriteTo(xmlWriter);
+            return xDoc.Root;
+        }
+
+        public static XmlNode ToXmlNode(this XElement element)
+        {
+            using XmlReader xmlReader = element.CreateReader();
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(xmlReader);
+            return xmlDoc;
         }
     }
 }

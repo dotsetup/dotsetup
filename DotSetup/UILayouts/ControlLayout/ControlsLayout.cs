@@ -68,12 +68,12 @@ namespace DotSetup
 
         public int CompareTo(object obj)
         {
-            if (obj == null) 
-			    return -1;
+            if (obj == null)
+                return -1;
 
             if (obj is ControlsLayout otherControls)
                 return ((controlSettings.Count == otherControls.controlSettings.Count)
-                    && controlSettings.Values.SequenceEqual(otherControls.controlSettings.Values))?0:1;
+                    && controlSettings.Values.SequenceEqual(otherControls.controlSettings.Values)) ? 0 : 1;
             else
                 return 1;
         }

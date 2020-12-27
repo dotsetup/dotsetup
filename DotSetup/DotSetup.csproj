@@ -141,10 +141,12 @@
     <Compile Include="Infrastructure\ControlUtils.cs" />
     <Compile Include="Infrastructure\DockingHelper.cs" />
     <Compile Include="Infrastructure\ProcessUtils.cs" />
+    <Compile Include="Infrastructure\XmlProcessor.cs" />
     <Compile Include="Installation\Configuration\SessionDataConsts.cs" />
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWait.cs" />
     <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWaitWithParamsChange.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />
+    <Compile Include="Installation\Packages\PackageDownloaderWebClient.cs" />
     <Compile Include="Installation\Packages\RequirementHandlers.cs" />
     <Compile Include="Infrastructure\UriUtils.cs" />
     <Compile Include="Infrastructure\CrossThreadExtensions.cs" />
@@ -172,6 +174,7 @@
     <Compile Include="UILayouts\ControlLayout\TextSettings.cs" />
     <Compile Include="UILayouts\ControlLayout\ControlSettings.cs" />
     <Compile Include="UILayouts\ProductLayouts\ProductLayoutManager.cs" />
+    <Compile Include="UILayouts\ProductLayouts\ProductLayoutUtils.cs" />
     <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout4.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -253,6 +256,9 @@
       <DependentUpon>SimplePageIndicator.cs</DependentUpon>
     </Compile>
     <Compile Include="UILayouts\UIComponents\UICommon.cs" />
+    <Compile Include="UILayouts\ProductLayouts\ProductControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <EmbeddedResource Include="Installation\WinForm\frmParent.resx">
       <DependentUpon>frmParent.cs</DependentUpon>
     </EmbeddedResource>
@@ -337,7 +343,7 @@
     <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.85.1.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.86.0.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

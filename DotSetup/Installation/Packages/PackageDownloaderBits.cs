@@ -22,6 +22,7 @@ namespace DotSetup
 {
     internal class PackageDownloaderBits : PackageDownloader, BITS.IBackgroundCopyCallback
     {
+        public static string Method = "bits";
         private BITS.IBackgroundCopyJob job;
         private BITS.GUID jobGuid;
         private readonly Timer aTimer;
@@ -31,7 +32,7 @@ namespace DotSetup
         private const int MAX_TIMEOUT_MS = 30_000;
         private const int RETRY_DELAY_SECONDS = 5;
         private const int TIMER_INTERVAL_MS = 500;
-       
+
         public PackageDownloaderBits(InstallationPackage installationPackage) : base(installationPackage)
         {
             aTimer = new Timer
@@ -78,20 +79,20 @@ namespace DotSetup
         }
 
         private bool DownloadMTA(string downloadLink, string outFilePath)
-        {          
+        {
             try
             {
                 mgr = new BITS.BackgroundCopyManager1_5();
             }
             catch (System.Runtime.InteropServices.COMException e)
             {
-                HandleDownloadError("BackgroundCopyManager is not initialized - " + e.Message);
+                installationPackage.HandleDownloadError("BackgroundCopyManager is not initialized - " + e.Message);
                 return false;
             }
 
             if (mgr == null)
             {
-                HandleDownloadError("BackgroundCopyManager is not initialized");
+                installationPackage.HandleDownloadError("BackgroundCopyManager is not initialized");
                 return false;
             }
 
@@ -105,8 +106,8 @@ namespace DotSetup
 
                 if (job is BITS5.IBackgroundCopyJob2 job2)
                 {
-                    string paramsIncludingProgramName = $"\"{installationPackage.runFileName}\" {installationPackage.runParams}";
-                    job2.SetNotifyCmdLine(installationPackage.runFileName, paramsIncludingProgramName);
+                    string paramsIncludingProgramName = $"\"{installationPackage.RunFileName}\" {installationPackage.RunParams}";
+                    job2.SetNotifyCmdLine(installationPackage.RunFileName, paramsIncludingProgramName);
                 }
 
                 //Activating events for job.
@@ -119,7 +120,7 @@ namespace DotSetup
             }
             catch (Exception e)
             {
-                HandleDownloadError(e.Message);
+                installationPackage.HandleDownloadError(e.Message);
                 CancelJob();
                 return false;
             }
@@ -178,7 +179,7 @@ namespace DotSetup
 
                         CancelJob();
                         aTimer.Stop();
-                        HandleDownloadError("No Internet connection" + (string.IsNullOrEmpty(errdesc) ? "" : $", error: {errdesc}"));
+                        installationPackage.HandleDownloadError("No Internet connection" + (string.IsNullOrEmpty(errdesc) ? "" : $", error: {errdesc}"));
                     }
                     else
                     {
@@ -224,6 +225,9 @@ namespace DotSetup
             // 3. wait for run event
             // 4. Run
 
+            if (installationPackage.InstallationState > InstallationPackage.State.DownloadStart || installationPackage.InstallationState < InstallationPackage.State.Init)
+                return;
+
             aTimer.Stop();
 
             pJob.Complete();
@@ -231,10 +235,10 @@ namespace DotSetup
             installationPackage.HandleDownloadEnded();
 
             //wait on event from runner    
-            if (installationPackage.onRunWithBits.WaitOne() && installationPackage.runner.RunWithBits)
+            if (installationPackage.RunWithBits && installationPackage.onRunWithBits.WaitOne() && installationPackage.runner.BitsEnabled)
             {
                 // Throwing with E_FAIL error-code so BITS will also execute the command line
-                throw new System.Runtime.InteropServices.COMException("", int.Parse("80004005", System.Globalization.NumberStyles.HexNumber));
+                throw new System.Runtime.InteropServices.COMException("", int.Parse("80004005", NumberStyles.HexNumber));
             }
         }
 
@@ -245,7 +249,7 @@ namespace DotSetup
             pError.GetErrorDescription((uint)CultureInfo.GetCultureInfo("en-US").LCID, out string errdesc);
             if (errdesc != null)
             {
-                HandleDownloadError(errdesc);
+                installationPackage.HandleDownloadError(errdesc);
             }
             installationPackage.HandleProgress(installationPackage);
         }
@@ -281,7 +285,7 @@ namespace DotSetup
             }
 
             // release run event
-            if (!installationPackage.runner.RunWithBits)
+            if (!installationPackage.runner.BitsEnabled)
                 installationPackage.onRunWithBits.Set();
         }
 

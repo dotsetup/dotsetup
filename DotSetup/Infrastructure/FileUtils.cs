@@ -24,10 +24,14 @@ namespace DotSetup.Infrastructure
 
         public static string GetMagicNumbers(string filepath, int bytesCount)
         {
-            // https://en.wikipedia.org/wiki/List_of_file_signatures
+            using var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+            return GetMagicNumbers(fs, bytesCount);
+        }
 
+        public static string GetMagicNumbers(FileStream fs, int bytesCount)
+        {
+            // https://en.wikipedia.org/wiki/List_of_file_signatures
             byte[] buffer;
-            using (var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read))
             using (var reader = new BinaryReader(fs))
                 buffer = reader.ReadBytes(bytesCount);
 
@@ -35,10 +39,31 @@ namespace DotSetup.Infrastructure
             return hex.Replace("-", string.Empty).ToLower();
         }
 
-        public static bool IsRunnableFileExtension(string fileName)
+        public static bool IsRunnableFile(string fileName)
         {
-            string[] runnableExtensions = { ".msi", ".exe" };
-            return runnableExtensions.Any(Path.GetExtension(fileName).ToLower().Equals);
+            bool res = false;
+            FileStream fs = null;
+
+
+            try
+            {
+                string[] runnableExtensions = { ".msi", ".exe" };
+                fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                if (runnableExtensions.Any(Path.GetExtension(fileName).ToLower().Equals) ||
+                    GetMagicNumbers(fs, 2) == "4d5a" || //MZ = exe
+                    GetMagicNumbers(fs, 8) == "d0cf11e0a1b11ae1")  //msi
+                    res = true;
+            }
+            catch (Exception)
+            {
+                res = false;
+            }
+            finally
+            {
+                if (fs != null)
+                    fs.Close();
+            }
+            return res;
         }
     }
 }
