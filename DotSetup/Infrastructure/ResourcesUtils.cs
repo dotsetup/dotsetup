@@ -17,12 +17,12 @@ namespace DotSetup
     {
         public static Assembly wrapperAssembly;
         public static Assembly libraryAssembly = Assembly.GetExecutingAssembly();
-        
+
         public static Stream GetEmbeddedResourceStream(Assembly assembly, string resourceName)
         {
             if (assembly == null && wrapperAssembly != null && libraryAssembly != null)
                 return GetEmbeddedResourceStream(wrapperAssembly, resourceName) ?? GetEmbeddedResourceStream(libraryAssembly, resourceName);
-            
+
             Stream res = null;
             try
             {
@@ -33,7 +33,7 @@ namespace DotSetup
             {
 
             }
-                        
+
             return res;
         }
 
@@ -41,7 +41,7 @@ namespace DotSetup
         {
             if (assembly == null && wrapperAssembly != null && libraryAssembly != null)
                 return EmbeddedResourceExists(wrapperAssembly, resourceName) || EmbeddedResourceExists(libraryAssembly, resourceName);
-           
+
             return assembly.GetManifestResourceNames().Any(s => s.EndsWith(resourceName));
         }
 
@@ -52,7 +52,7 @@ namespace DotSetup
 
             List<string> res = new List<string>();
             try
-            {                
+            {
                 res = assembly.GetManifestResourceNames().Where(str => str.EndsWith(resourceNameEnding)).ToList();
             }
 #if DEBUG
@@ -103,10 +103,10 @@ namespace DotSetup
                     wrapperProperties[item.Key] = item.Value;
                 }
                 return wrapperProperties;
-            }               
+            }
 
             Dictionary<string, string> res = new Dictionary<string, string>();
-            
+
             if (assembly == null)
                 return res;
 
@@ -157,9 +157,9 @@ namespace DotSetup
 
         public static bool IsPathDirectory(string path)
         {
-            if (string.IsNullOrEmpty(path)) 
-			   throw new ArgumentNullException("path");
-			   
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException("path");
+
             path = path.Trim();
 
             // if has trailing slash then it's a directory

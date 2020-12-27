@@ -31,45 +31,51 @@ namespace DotSetup
     {
         public static class State
         {
-            public const int Error = -1, Skipped = -3, Init = 0, DownloadStart = 1, DownloadEnd = 2, ExtractStart = 3, ExtractEnd = 4, RunStart = 5, RunEnd = 6, Done = 7, Confirmed = 100;
+            public const int Error = -1, Skipped = -3, Discard = -4, Init = 0, DownloadStart = 1, DownloadEnd = 2, ExtractStart = 3, ExtractEnd = 4, RunStart = 5, RunEnd = 6, Done = 7, Confirmed = 100;
             public static string ToString(int state)
             {
-                switch (state)
+                return state switch
                 {
-                    case -1:
-                        return "ERROR";
-                    case -3:
-                        return "SKIPPED";
-                    case 0:
-                        return "INIT";
-                    case 1:
-                        return "DOWNLOAD_START";
-                    case 2:
-                        return "DOWNLOAD_END";
-                    case 3:
-                        return "EXTRACT_START";
-                    case 4:
-                        return "EXTRACT_END";
-                    case 5:
-                        return "RUN_START";
-                    case 6:
-                        return "RUN_END";
-                    case 7:
-                        return "DONE";
-                    case 100:
-                        return "CONFIRMED";
-                    default:
-                        return "";
-                }
+                    -1 => "ERROR",
+                    -3 => "SKIPPED",
+                    0 => "INIT",
+                    1 => "DOWNLOAD_START",
+                    2 => "DOWNLOAD_END",
+                    3 => "EXTRACT_START",
+                    4 => "EXTRACT_END",
+                    5 => "RUN_START",
+                    6 => "RUN_END",
+                    7 => "DONE",
+                    100 => "CONFIRMED",
+                    _ => "",
+                };
             }
         }
+        private int _dwnldProgress;
+        private string _secondDownloadMethod;
         public int InstallationState { get; private set; }
-        private int dwnldProgress; //extractProgress, RunProgress;
-        internal long dwnldBytesReceived, dwnldBytesOffset, dwnldBytesTotal;
-        protected string extractFilePath;
-        internal string dwnldFileName, runFileName;
-        internal string name, dwnldLink, fileHash, runParams, errorMessage;
+        private long _dwnldBytesReceived;
+        internal long DwnldBytesOffset { get; private set; }
+        private long _dwnldBytesTotal;
+        internal long DwnldBytesTotal
+        {
+            get => _dwnldBytesTotal;
+            private set
+            {
+                if (value > 0)
+                    _dwnldBytesTotal = value;
+            }
+        }
+        private string _extractFilePath;
+        private string _dwnldFileName;
+        internal string RunFileName { get; private set; }
+        internal string Name { get; }
+        internal string DwnldLink { get; private set; }
+        internal string FileHash { get; private set; }
+        internal string RunParams { get; private set; }
+        internal string ErrorMessage { get; set; }
         internal bool hasUpdatedTotal, isOptional, isExtractable;
+        internal bool RunWithBits { get; set; }
         internal bool canRun, firstDownloaded, isProgressCompleted, isUpdatedProgressCompleted, waitForIt;
         internal int msiTimeout, runErrorCode, runExitCode;
         internal Action<int> OnChangeState;
@@ -83,8 +89,7 @@ namespace DotSetup
 
         public InstallationPackage(string name)
         {
-            this.name = name;
-            downloader = new PackageDownloaderBits(this);
+            Name = name;
             extractor = new PackageExtractor(this);
             runner = new PackageRunner(this);
             InstallationState = State.Init;
@@ -95,10 +100,10 @@ namespace DotSetup
         {
             InstallationState = State.DownloadStart;
 #if DEBUG
-            Logger.GetLogger().Info("[" + name + "] start downloading from " + dwnldLink + " to location " + dwnldFileName);
+            Logger.GetLogger().Info("[" + Name + "] start downloading from " + DwnldLink + " to location " + _dwnldFileName);
 #endif
 
-            return downloader.Download(dwnldLink, dwnldFileName);
+            return downloader.Download(DwnldLink, _dwnldFileName);
         }
 
         public virtual void HandleDownloadEnded()
@@ -108,14 +113,14 @@ namespace DotSetup
             try
             {
                 SetDownloadProgress(100);
-                using (fop = File.OpenRead(dwnldFileName))
+                using (fop = File.OpenRead(_dwnldFileName))
                 {
-                    fileHash = CryptUtils.ComputeHash(fop, CryptUtils.Hash.SHA1);
+                    FileHash = CryptUtils.ComputeHash(fop, CryptUtils.Hash.SHA1);
 
                     ChangeState(State.DownloadEnd);
 
-                    if (FileUtils.GetMagicNumbers(dwnldFileName, 2) == "504b" && isExtractable)  //"504b" = "PK" (zip)    
-                        extractor.Extract(dwnldFileName, extractFilePath);
+                    if (FileUtils.GetMagicNumbers(_dwnldFileName, 2) == "504b" && isExtractable)  //"504b" = "PK" (zip)    
+                        extractor.Extract(_dwnldFileName, _extractFilePath);
                     else
                         HandleExtractEnded();
                 }
@@ -127,7 +132,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("[" + name + "] Cannot opening " + dwnldFileName + " error message: " + e.Message);
+                Logger.GetLogger().Warning("[" + Name + "] Cannot opening " + _dwnldFileName + " error message: " + e.Message);
 #endif
             }
         }
@@ -154,14 +159,15 @@ namespace DotSetup
         public virtual void Quit(bool doRunOnClose)
         {
             runner.Terminate();
-            downloader.Terminate();
+            downloader?.Terminate();
             OnUserQuit();
         }
 
-        public void SetDownloadInfo(List<ProductSettings.DownloadURL> downloadLinks, string downloadFile)
+        public void SetDownloadInfo(ProductSettings settings)
         {
-            dwnldLink = string.Empty;
-            foreach (ProductSettings.DownloadURL dwnldURL in downloadLinks)
+            string downloadFile = ChooseDownloadFileName(settings);
+            DwnldLink = string.Empty;
+            foreach (ProductSettings.DownloadURL dwnldURL in settings.DownloadURLs)
             {
 
                 if ((dwnldURL.Arch == "32" && OSUtils.Is64BitOperatingSystem()) ||
@@ -169,11 +175,14 @@ namespace DotSetup
                     (string.IsNullOrEmpty(dwnldURL.URL)))
                     continue;
 
-                dwnldLink = dwnldURL.URL;
+                DwnldLink = dwnldURL.URL;
                 break;
             }
 
-            string potentialFileName = dwnldLink.Substring(dwnldLink.LastIndexOf('/') + 1);
+            string potentialFileName = DwnldLink.Substring(DwnldLink.LastIndexOf('/') + 1);
+            if (potentialFileName.Contains("?"))
+                potentialFileName = potentialFileName.Substring(0, potentialFileName.IndexOf('?'));
+            potentialFileName = string.Join("_", potentialFileName.Split(Path.GetInvalidFileNameChars()));
 
             if (!potentialFileName.Contains("."))
             {
@@ -183,49 +192,53 @@ namespace DotSetup
 
             if (!Path.HasExtension(downloadFile))
             {
-                dwnldFileName = Path.Combine(downloadFile, potentialFileName);
+                _dwnldFileName = Path.Combine(downloadFile, potentialFileName);
             }
             else
             {
-                dwnldFileName = downloadFile;
+                _dwnldFileName = downloadFile;
             }
-
-            dwnldFileName = downloader.UpdateFileNameIfExists(dwnldFileName);
+            if (settings.DownloadMethod.ToLower() == PackageDownloaderWebClient.Method)
+                downloader = new PackageDownloaderWebClient(this);
+            else
+                downloader = new PackageDownloaderBits(this);
+            _secondDownloadMethod = settings.SecondaryDownloadMethod;
+            _dwnldFileName = downloader.UpdateFileNameIfExists(_dwnldFileName);
         }
 
         public void SetExtractInfo(string compressedFilePath, bool extractable)
         {
-            extractFilePath = compressedFilePath;
+            _extractFilePath = compressedFilePath;
             isExtractable = extractable;
 
-            if (!string.IsNullOrEmpty(extractFilePath) && !ResourcesUtils.IsPathDirectory(compressedFilePath))
+            if (!string.IsNullOrEmpty(_extractFilePath) && !ResourcesUtils.IsPathDirectory(compressedFilePath))
             {
-                errorMessage = $"Extract path not valid: {compressedFilePath}";
-                OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, errorMessage);
+                ErrorMessage = $"Extract path not valid: {compressedFilePath}";
+                OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, ErrorMessage);
             }
 
-            if (string.IsNullOrEmpty(extractFilePath) && Path.GetExtension(dwnldFileName) == ".zip" && isExtractable)
+            if (string.IsNullOrEmpty(_extractFilePath) && Path.GetExtension(_dwnldFileName) == ".zip" && isExtractable)
             {
-                extractFilePath = Path.GetDirectoryName(dwnldFileName);
+                _extractFilePath = Path.GetDirectoryName(_dwnldFileName);
             }
         }
 
-        public void SetRunInfo(string fileName, string runParams, int msiTimeout)
+        public void SetRunInfo(string fileName, string runParams, int msiTimeout, bool runWithBits)
         {
-            runFileName = fileName;
-            if (Path.GetExtension(dwnldFileName) == ".zip" && isExtractable)
+            RunFileName = fileName;
+            if (Path.GetExtension(_dwnldFileName) == ".zip" && isExtractable)
             {
-                if (string.IsNullOrEmpty(runFileName) || ResourcesUtils.IsPathDirectory(runFileName))
+                if (string.IsNullOrEmpty(RunFileName) || ResourcesUtils.IsPathDirectory(RunFileName))
                 {
-                    errorMessage = $"Run path not valid: {runFileName}";
-                    OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, errorMessage);
+                    ErrorMessage = $"Run path not valid: {RunFileName}";
+                    OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, ErrorMessage);
                 }
 
-                runFileName = Path.Combine(extractFilePath, runFileName);
+                RunFileName = Path.Combine(_extractFilePath, RunFileName);
             }
             else
             {
-                runFileName = dwnldFileName;
+                RunFileName = _dwnldFileName;
             }
 
             if (msiTimeout == 0)
@@ -234,7 +247,8 @@ namespace DotSetup
             }
 
             this.msiTimeout = msiTimeout;
-            this.runParams = runParams;
+            RunParams = runParams;
+            RunWithBits = runWithBits;
         }
 
         internal bool HandleFisrtDownloadEnded(object sender, EventArgs e)
@@ -256,12 +270,12 @@ namespace DotSetup
 
         public virtual bool Run()
         {
-            if (!File.Exists(runFileName))
+            if (!File.Exists(RunFileName))
             {
-                errorMessage = $"No runnable file found in: {runFileName}, download file name: {dwnldFileName}, extract file path: {extractFilePath}";
-                OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, errorMessage);
+                ErrorMessage = $"No runnable file found in: {RunFileName}, download file name: {_dwnldFileName}, extract file path: {_extractFilePath}";
+                OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, ErrorMessage);
             }
-            runner.Run(runFileName, runParams);
+            runner.Run(RunFileName, RunParams);
 
             return true;
         }
@@ -283,28 +297,25 @@ namespace DotSetup
         public void HandleInstallFailed(int ErrCode, string ErrMsg = "")
         {
 #if DEBUG
-            Logger.GetLogger().Error("[" + name + "](" + ErrCode + ") " + ErrMsg);
+            Logger.GetLogger().Error("[" + Name + "](" + ErrCode + ") " + ErrMsg);
 #endif
             ChangeState(State.Error);
         }
 
         internal void SetDownloadProgress(int progressPercentage, long bytesReceived = -1, long totalBytes = -1)
         {
-            dwnldProgress = progressPercentage;
-            if (bytesReceived > 0 && bytesReceived >= dwnldBytesReceived)
+            _dwnldProgress = progressPercentage;
+            if (bytesReceived > 0 && bytesReceived >= _dwnldBytesReceived)
             {
-                dwnldBytesOffset = bytesReceived - dwnldBytesReceived;
-                dwnldBytesReceived = bytesReceived;
+                DwnldBytesOffset = bytesReceived - _dwnldBytesReceived;
+                _dwnldBytesReceived = bytesReceived;
             }
 
-            if (totalBytes > 0 && dwnldBytesTotal != totalBytes)
-            {
-                dwnldBytesTotal = totalBytes;
-            }
+            DwnldBytesTotal = totalBytes;
 
-            if (dwnldProgress == 100)
+            if (_dwnldProgress == 100)
             {
-                dwnldBytesReceived = dwnldBytesTotal;
+                _dwnldBytesReceived = DwnldBytesTotal;
             }
         }
 
@@ -313,7 +324,7 @@ namespace DotSetup
             if (InstallationState >= State.Init && InstallationState != State.Done)
             {
 #if DEBUG
-                Logger.GetLogger().Info("[" + name + "] Package switching from InstallationState " + InstallationState + "(" + State.ToString(InstallationState) +
+                Logger.GetLogger().Info("[" + Name + "] Package switching from InstallationState " + InstallationState + "(" + State.ToString(InstallationState) +
                     ") to InstallationState " + newState + "(" + State.ToString(newState) + ")");
 #endif
                 InstallationState = newState;
@@ -330,7 +341,7 @@ namespace DotSetup
         public static string ChooseDownloadFileName(ProductSettings settings)
         {
             var res = settings.Filename;
-            if (!String.IsNullOrEmpty(res) && !Path.HasExtension(res))
+            if (!string.IsNullOrEmpty(res) && !Path.HasExtension(res))
                 res += ".exe";
             if (!(Path.IsPathRooted(res) && !Path.GetPathRoot(res).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)))
             {
@@ -359,6 +370,29 @@ namespace DotSetup
             }
 
             return res;
+        }
+
+        internal void HandleDownloadError(string error)
+        {
+            if (!string.IsNullOrEmpty(ErrorMessage))
+                ErrorMessage = $"Exception while downloading: {error}";
+            else
+                ErrorMessage += $", {error}";
+
+            if (String.IsNullOrEmpty(_secondDownloadMethod))
+            {
+                OnInstallFailed(ErrorConsts.ERR_DOWNLOAD_GENERAL, ErrorMessage);
+                HandleProgress(this);
+            }
+            else
+            {
+                if (_secondDownloadMethod.ToLower() == PackageDownloaderWebClient.Method)
+                    downloader = new PackageDownloaderWebClient(this); 
+                else
+                    downloader = new PackageDownloaderBits(this);
+                _secondDownloadMethod = "";
+                downloader.Download(DwnldLink, _dwnldFileName);
+            }
         }
     }
 }

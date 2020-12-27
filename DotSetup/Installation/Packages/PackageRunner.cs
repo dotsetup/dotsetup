@@ -15,24 +15,24 @@ namespace DotSetup
 {
     internal class PackageRunner
     {
-        private readonly InstallationPackage installationPackage;
-        private Thread runnerThread = null;
-        private Mutex msiRunMutex = null;
-        public bool waitForRunner;
-        private bool _runWithBits;
-        public bool RunWithBits => _runWithBits;
+        private readonly InstallationPackage _installationPackage;
+        private Thread _runnerThread = null;
+        private Mutex _msiRunMutex = null;
+        private readonly bool _waitForRunner;
+
+        public bool BitsEnabled { get; private set; }
         private readonly object terminationLock = new object();
         internal const int ERROR_INSTALL_ALREADY_RUNNING = 1618;
         public PackageRunner(InstallationPackage installationPackage)
         {
-            this.installationPackage = installationPackage;
-            _runWithBits = false;
-            waitForRunner = false;
+            _installationPackage = installationPackage;
+            BitsEnabled = false;
+            _waitForRunner = false;
         }
 
         internal void Run(string runName, string runParam = "")
         {
-            runnerThread = new Thread(() =>
+            _runnerThread = new Thread(() =>
             {
                 lock (terminationLock)
                 {
@@ -43,31 +43,40 @@ namespace DotSetup
                             Process p = null;
 
 #if DEBUG
-                            Logger.GetLogger().Info("Running " + runName + " " + runParam);
+                            Logger.GetLogger().Info($"Running {runName} {runParam}");
 #endif
-                            if (!FileUtils.IsRunnableFileExtension(runName))
+                            bool isRunnable = FileUtils.IsRunnableFile(runName);
+
+                            if (_installationPackage.RunWithBits && !isRunnable)
                             {
-                                p = new System.Diagnostics.Process();
-                                p.StartInfo.UseShellExecute = true;
-                                p.StartInfo.FileName = runName;
-                                p.StartInfo.Arguments = runParam;
+#if DEBUG
+                                Logger.GetLogger().Info($"{runName} sets to run with BITS but it's not an executable file. BITS is not going to be used");
+#endif
+                                _installationPackage.RunWithBits = false;
+                            }
+
+                            if (_installationPackage.RunWithBits)
+                            {
+                                BitsEnabled = true;
                             }
                             else
                             {
-                                _runWithBits = true;
+                                p = new Process();
+                                p.StartInfo.FileName = runName;
+                                p.StartInfo.Arguments = runParam;
+                                p.StartInfo.UseShellExecute = !FileUtils.IsRunnableFile(runName);
                             }
-
 
                             if (Path.GetExtension(runName).ToLower() == ".msi")
                             {
-                                int msiTimeout = installationPackage.msiTimeout;
+                                int msiTimeout = _installationPackage.msiTimeout;
                                 if (!WaitForMsi(runName, msiTimeout))
                                 {
                                     throw new Win32Exception(ERROR_INSTALL_ALREADY_RUNNING);
                                 }
                             }
 
-                            installationPackage.HandleRunStart();
+                            _installationPackage.HandleRunStart();
 
                             Process[] preRunningProcesses = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(runName));
                             int preRunningProcessesCount = preRunningProcesses.Length;
@@ -81,7 +90,7 @@ namespace DotSetup
                             }
 
                             //release the JobTransferred lock
-                            if (installationPackage.onRunWithBits.Set() && _runWithBits)
+                            if (_installationPackage.onRunWithBits.Set() && BitsEnabled)
                             {
                                 Process[] processByName = new Process[] { };
                                 Stopwatch timer = new Stopwatch();
@@ -114,13 +123,13 @@ namespace DotSetup
                                 {
                                     if (sender is Process process)
                                     {
-                                        installationPackage.runExitCode = process.ExitCode;
-                                        if (installationPackage.waitForIt)
-                                            installationPackage.HandleRunEnd();
+                                        _installationPackage.runExitCode = process.ExitCode;
+                                        if (_installationPackage.waitForIt)
+                                            _installationPackage.HandleRunEnd();
                                     }
                                 };
 
-                                if (!_runWithBits)
+                                if (!BitsEnabled)
                                     p.Start();
                             }
                             else
@@ -131,25 +140,25 @@ namespace DotSetup
                         }
                         catch (Win32Exception ex)
                         {
-                            installationPackage.runErrorCode = ex.NativeErrorCode;
+                            _installationPackage.runErrorCode = ex.NativeErrorCode;
                             throw;
                         }
                         finally
                         {
-                            _runWithBits = false;
+                            BitsEnabled = false;
                         }
                     }
                     catch (Exception ex)
                     {
-                        installationPackage.errorMessage = $"Running {runName} {runParam} - {ex.Message}";
-                        installationPackage.OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, installationPackage.errorMessage);
+                        _installationPackage.ErrorMessage = $"Running {runName} {runParam} - {ex.Message}";
+                        _installationPackage.OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, _installationPackage.ErrorMessage);
                     }
 
-                    if (!installationPackage.waitForIt)
-                        installationPackage.HandleRunEnd();
+                    if (!_installationPackage.waitForIt)
+                        _installationPackage.HandleRunEnd();
                 }
             });
-            runnerThread.Start();
+            _runnerThread.Start();
         }
 
         internal bool WaitForMsi(string runName, int maxWaitTime)
@@ -161,8 +170,8 @@ namespace DotSetup
 #endif
             try
             {
-                msiRunMutex = Mutex.OpenExisting(installerServiceMutexName, MutexRights.Synchronize);
-                isMsiFree = msiRunMutex.WaitOne(maxWaitTime, false);
+                _msiRunMutex = Mutex.OpenExisting(installerServiceMutexName, MutexRights.Synchronize);
+                isMsiFree = _msiRunMutex.WaitOne(maxWaitTime, false);
             }
             catch (WaitHandleCannotBeOpenedException)
             {
@@ -171,7 +180,7 @@ namespace DotSetup
             }
             finally
             {
-                if ((msiRunMutex != null) && !isMsiFree)
+                if ((_msiRunMutex != null) && !isMsiFree)
                 {
 #if DEBUG
                     Logger.GetLogger().Info("Timeout expired for running msi - " + runName);
@@ -183,16 +192,16 @@ namespace DotSetup
 
         internal void Terminate()
         {
-            if (waitForRunner)
+            if (_waitForRunner)
             {
                 lock (terminationLock)
                 {
 
                 }
             }
-            else if (runnerThread != null)
+            else if (_runnerThread != null)
             {
-                runnerThread.Join(1000);
+                _runnerThread.Join(1000);
             }
         }
     }

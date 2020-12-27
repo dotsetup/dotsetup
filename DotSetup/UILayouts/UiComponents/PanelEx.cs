@@ -54,7 +54,7 @@ namespace DotSetup
         private Stream Base64ToStream(Stream responseStream, string decode)
         {
             StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.UTF8);
-            String responseString = reader.ReadToEnd();
+            string responseString = reader.ReadToEnd();
             responseStream = CryptUtils.Decode(responseString, decode);
             return responseStream;
         }

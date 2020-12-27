@@ -8,8 +8,8 @@ namespace DotSetup_UnitTest
     [TestClass]
     public class RequirementUtils_UnitTest
     {
-        ConfigParser configParser;
-        XmlDocument textDoc;
+        private ConfigParser configParser;
+        private XmlDocument textDoc;
 
         [TestInitialize]
         public void TestInit()
@@ -37,7 +37,7 @@ namespace DotSetup_UnitTest
         {
             foreach (XmlNode CustomVar in textDoc.SelectNodes("//Products/Product/CustomData/CustomVars"))
             {
-                
+
                 Assert.AreNotEqual(CustomVar.SelectSingleNode("//winVer").InnerText, "", "No custom variable winVer");
                 Assert.AreEqual(CustomVar.SelectSingleNode("//winVerExists").InnerText, "true", "No custom variable winVerExists");
                 Assert.AreNotEqual(CustomVar.SelectSingleNode("//totalRam").InnerText, "", "No custom variable totalRam");

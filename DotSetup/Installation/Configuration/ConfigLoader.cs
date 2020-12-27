@@ -63,7 +63,7 @@ namespace DotSetup
             {
                 PageDesign newDesign = pagesDesign.FirstOrDefault(x => x.PageName == kvp.Key.PageName);
                 PageDesign oldDesign = kvp.Key;
-                if (!string.IsNullOrEmpty(newDesign.PageName) && newDesign.ControlsLayouts.CompareTo(oldDesign.ControlsLayouts)==1)
+                if (!string.IsNullOrEmpty(newDesign.PageName) && newDesign.ControlsLayouts.CompareTo(oldDesign.ControlsLayouts) == 1)
                 {
                     DecoratePage(kvp.Value, newDesign);
                 }

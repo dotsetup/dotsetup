@@ -8,3 +8,4 @@ dotSetup is written in .NET and available under the GPLv3 license.
 
 ## Getting the environment ready:
 * Download and install the latest Visual Studio - for C# and .NET framework
+* Run the DllExport.bat script in order to install the DllExport NuGet package

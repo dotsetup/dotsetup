@@ -31,18 +31,20 @@ namespace DotSetup
         private void InitializeComponent()
         {
             this.pnlLayout = new System.Windows.Forms.Panel();
+            this.txtOptIn = new System.Windows.Forms.CheckBox();
+            this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
             this.txtDisclaimer = new DotSetup.RichTextBoxEx();
             this.imgBackground = new DotSetup.PanelEx();
+            this.imgOptional = new DotSetup.PictureBoxEx();
             this.txtSmOptInY = new System.Windows.Forms.RadioButton();
             this.txtSmOptInN = new System.Windows.Forms.RadioButton();
             this.txtSmOptIn = new DotSetup.RichTextBoxEx();
             this.imgSmOpInBg = new DotSetup.PictureBoxEx();
-            this.txtOptIn = new System.Windows.Forms.CheckBox();
-            this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
             this.txtTitle = new DotSetup.RichTextBoxEx();
             this.txtDescription = new DotSetup.RichTextBoxEx();
             this.pnlLayout.SuspendLayout();
             this.imgBackground.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgOptional)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgSmOpInBg)).BeginInit();
             this.SuspendLayout();
             // 
@@ -64,6 +66,25 @@ namespace DotSetup
             this.pnlLayout.Size = new System.Drawing.Size(600, 320);
             this.pnlLayout.TabIndex = 11;
             // 
+            // txtOptIn
+            // 
+            this.txtOptIn.AutoSize = true;
+            this.txtOptIn.Location = new System.Drawing.Point(3, 200);
+            this.txtOptIn.Name = "txtOptIn";
+            this.txtOptIn.Size = new System.Drawing.Size(80, 17);
+            this.txtOptIn.TabIndex = 15;
+            this.txtOptIn.Text = "checkBox1";
+            this.txtOptIn.UseVisualStyleBackColor = true;
+            this.txtOptIn.Visible = false;
+            // 
+            // pnlDarkenOverlay
+            // 
+            this.pnlDarkenOverlay.Location = new System.Drawing.Point(0, 0);
+            this.pnlDarkenOverlay.Name = "pnlDarkenOverlay";
+            this.pnlDarkenOverlay.Size = new System.Drawing.Size(560, 260);
+            this.pnlDarkenOverlay.TabIndex = 24;
+            this.pnlDarkenOverlay.Visible = false;
+            // 
             // txtDisclaimer
             // 
             this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
@@ -73,8 +94,10 @@ namespace DotSetup
             this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
             this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
+            this.txtDisclaimer.LineSpacing = 210;
             this.txtDisclaimer.Location = new System.Drawing.Point(0, 280);
             this.txtDisclaimer.Name = "txtDisclaimer";
+            this.txtDisclaimer.Padding = 2;
             this.txtDisclaimer.ReadOnly = true;
             this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.txtDisclaimer.Size = new System.Drawing.Size(600, 40);
@@ -84,6 +107,7 @@ namespace DotSetup
             // imgBackground
             // 
             this.imgBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.imgBackground.Controls.Add(this.imgOptional);
             this.imgBackground.Controls.Add(this.txtSmOptInY);
             this.imgBackground.Controls.Add(this.txtSmOptInN);
             this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;
@@ -92,6 +116,18 @@ namespace DotSetup
             this.imgBackground.Name = "imgBackground";
             this.imgBackground.Size = new System.Drawing.Size(600, 260);
             this.imgBackground.TabIndex = 9;
+            // 
+            // imgOptional
+            // 
+            this.imgOptional.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.imgOptional.BackColor = System.Drawing.Color.Transparent;
+            this.imgOptional.Location = new System.Drawing.Point(400, 0);
+            this.imgOptional.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.imgOptional.Name = "imgOptional";
+            this.imgOptional.Size = new System.Drawing.Size(200, 21);
+            this.imgOptional.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.imgOptional.TabIndex = 27;
+            this.imgOptional.TabStop = false;
             // 
             // txtSmOptInY
             // 
@@ -124,6 +160,7 @@ namespace DotSetup
             this.txtSmOptIn.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtSmOptIn.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtSmOptIn.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Bold);
+            this.txtSmOptIn.LineSpacing = 300;
             this.txtSmOptIn.Location = new System.Drawing.Point(127, 217);
             this.txtSmOptIn.Name = "txtSmOptIn";
             this.txtSmOptIn.ReadOnly = true;
@@ -142,31 +179,13 @@ namespace DotSetup
             this.imgSmOpInBg.TabStop = false;
             this.imgSmOpInBg.Visible = false;
             // 
-            // txtOptIn
-            // 
-            this.txtOptIn.AutoSize = true;
-            this.txtOptIn.Location = new System.Drawing.Point(3, 200);
-            this.txtOptIn.Name = "txtOptIn";
-            this.txtOptIn.Size = new System.Drawing.Size(80, 17);
-            this.txtOptIn.TabIndex = 15;
-            this.txtOptIn.Text = "checkBox1";
-            this.txtOptIn.UseVisualStyleBackColor = true;
-            this.txtOptIn.Visible = false;
-            // 
-            // pnlDarkenOverlay
-            // 
-            this.pnlDarkenOverlay.Location = new System.Drawing.Point(0, 0);
-            this.pnlDarkenOverlay.Name = "pnlDarkenOverlay";
-            this.pnlDarkenOverlay.Size = new System.Drawing.Size(560, 260);
-            this.pnlDarkenOverlay.TabIndex = 24;
-            this.pnlDarkenOverlay.Visible = false;
-            // 
             // txtTitle
             // 
             this.txtTitle.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
             this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtTitle.Font = new System.Drawing.Font("Arial", 13F, System.Drawing.FontStyle.Bold);
             this.txtTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(125)))), ((int)(((byte)(173)))));
+            this.txtTitle.LineSpacing = 300;
             this.txtTitle.Location = new System.Drawing.Point(3, 63);
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.ReadOnly = true;
@@ -182,6 +201,7 @@ namespace DotSetup
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDescription.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtDescription.LineSpacing = 300;
             this.txtDescription.Location = new System.Drawing.Point(3, 89);
             this.txtDescription.Name = "txtDescription";
             this.txtDescription.ReadOnly = true;
@@ -203,6 +223,7 @@ namespace DotSetup
             this.pnlLayout.PerformLayout();
             this.imgBackground.ResumeLayout(false);
             this.imgBackground.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgOptional)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgSmOpInBg)).EndInit();
             this.ResumeLayout(false);
 
@@ -221,5 +242,6 @@ namespace DotSetup
         private RichTextBoxEx txtSmOptIn;
         private System.Windows.Forms.Panel pnlDarkenOverlay;
         private RichTextBoxEx txtTitle;
+        private PictureBoxEx imgOptional;
     }
 }

@@ -25,8 +25,8 @@ namespace DotSetup
             }
             catch (System.Exception e)
             {
-                installationPackage.errorMessage = e.Message;
-                installationPackage.OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, installationPackage.errorMessage);
+                installationPackage.ErrorMessage = e.Message;
+                installationPackage.OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, installationPackage.ErrorMessage);
             }
             installationPackage.HandleExtractEnded();
         }
@@ -42,7 +42,7 @@ namespace DotSetup
         /// <param name="zipFile">File to unzip</param>
         /// <param name="folderPath">Folder to put the unzipped files</param>
         private static void UnZipFromMTAThread(string zipFile, string folderPath)
-        {            
+        {
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
             {
                 UnZip(zipFile, folderPath);
@@ -64,7 +64,7 @@ namespace DotSetup
                 });
 
                 Thread staThread = new Thread(staThreadStart);
-                staThread.SetApartmentState(ApartmentState.STA);                
+                staThread.SetApartmentState(ApartmentState.STA);
                 staThread.Start();
                 staThread.Join();
                 if (unzipException != null) throw unzipException;
@@ -77,7 +77,7 @@ namespace DotSetup
         /// </summary>
         /// <param name="param">object array containing: [string zipFile, string destinationFolderPath]</param>
         private static void UnZip(string zipFile, string folderPath)
-        {    
+        {
             if (!File.Exists(zipFile))
                 throw new FileNotFoundException();
 

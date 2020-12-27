@@ -10,6 +10,7 @@ namespace DotSetup
     internal abstract class PackageDownloader
     {
         protected InstallationPackage installationPackage;
+
         public PackageDownloader(InstallationPackage installationPackage)
         {
             this.installationPackage = installationPackage;
@@ -33,13 +34,6 @@ namespace DotSetup
                 newFullPath = Path.Combine(path, tempFileName + extension);
             }
             return newFullPath;
-        }
-
-        protected void HandleDownloadError(string error)
-        {
-            installationPackage.errorMessage = $"Exception while downloading: {error}";
-            installationPackage.OnInstallFailed(ErrorConsts.ERR_DOWNLOAD_GENERAL, installationPackage.errorMessage);
-            installationPackage.HandleProgress(installationPackage);
         }
 
         public virtual void Terminate() { }

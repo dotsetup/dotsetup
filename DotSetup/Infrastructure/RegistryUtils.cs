@@ -70,7 +70,7 @@ namespace DotSetup
         }
 
         // Get a pointer to a registry key. (convert RegistryKey to HKEY)
-        static IntPtr RegistryKeyHandle(RegistryKey registryKey)
+        private static IntPtr RegistryKeyHandle(RegistryKey registryKey)
         {
             //Get the type of the RegistryKey
             Type registryKeyType = typeof(RegistryKey);
@@ -129,7 +129,7 @@ namespace DotSetup
             System.Reflection.ConstructorInfo safeRegistryHandleCtorInfo = safeRegistryHandleType.GetConstructor(
                 publicConstructors, null, safeRegistryHandleCtorTypes, null);
             //Get the SafeRegistryHandle
-            Microsoft.Win32.SafeHandles.SafeRegistryHandle safeHandle = (Microsoft.Win32.SafeHandles.SafeRegistryHandle)safeRegistryHandleCtorInfo.Invoke(new Object[] { hKey, ownsHandle });
+            Microsoft.Win32.SafeHandles.SafeRegistryHandle safeHandle = (Microsoft.Win32.SafeHandles.SafeRegistryHandle)safeRegistryHandleCtorInfo.Invoke(new object[] { hKey, ownsHandle });
             //Get the RegistryKey
             RegistryKey resultKey = RegistryKey.FromHandle(safeHandle); // ONLY possible under .NET 4.0! In .NET 3.5 there is no .FromHandle Method available!    
 #endif

@@ -47,13 +47,22 @@ namespace DotSetup
                 foreach (ProductSettings prodSettings in productSettings)
                 {
                     ProductLayout productLayout = new ProductLayout(prodSettings.Name, prodSettings.LayoutName, prodSettings.ControlsLayouts);
-                    if (productLayout.productLayout != null)
+                    if (string.IsNullOrEmpty(productLayout.errorMsg))
+                    {
                         productLayouts.Add(productLayout);
+                    }
                     else
+                    {
+                        packageManager.DiscardPackge(prodSettings.Name, productLayout.errorMsg);
                         isSuccess = false;
+                    }
                 }
             }
+#if DEBUG
             catch (Exception e)
+#else
+            catch (Exception)
+#endif
             {
 #if DEBUG
                 Logger.GetLogger().Error($"AddProductLayouts failed, error: {e.Message}");
@@ -95,8 +104,12 @@ namespace DotSetup
             if (productLayouts != null && productIndex < productLayouts.Count)
             {
                 currntLayout = productLayouts[productIndex];
+                if (pnlLayout.Controls.Count > 0)
+                    pnlLayout.Resize -= ((ProductControl)pnlLayout.Controls[0]).HandleChanges;
+
                 pnlLayout.Controls.Clear();
                 pnlLayout.Controls.Add(currntLayout.productLayout);
+                pnlLayout.Resize += ((ProductControl)pnlLayout.Controls[0]).HandleChanges;
                 optLayout = new OptLayout(pnlLayout, 4);
                 OnLayoutShown(currntLayout.productName);
             }

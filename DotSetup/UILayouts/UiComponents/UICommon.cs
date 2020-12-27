@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace DotSetup.UILayouts.UIComponents
 {
-    class UICommon
+    internal class UICommon
     {
         public static Image LoadImage(string imageName, string decode)
         {

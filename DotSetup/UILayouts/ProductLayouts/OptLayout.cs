@@ -56,7 +56,7 @@ namespace DotSetup
             pnlLayout.Controls.Add(imgDarkenOverlay);
 
             string opt = ConfigParser.GetConfig().GetStringValue("//RemoteConfiguration/FlowSettings/OptType", OptType.IN);
-            if (opt == OptType.SMART && (smOptInText == null || String.IsNullOrEmpty(smOptInText.Text))) // Fallback if the remote config not relevant
+            if (opt == OptType.SMART && (smOptInText == null || string.IsNullOrEmpty(smOptInText.Text))) // Fallback if the remote config not relevant
                 opt = OptType.IN;
             if (opt == OptType.IN)
             {

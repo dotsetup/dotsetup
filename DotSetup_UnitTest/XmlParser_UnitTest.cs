@@ -9,7 +9,7 @@ namespace DotSetup_UnitTest
     [TestClass]
     public class XmlParser_UnitTest
     {
-        XmlDocument textDoc;
+        private XmlDocument textDoc;
 
         [TestInitialize]
         public void TestInit()

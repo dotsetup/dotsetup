@@ -53,8 +53,8 @@ namespace DotSetup
             for (int i = start; i < json.Length; i++)
             {
                 char c = json[i];
-                if (c == '\\') 
-				    escbegin = !escbegin;
+                if (c == '\\')
+                    escbegin = !escbegin;
                 if (!escbegin)
                 {
                     if (c == '"')
@@ -75,8 +75,8 @@ namespace DotSetup
                                 if (i != start)
                                 {
                                     var child = ParseJSON(json, i, out var cend);
-                                    if (arraylist != null) 
-									    arraylist.Add(child);
+                                    if (arraylist != null)
+                                        arraylist.Add(child);
                                     else
                                     {
                                         dict.Add(key, child);
@@ -89,10 +89,10 @@ namespace DotSetup
                                 end = i;
                                 if (key != null)
                                 {
-                                    if (arraylist != null) 
-									    dict.Add(key, arraylist);
-                                    else 
-									    dict.Add(key, DecodeString(regex, sb.ToString()));
+                                    if (arraylist != null)
+                                        dict.Add(key, arraylist);
+                                    else
+                                        dict.Add(key, DecodeString(regex, sb.ToString()));
                                 }
                                 return dict;
                             case '[':
@@ -134,12 +134,12 @@ namespace DotSetup
                     }
                 }
                 sb.Append(c);
-                if (escend) 
-				    escbegin = false;
-                if (escbegin) 
-				    escend = true;
-                else 
-				    escend = false;
+                if (escend)
+                    escbegin = false;
+                if (escbegin)
+                    escend = true;
+                else
+                    escend = false;
             }
             end = json.Length - 1;
             return dict; //theoretically shouldn't ever get here
