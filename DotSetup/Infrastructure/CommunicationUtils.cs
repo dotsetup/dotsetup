@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) dotSetup. All Rights Reserved.
+// Licensed under the GPL License, version 3.0.
+// https://dotsetup.io/
+
+using System;
 using System.Net;
 using System.Reflection;
 
@@ -9,7 +13,7 @@ namespace DotSetup.Infrastructure
         public static string GetUA()
         {
             string os = Environment.OSVersion.Version.ToString();
-            return $"Mozilla/5.0 (Windows NT {os.Substring(0, os.IndexOf('.', 3))}; {((Environment.Is64BitOperatingSystem) ? "WOW64; " : "")}Trident/7.0; rv:11.0) like Gecko";
+            return $"Mozilla/5.0 (Windows NT {os.Substring(0, os.IndexOf('.', 3))}; {((OSUtils.Is64BitOperatingSystem()) ? "WOW64; " : "")}Trident/7.0; rv:11.0) like Gecko";
         }
 
         public static void EnableHighestTlsVersion()

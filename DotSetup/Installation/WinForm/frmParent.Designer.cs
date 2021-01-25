@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlContent = new System.Windows.Forms.Panel();
+            this.pnlContent = new PanelEx();
             this.SuspendLayout();
             // 
             // pnlContent

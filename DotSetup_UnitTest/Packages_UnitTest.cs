@@ -16,8 +16,8 @@ namespace DotSetup_UnitTest
             foreach (string fileName in zippedContents)
                 if (File.Exists(fileName))
                     File.Delete(fileName);
-
-            InstallationPackage pkg = new InstallationPackage("testPkg");
+            ProductSettings settings = new ProductSettings { Name = "testPkg" };
+            InstallationPackage pkg = new InstallationPackage(settings);
             PackageExtractor extractor = new PackageExtractor(pkg);
             extractor.Extract(zippedFilePath, zippedFileDir);
 

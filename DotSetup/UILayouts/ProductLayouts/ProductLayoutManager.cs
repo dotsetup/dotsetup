@@ -10,33 +10,33 @@ namespace DotSetup
 {
     public class ProductLayoutManager
     {
-        private readonly List<ProductLayout> productLayouts;
-        private readonly List<ProductSettings> productSettings;
-        private ProductLayout currntLayout;
-        private int productIndex;
-        private readonly PackageManager packageManager;
-        private Panel pnlLayout;
-        private OptLayout optLayout;
-        internal Action<string> OnLayoutShown;
+        private readonly List<ProductLayout> _productLayouts;
+        private readonly List<ProductSettings> _productSettings;
+        private ProductLayout _currntLayout;
+        private int _productIndex = 0;
+        private readonly PackageManager _packageManager;
+        private Panel _pnlLayout;
+        private OptLayout _optLayout;
+        internal Action<string, int> OnLayoutShown;
 
         public bool HasNext { get; private set; }
 
+        public int RemainingProducts => (_productLayouts != null) ? _productLayouts.Count - _productIndex : 0;
+
         public ProductLayoutManager(PackageManager packageManager)
         {
-            this.packageManager = packageManager;
-            productLayouts = new List<ProductLayout>();
-            productSettings = new List<ProductSettings>();
+            _packageManager = packageManager;
+            _productLayouts = new List<ProductLayout>();
+            _productSettings = new List<ProductSettings>();
         }
 
-        public int GetIndex(string pkgName)
-        {
-            return productSettings.FindIndex(prod => prod.Name == pkgName);
-        }
+        public int GetIndex(string pkgName) => _productSettings.FindIndex(prod => prod.Name == pkgName);
 
         public void AddProductSettings(ProductSettings prodSettings)
         {
-            if (prodSettings.IsOptional)
-                productSettings.Add(prodSettings);
+            if (!prodSettings.IsOptional)
+                return;
+            _productSettings.Add(prodSettings);
         }
 
         public bool AddProductLayouts()
@@ -44,16 +44,16 @@ namespace DotSetup
             bool isSuccess = true;
             try
             {
-                foreach (ProductSettings prodSettings in productSettings)
+                foreach (ProductSettings prodSettings in _productSettings)
                 {
                     ProductLayout productLayout = new ProductLayout(prodSettings.Name, prodSettings.LayoutName, prodSettings.ControlsLayouts);
                     if (string.IsNullOrEmpty(productLayout.errorMsg))
                     {
-                        productLayouts.Add(productLayout);
+                        _productLayouts.Add(productLayout);
                     }
                     else
                     {
-                        packageManager.DiscardPackge(prodSettings.Name, productLayout.errorMsg);
+                        _packageManager.DiscardPackge(prodSettings.Name, productLayout.errorMsg);
                         isSuccess = false;
                     }
                 }
@@ -74,7 +74,7 @@ namespace DotSetup
 
         public void SetPnlLayout(Panel pnlLayout)
         {
-            this.pnlLayout = pnlLayout;
+            _pnlLayout = pnlLayout;
 
             if (pnlLayout == null || !HasProducts())
             {
@@ -84,37 +84,31 @@ namespace DotSetup
             }
             else
             {
-                productIndex = 0;
+                _productIndex = 0;
                 NextLayout();
             }
         }
 
-        public bool IsPnlLayoutSet()
-        {
-            return (pnlLayout != null) && (currntLayout != null);
-        }
+        public bool IsPnlLayoutSet() => (_pnlLayout != null) && (_currntLayout != null);
 
-        public bool HasProducts()
-        {
-            return productLayouts != null && productLayouts.Count > 0;
-        }
+        public bool HasProducts() => _productLayouts != null && _productLayouts.Count > 0;
 
         public bool NextLayout()
         {
-            if (productLayouts != null && productIndex < productLayouts.Count)
+            if (_productLayouts != null && _productIndex < _productLayouts.Count)
             {
-                currntLayout = productLayouts[productIndex];
-                if (pnlLayout.Controls.Count > 0)
-                    pnlLayout.Resize -= ((ProductControl)pnlLayout.Controls[0]).HandleChanges;
+                _currntLayout = _productLayouts[_productIndex];
+                if (_pnlLayout.Controls.Count > 0)
+                    _pnlLayout.Resize -= ((ProductControl)_pnlLayout.Controls[0]).HandleChanges;
 
-                pnlLayout.Controls.Clear();
-                pnlLayout.Controls.Add(currntLayout.productLayout);
-                pnlLayout.Resize += ((ProductControl)pnlLayout.Controls[0]).HandleChanges;
-                optLayout = new OptLayout(pnlLayout, 4);
-                OnLayoutShown(currntLayout.productName);
+                _pnlLayout.Controls.Clear();
+                _pnlLayout.Controls.Add(_currntLayout.productLayout);
+                _pnlLayout.Resize += ((ProductControl)_pnlLayout.Controls[0]).HandleChanges;
+                _optLayout = new OptLayout(_pnlLayout, 4);
+                OnLayoutShown(_currntLayout.productName, _productIndex);
             }
-            productIndex++;
-            HasNext = (productLayouts == null || productIndex <= productLayouts.Count);
+            _productIndex++;
+            HasNext = (_productLayouts == null || _productIndex <= _productLayouts.Count);
             return HasNext;
         }
 
@@ -123,32 +117,34 @@ namespace DotSetup
             bool hasNext = false;
             if (!IsPnlLayoutSet())
                 return hasNext;
-            if (optLayout.opt == OptLayout.OptType.IN && optLayout.optIn != null && !optLayout.optIn.Checked)
+            if (_optLayout.opt == OptLayout.OptType.IN && _optLayout.optIn != null && !_optLayout.optIn.Checked)
             {
                 hasNext = DeclineClicked();
             }
-            else if (optLayout.opt == OptLayout.OptType.SMART)
+            else if (_optLayout.opt == OptLayout.OptType.SMART)
             {
                 hasNext = true;
-                if (!optLayout.smOptInY.Checked && !optLayout.smOptInN.Checked)
+                if (!_optLayout.smOptInY.Checked && !_optLayout.smOptInN.Checked)
                 {
-                    if (!optLayout.smOptShown)
-                        optLayout.ShowSmOptInOverlay();
+                    if (!_optLayout.smOptShown)
+                        _optLayout.ShowSmOptInOverlay();
                     else
-                        optLayout.BlinkSmartOptin();
+                        _optLayout.BlinkSmartOptin();
                 }
-                else if (optLayout.smOptInY.Checked)
+                else if (_optLayout.smOptInY.Checked)
                 {
-                    optLayout.RemoveDarken();
+                    _optLayout.RemoveDarken();
+                    _packageManager.ConfirmPackage(_currntLayout.productName);
                     hasNext = NextLayout();
                 }
-                else if (optLayout.smOptInN.Checked)
+                else if (_optLayout.smOptInN.Checked)
                 {
                     hasNext = DeclineClicked();
                 }
             }
             else
             {
+                _packageManager.ConfirmPackage(_currntLayout.productName);
                 hasNext = NextLayout();
             }
             return hasNext;
@@ -159,8 +155,8 @@ namespace DotSetup
             bool hasNext = false;
             if (IsPnlLayoutSet())
             {
-                optLayout.RemoveDarken();
-                packageManager.DeclinePackge(currntLayout.productName);
+                _optLayout.RemoveDarken();
+                _packageManager.DeclinePackage(_currntLayout.productName);
                 hasNext = NextLayout();
             }
             return hasNext;
@@ -168,18 +164,18 @@ namespace DotSetup
 
         public bool SkipAllClicked()
         {
-            bool hasNext = false;
             if (IsPnlLayoutSet())
             {
-                optLayout.RemoveDarken();
-                packageManager.SkipAll();
+                _optLayout.RemoveDarken();
+                _packageManager.SkipAll(_currntLayout.productName);
             }
-            return hasNext;
+            //all products were skipped so no more layouts...
+            return false;
         }
 
         public bool IsSkipAllButtonNeeded()
         {
-            return packageManager.GetOptionalsCount() > 1;
+            return _packageManager.GetOptionalsCount() > 1;
         }
     }
 }

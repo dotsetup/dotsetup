@@ -19,7 +19,8 @@ namespace DotSetup
             try
             {
                 CmdReader.GetReader(args);
-                configParser = new ConfigParser();
+                configParser = ConfigParser.GetConfig();
+                configParser.Init();
             }
 #if DEBUG
             catch (Exception e)

@@ -7,14 +7,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Xml;
 
 namespace DotSetup
 {
     public struct ProductSettings
     {
-        public string Name, Publisher, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Skin, Class, DownloadMethod, SecondaryDownloadMethod;
+        public string Name, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Class, DownloadMethod, SecondaryDownloadMethod;
 
         public struct DownloadURL
         {
@@ -24,7 +23,7 @@ namespace DotSetup
 
         public struct ProductEvent
         {
-            public string Type, Triger;
+            public string Name, Type, Triger;
         }
         public List<ProductEvent> ProductEvents;
 
@@ -48,10 +47,11 @@ namespace DotSetup
         public ProductRequirements PreInstall;
         public ProductRequirements PostInstall;
         public ControlsLayout ControlsLayouts;
-        public bool IsOptional, IsExtractable, RunWithBits;
+        public bool IsOptional, IsExtractable, RunWithBits, RunAndWait;
         public int MsiTimeoutMS;
-        public Dictionary<string, string> AnalyticsParams;
+        public object Other;
     }
+
     public struct FormDesign
     {
         public int Height, Width, ClientHeight, ClientWidth, BottomPanelHeight;
@@ -76,18 +76,22 @@ namespace DotSetup
 
         public string LocaleCode { get; private set; }
         public string workDir;
-
-        private static ConfigParser _configParser;
         private static string userSelectedLocale;
 
+        internal static ConfigParser instance = null;
         public static ConfigParser GetConfig()
         {
-            return _configParser;
+            if (instance == null)
+                instance = new ConfigParser();
+            return instance;
         }
 
         public ConfigParser()
         {
-            _configParser = this;
+        }
+
+        internal void Init()
+        {
             Stream mainXmlStream = ResourcesUtils.GetEmbeddedResourceStream(null, "main.xml");
             if (mainXmlStream == null)
                 mainXmlStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("<Main><Products></Products></Main>"));
@@ -123,7 +127,7 @@ namespace DotSetup
 
         public ConfigParser(XmlDocument xmlDoc)
         {
-            _configParser = this;
+            instance = this;
             this.xmlDoc = xmlDoc;
         }
 
@@ -148,21 +152,12 @@ namespace DotSetup
             }
         }
 
-        public void SetConfigValue(string entryKey, string entryValue)
+        public virtual void SetConfigValue(string entryKey, string entryValue)
         {
-            if (ConfigConsts.SensitiveConfigKeys.Contains(entryKey.ToUpper()))
-            {
-#if DEBUG
-                Logger.GetLogger().Error("Cannot override the key: " + entryKey + ", this key cannot be injected");
-#endif
-            }
-            else
-            {
-                string xpath = entryKey;
-                if (!xpath.StartsWith("//"))
-                    xpath = "//Config/" + xpath;
-                SetStringValue(xpath, ParseConfigValue(entryKey, entryValue));
-            }
+            string xpath = entryKey;
+            if (!xpath.StartsWith("//"))
+                xpath = "//Config/" + xpath;
+            SetStringValue(xpath, ParseConfigValue(entryKey, entryValue));
         }
 
         private void ReadResourcesToXml()
@@ -177,7 +172,7 @@ namespace DotSetup
             }
         }
 
-        private string ParseConfigValue(string entryKey, string entryValue)
+        protected string ParseConfigValue(string entryKey, string entryValue)
         {
             try
             {
@@ -218,10 +213,10 @@ namespace DotSetup
 
         private void SetLocaleCode()
         {
-            LocaleCode = GetConfigValue("DEFAULT_LOCALE", "en");
+            LocaleCode = GetConfigValue(ConfigConsts.DEFAULT_LOCALE, "en");
             string tmpLocale = LocaleCode;
 
-            switch (GetConfigValue("LOCALE").ToLower())
+            switch (GetConfigValue(ConfigConsts.LOCALE).ToLower())
             {
                 case "oslang":
                     CultureInfo ci = CultureInfo.CurrentUICulture;
@@ -297,7 +292,7 @@ namespace DotSetup
         private void ReadConfigSettings()
         {
             SetLocaleCode();
-            if (!SetWorkDir(GetConfigValue("WORK_DIR")))
+            if (!SetWorkDir(GetConfigValue(ConfigConsts.WORK_DIR)))
             {
                 string md5Name = CryptUtils.ComputeHash(GetConfigValue(ConfigConsts.PRODUCT_TITLE), CryptUtils.Hash.MD5);
                 SetWorkDir(Path.Combine(KnownFolders.GetTempFolderSafe(), "Temp\\" + md5Name + "_files\\"));
@@ -438,7 +433,7 @@ namespace DotSetup
             return !string.IsNullOrEmpty(workDir);
         }
 
-        private void ReadProductsSettings()
+        internal virtual void ReadProductsSettings()
         {
             productsSettings = new List<ProductSettings>();
             foreach (XmlNode productSettingsNode in xmlDoc.SelectNodes("//Products/Product"))
@@ -460,8 +455,7 @@ namespace DotSetup
             XmlNode productDynamicData = productSettingsNode.SelectSingleNode("DynamicData");
             productSettings.Name = XmlParser.GetStringValue(productStaticData, "Title");
             if (productSettings.IsOptional)
-                productSettings.Name = "sec:" + XmlParser.GetStringValue(productDynamicData, "InternalName");
-            productSettings.Skin = XmlParser.GetStringValue(productDynamicData, "Skin");
+                productSettings.Name = XmlParser.GetStringValue(productDynamicData, "InternalName");
             productSettings.Class = XmlParser.GetStringValue(productDynamicData, "Class");
 
             EvalCustomVariables(productStaticData.SelectSingleNode("CustomData/CustomVars"));
@@ -486,23 +480,28 @@ namespace DotSetup
             foreach (XmlNode productLogicNode in productStaticData.SelectNodes("Logic"))
             {
                 productSettings.Behavior = XmlParser.GetStringValue(productLogicNode, "Behavior");
-                productSettings.RunWithBits = XmlParser.GetBoolValue(productLogicNode, "RunWithBits", runWithBitsDefault);								
+                productSettings.RunWithBits = XmlParser.GetBoolValue(productLogicNode, "RunWithBits", runWithBitsDefault);
+                productSettings.RunAndWait = XmlParser.GetBoolValue(productLogicNode, "RunAndWait");
                 productSettings.DownloadMethod = XmlParser.GetStringValue(productLogicNode, "DownloadMethod");
-                if (String.IsNullOrEmpty(productSettings.DownloadMethod))
-                    productSettings.DownloadMethod = GetConfigValue("DOWNLOAD_METHOD");
+                if (string.IsNullOrEmpty(productSettings.DownloadMethod))
+                    productSettings.DownloadMethod = GetConfigValue(ConfigConsts.DOWNLOAD_METHOD);
                 productSettings.SecondaryDownloadMethod = XmlParser.GetStringValue(productLogicNode, "SecondaryDownloadMethod");
-                if (String.IsNullOrEmpty(productSettings.SecondaryDownloadMethod))
-                    productSettings.SecondaryDownloadMethod = GetConfigValue("SECONDARY_DOWNLOAD_METHOD");
+                if (string.IsNullOrEmpty(productSettings.SecondaryDownloadMethod))
+                    productSettings.SecondaryDownloadMethod = GetConfigValue(ConfigConsts.SECONDARY_DOWNLOAD_METHOD);
                 productSettings.MsiTimeoutMS = XmlParser.GetIntValue(productLogicNode, "MsiTimeoutMs");
                 productSettings.ProductEvents = new List<ProductSettings.ProductEvent>();
                 foreach (XmlNode EventNode in productLogicNode.SelectNodes("Events/Event"))
                 {
-                    ProductSettings.ProductEvent productEvent = new ProductSettings.ProductEvent
+                    if (EventNode.Attributes.Count > 0)
                     {
-                        Type = XmlParser.GetStringValue(EventNode),
-                        Triger = XmlParser.GetStringAttribute(EventNode, "reportOn")
-                    };
-                    productSettings.ProductEvents.Add(productEvent);
+                        ProductSettings.ProductEvent productEvent = new ProductSettings.ProductEvent
+                        {
+                            Name = EventNode.Attributes.Item(0).Name,
+                            Type = XmlParser.GetStringValue(EventNode)
+                        };
+                        productEvent.Triger = XmlParser.GetStringAttribute(EventNode, productEvent.Name);
+                        productSettings.ProductEvents.Add(productEvent);
+                    }
                 }
             }
 
@@ -515,7 +514,6 @@ namespace DotSetup
             }
             productSettings.PreInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PreInstall/Requirements"));
             productSettings.PostInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PostInstall/Requirements"));
-            productSettings.AnalyticsParams = ExtractProductAnalyticsParams(productStaticData.SelectNodes("AnalyticsParams/Param"));
             productSettings.LayoutName = XmlParser.GetStringValue(productStaticData, "Layout");
 
             ControlsLayout defLocaleControlsLayout = null;
@@ -541,8 +539,12 @@ namespace DotSetup
                     Logger.GetLogger().Error("Missing locale for product: " + productSettings.Name + " language code: " + LocaleCode);
 #endif
             }
-
+            AddAdditionalSettings(ref productSettings, productStaticData, productDynamicData);
             return productSettings;
+        }
+
+        internal virtual void AddAdditionalSettings(ref ProductSettings productSettings, XmlNode productStaticData, XmlNode productDynamicData)
+        {
         }
 
         private ProductSettings.ProductRequirements ExtractProductRequirementsRoot(XmlNodeList productRequirementsList)
@@ -555,20 +557,21 @@ namespace DotSetup
             return requirementsRoot;
         }
 
-        private List<ProductSettings.ProductRequirements> ExtractProductRequirements(XmlNodeList productRequirementsList)
+        private List<ProductSettings.ProductRequirements> ExtractProductRequirements(XmlNodeList productRequirementsList, string logicalOp = "")
         {
             List<ProductSettings.ProductRequirements> requirementsList = new List<ProductSettings.ProductRequirements>();
             foreach (XmlNode requirementsNode in productRequirementsList)
             {
+                string nextLogicalOp = XmlParser.GetStringAttribute(requirementsNode, "Requirements", "logicalOp");
                 ProductSettings.ProductRequirements requirements = new ProductSettings.ProductRequirements
                 {
-                    LogicalOperator = XmlParser.GetStringAttribute(requirementsNode, "Requirements", "logicalOp")
+                    LogicalOperator = logicalOp
                 };
                 if (string.IsNullOrEmpty(requirements.LogicalOperator))
                     requirements.LogicalOperator = Enum.GetName(typeof(RequirementHandlers.LogicalOperatorType), RequirementHandlers.LogicalOperatorType.AND); //default value     
 
                 requirements.RequirementList = ExtractProductRequirement(requirementsNode.SelectNodes("Requirement"));
-                requirements.RequirementsList = ExtractProductRequirements(requirementsNode.SelectNodes("Requirements"));
+                requirements.RequirementsList = ExtractProductRequirements(requirementsNode.SelectNodes("Requirements"), nextLogicalOp);
                 requirementsList.Add(requirements);
             }
 
@@ -606,18 +609,6 @@ namespace DotSetup
             }
 
             return requirementList;
-        }
-
-        private Dictionary<string, string> ExtractProductAnalyticsParams(XmlNodeList paramsNodeList)
-        {
-            Dictionary<string, string> Params = new Dictionary<string, string>();
-            foreach (XmlNode paramNode in paramsNodeList)
-            {
-                string key = XmlParser.GetStringValue(paramNode, "Key");
-                string value = XmlParser.GetStringValue(paramNode, "Value");
-                Params.Add(key, value);
-            }
-            return Params;
         }
 
         public void EvalCustomVariables(XmlNode productCustomVars)
@@ -713,6 +704,12 @@ namespace DotSetup
                 res = defaultValue;
             }
             return res;
+        }
+
+        public bool GetConfigValueAsBool(string key, bool defaultValue = false)
+        {
+            XmlNode configNode = xmlDoc.SelectSingleNode("//Config");
+            return XmlParser.GetBoolValue(configNode, key, defaultValue);
         }
 
         public void SetStringValue(string xpath, string value)

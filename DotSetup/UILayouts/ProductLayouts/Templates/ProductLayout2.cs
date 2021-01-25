@@ -15,7 +15,7 @@ namespace DotSetup
         public static extern long ShowCaret(IntPtr hwnd);
         [DllImport("user32.dll", EntryPoint = "HideCaret")]
         public static extern long HideCaret(IntPtr hwnd);
-        private ControlsLayout _controlsLayout;
+
         public ProductLayout2(ControlsLayout controlsLayout)
         {
             InitializeComponent();
@@ -28,21 +28,19 @@ namespace DotSetup
                 txtDescription.ForeColor = FontColor;
             }
 
-            _controlsLayout = controlsLayout;
             controlsLayout.SetLayout(pnlLayout.Controls);
-            
+
             Dock = DockStyle.Fill;
         }
 
-        override public void HandleChanges()
+        public override void HandleChanges()
         {
             ProductLayoutUtils.ResizeBackground(Parent, imgBackground, txtDisclaimer);
             ProductLayoutUtils.MoveOptionalBadge(Parent, imgOptional);
-
-            _controlsLayout.SetLayout(pnlLayout.Controls);
+            ProductLayoutUtils.MoveDisclaimer(Parent, txtDisclaimer);
         }
 
-        override public void HandleChanges(object sender, EventArgs e)
+        public override void HandleChanges(object sender, EventArgs e)
         {
             HandleChanges();
         }

@@ -1,6 +1,10 @@
-﻿using System;
-using System.Net;
+﻿// Copyright (c) dotSetup. All Rights Reserved.
+// Licensed under the GPL License, version 3.0.
+// https://dotsetup.io/
+
+using System;
 using System.ComponentModel;
+using System.Net;
 
 namespace DotSetup
 {
@@ -71,7 +75,7 @@ namespace DotSetup
                 Logger.GetLogger().Info("Download progress finished for package: " + installationPackage.Name);
 #endif
                 installationPackage.SetDownloadProgress(100);
-				installationPackage.RunWithBits = false;
+                installationPackage.RunWithBits = false;
                 installationPackage.HandleDownloadEnded();
             }
         }

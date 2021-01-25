@@ -17,10 +17,14 @@ namespace DotSetup
         public static Button btnRetry;
         public static Button btnFinish;
         public static event Action<ProgressEventArgs> OnProgressUpdate;
-        public static int currentState, currentProgress = -1;
+        public static int currentState, currentProgress = 0, TimerProgress = 0;
+        public static Random rand = new Random();
+        public static Timer fakeProgressTimer = new Timer();
+        public static bool isActive;
 
         public static void SetComponents(ProgressBar _pbProgressBar, Control _lblProgressValue, Control _lblProgressUpperText, Button _btnRetry, Button _btnFinish)
         {
+            isActive = true;
             statText = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STAT_TEXT");
             statInst = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STAT_INSTALLING");
             statFinished = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STAT_FINISHED");
@@ -32,6 +36,30 @@ namespace DotSetup
             btnRetry = _btnRetry;
             btnFinish = _btnFinish;
             SetComponentStartState();
+            StartFakeProgressTimer();
+        }
+
+        private static void StartFakeProgressTimer()
+        {
+            fakeProgressTimer.Tick += new EventHandler(TimerEventProcessor);
+            fakeProgressTimer.Interval = rand.Next(1000, 3000);
+            fakeProgressTimer.Start();
+        }
+
+        public static void TimerEventProcessor(object myObject, EventArgs myEventArgs)
+        {
+            fakeProgressTimer.Interval = rand.Next(3000, 5000);
+
+            if ((pbProgressBar != null) && (currentProgress == TimerProgress) && (TimerProgress < 10))
+            {
+                TimerProgress = currentProgress + 1;
+                ProgressEventArgs progressEvent = new ProgressEventArgs("", TimerProgress, 0, 0, 0, false);
+                HandleProgress(progressEvent);
+            }
+            else
+            {
+                TimerProgress = currentProgress;
+            }
         }
 
         public static void RetryClicked()
@@ -52,25 +80,36 @@ namespace DotSetup
         {
             ProgressEventArgs progressEvent = (ProgressEventArgs)progressEventArgs;
             currentState = progressEvent.state;
-            currentProgress = progressEvent.downloadPercentage;
+            if (currentProgress < progressEvent.downloadPercentage)
+                currentProgress = progressEvent.downloadPercentage;
+            if (!isActive)
+                return;
             OnProgressUpdate?.Invoke(progressEvent);
-            pbProgressBar?.PerformSafely(() => pbProgressBar.Value = progressEvent.downloadPercentage);
+            pbProgressBar?.PerformSafely(() => pbProgressBar.Value = currentProgress);
             if (progressEvent.state == ProgressEventArgs.State.Run)
             {
+                fakeProgressTimer.Stop();
                 pbProgressBar?.PerformSafely(() => pbProgressBar.Style = ProgressBarStyle.Marquee);
                 lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statInst);
             }
             else if (progressEvent.state == ProgressEventArgs.State.Download)
             {
-                lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statCompleted.Replace("$percent$", progressEvent.downloadPercentage + "%"));
+                lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statCompleted.Replace("$percent$", currentProgress + "%"));
             }
             else if (progressEvent.state == ProgressEventArgs.State.Done)
             {
+                fakeProgressTimer.Stop();
                 pbProgressBar?.PerformSafely(() => pbProgressBar.Style = ProgressBarStyle.Continuous);
                 lblProgressValue?.PerformSafely(() => lblProgressValue.Text = statCompleted.Replace("$percent$", "100%"));
                 lblProgressUpperText?.PerformSafely(() => lblProgressUpperText.Text = statFinished);
                 btnFinish?.PerformSafely(() => btnFinish.Show());
             }
+        }
+
+        internal static void Close()
+        {
+            isActive = false;
+            fakeProgressTimer.Stop();
         }
     }
 }

@@ -59,7 +59,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Configuration_UnitTest.cs" />
     <Compile Include="Packages_UnitTest.cs" />
     <Compile Include="RequirementUtils_UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

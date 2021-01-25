@@ -9,38 +9,33 @@ using DotSetup.Infrastructure;
 
 namespace DotSetup
 {
-    public class DotSetupManager
+    public class DotSetupLauncher
     {
-        public static class EventName
-        {
-            public const string OnProgress = "OnProgress",
-                                OnFirstDownloadEnd = "OnFirstDownloadEnd",
-                                OnFatalError = "OnFatalError";
-        }
-
         internal ConfigLoader configLoader;
         internal PackageManager packageManager;
         private SingleInstance singleInstance;
 
-        private static DotSetupManager instance = null;
-        public static DotSetupManager GetManager()
-        {
-            if (instance == null)
-                instance = new DotSetupManager();
-            return instance;
-        }
+        internal static DotSetupLauncher Instance { get; set; } = null;
 
-        public DotSetupManager()
+        public DotSetupLauncher()
         {
             CommunicationUtils.EnableHighestTlsVersion();
         }
 
-        public void InitInstaller(string[] args, Assembly assembly)
+        public virtual void InitInstaller(string[] args, Assembly assembly)
         {
             ResourcesUtils.wrapperAssembly = assembly;
-            configLoader = new ConfigLoader(args);
-            ValidateSingleInstance();
+            InitConfig(args);
             packageManager = new PackageManager();
+
+        }
+
+        internal void InitConfig(string[] args)
+        {
+            configLoader = new ConfigLoader(args);
+            if (Instance == null)
+                Instance = this;
+            ValidateSingleInstance();
         }
 
         public int Activate()
@@ -48,7 +43,7 @@ namespace DotSetup
             return packageManager.Activate();
         }
 
-        public void FinalizeInstaller(bool runOnClose)
+        public virtual void FinalizeInstaller(bool runOnClose)
         {
 #if DEBUG
             Logger.GetLogger().Info("Finalizing application...");

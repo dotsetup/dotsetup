@@ -29,9 +29,9 @@ namespace DotSetup
 
             public static IEnumerable<T> TakeSnapshot<T>(uint flags, int id) where T : IEntry, new()
             {
-                using (var snap = new Snapshot(flags, id))
-                    for (IEntry entry = new T { }; entry.TryMoveNext(snap, out entry);)
-                        yield return (T)entry;
+                using Snapshot snap = new Snapshot(flags, id);
+                for (IEntry entry = new T { }; entry.TryMoveNext(snap, out entry);)
+                    yield return (T)entry;
             }
 
             public interface IEntry

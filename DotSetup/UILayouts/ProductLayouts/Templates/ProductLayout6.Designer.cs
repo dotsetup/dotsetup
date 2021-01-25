@@ -29,26 +29,28 @@
         private void InitializeComponent()
         {
             this.pnlLayout = new System.Windows.Forms.Panel();
-            this.txtSmOptInY = new System.Windows.Forms.RadioButton();
-            this.txtSmOptInN = new System.Windows.Forms.RadioButton();
-            this.txtOptIn = new System.Windows.Forms.CheckBox();
-            this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
+            this.imgOptional = new DotSetup.PictureBoxEx();
             this.imgTitle = new DotSetup.PictureBoxEx();
             this.txtTitle = new DotSetup.RichTextBoxEx();
             this.txtDescription = new DotSetup.RichTextBoxEx();
             this.txtDisclaimer = new DotSetup.RichTextBoxEx();
-            this.imgBackground = new DotSetup.PictureBoxEx();
+            this.imgBackground = new DotSetup.PanelEx();
+            this.txtSmOptInY = new System.Windows.Forms.RadioButton();
+            this.txtSmOptInN = new System.Windows.Forms.RadioButton();
             this.txtSmOptIn = new DotSetup.RichTextBoxEx();
             this.imgSmOpInBg = new DotSetup.PictureBoxEx();
+            this.txtOptIn = new System.Windows.Forms.CheckBox();
+            this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
             this.pnlLayout.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgOptional)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgTitle)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imgBackground)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgSmOpInBg)).BeginInit();
             this.SuspendLayout();
             // 
             // pnlLayout
             // 
             this.pnlLayout.BackColor = System.Drawing.Color.Transparent;
+            this.pnlLayout.Controls.Add(this.imgOptional);
             this.pnlLayout.Controls.Add(this.imgTitle);
             this.pnlLayout.Controls.Add(this.txtTitle);
             this.pnlLayout.Controls.Add(this.txtDescription);
@@ -65,6 +67,89 @@
             this.pnlLayout.Name = "pnlLayout";
             this.pnlLayout.Size = new System.Drawing.Size(600, 320);
             this.pnlLayout.TabIndex = 11;
+            // 
+            // imgOptional
+            // 
+            this.imgOptional.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.imgOptional.BackColor = System.Drawing.Color.Transparent;
+            this.imgOptional.Location = new System.Drawing.Point(380, 0);
+            this.imgOptional.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.imgOptional.Name = "imgOptional";
+            this.imgOptional.Size = new System.Drawing.Size(220, 21);
+            this.imgOptional.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.imgOptional.TabIndex = 29;
+            this.imgOptional.TabStop = false;
+            // 
+            // imgTitle
+            // 
+            this.imgTitle.Location = new System.Drawing.Point(16, 20);
+            this.imgTitle.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.imgTitle.Name = "imgTitle";
+            this.imgTitle.Size = new System.Drawing.Size(38, 35);
+            this.imgTitle.TabIndex = 14;
+            this.imgTitle.TabStop = false;
+            // 
+            // txtTitle
+            // 
+            this.txtTitle.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtTitle.Font = new System.Drawing.Font("Arial", 10F);
+            this.txtTitle.ForeColor = System.Drawing.Color.White;
+            this.txtTitle.LineSpacing = 260;
+            this.txtTitle.Location = new System.Drawing.Point(59, 27);
+            this.txtTitle.Name = "txtTitle";
+            this.txtTitle.ReadOnly = true;
+            this.txtTitle.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtTitle.Size = new System.Drawing.Size(150, 30);
+            this.txtTitle.TabIndex = 25;
+            this.txtTitle.Text = "";
+            // 
+            // txtDescription
+            // 
+            this.txtDescription.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtDescription.Font = new System.Drawing.Font("Arial", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtDescription.ForeColor = System.Drawing.Color.White;
+            this.txtDescription.LineSpacing = 260;
+            this.txtDescription.Location = new System.Drawing.Point(20, 69);
+            this.txtDescription.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.txtDescription.Name = "txtDescription";
+            this.txtDescription.ReadOnly = true;
+            this.txtDescription.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtDescription.Size = new System.Drawing.Size(298, 187);
+            this.txtDescription.TabIndex = 12;
+            this.txtDescription.Text = "";
+            // 
+            // txtDisclaimer
+            // 
+            this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
+            this.txtDisclaimer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDisclaimer.BackColor = System.Drawing.Color.White;
+            this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
+            this.txtDisclaimer.LineSpacing = 210;
+            this.txtDisclaimer.Location = new System.Drawing.Point(10, 258);
+            this.txtDisclaimer.Name = "txtDisclaimer";
+            this.txtDisclaimer.ReadOnly = true;
+            this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtDisclaimer.Size = new System.Drawing.Size(580, 62);
+            this.txtDisclaimer.TabIndex = 11;
+            this.txtDisclaimer.Text = "";
+            // 
+            // imgBackground
+            // 
+            this.imgBackground.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;
+            this.imgBackground.Location = new System.Drawing.Point(0, 0);
+            this.imgBackground.Margin = new System.Windows.Forms.Padding(0);
+            this.imgBackground.Name = "imgBackground";
+            this.imgBackground.Size = new System.Drawing.Size(600, 260);
+            this.imgBackground.TabIndex = 9;
             // 
             // txtSmOptInY
             // 
@@ -92,102 +177,6 @@
             this.txtSmOptInN.UseVisualStyleBackColor = true;
             this.txtSmOptInN.Visible = false;
             // 
-            // txtOptIn
-            // 
-            this.txtOptIn.AutoSize = true;
-            this.txtOptIn.Location = new System.Drawing.Point(13, 210);
-            this.txtOptIn.Name = "txtOptIn";
-            this.txtOptIn.Size = new System.Drawing.Size(80, 17);
-            this.txtOptIn.TabIndex = 15;
-            this.txtOptIn.Text = "checkBox1";
-            this.txtOptIn.UseVisualStyleBackColor = true;
-            this.txtOptIn.Visible = false;
-            // 
-            // pnlDarkenOverlay
-            // 
-            this.pnlDarkenOverlay.Location = new System.Drawing.Point(0, 0);
-            this.pnlDarkenOverlay.Name = "pnlDarkenOverlay";
-            this.pnlDarkenOverlay.Size = new System.Drawing.Size(560, 260);
-            this.pnlDarkenOverlay.TabIndex = 24;
-            this.pnlDarkenOverlay.Visible = false;
-            // 
-            // imgTitle
-            // 
-            this.imgTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.imgTitle.Location = new System.Drawing.Point(16, 20);
-            this.imgTitle.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
-            this.imgTitle.Name = "imgTitle";
-            this.imgTitle.Size = new System.Drawing.Size(38, 35);
-            this.imgTitle.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.imgTitle.TabIndex = 14;
-            this.imgTitle.TabStop = false;
-            // 
-            // txtTitle
-            // 
-            this.txtTitle.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
-            this.txtTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtTitle.Font = new System.Drawing.Font("Arial", 10F);
-            this.txtTitle.ForeColor = System.Drawing.Color.White;
-            this.txtTitle.LineSpacing = 260;
-            this.txtTitle.Location = new System.Drawing.Point(59, 27);
-            this.txtTitle.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.txtTitle.Name = "txtTitle";
-            this.txtTitle.ReadOnly = true;
-            this.txtTitle.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtTitle.Size = new System.Drawing.Size(150, 30);
-            this.txtTitle.TabIndex = 13;
-            this.txtTitle.Text = "";
-            // 
-            // txtDescription
-            // 
-            this.txtDescription.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
-            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDescription.Font = new System.Drawing.Font("Arial", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDescription.ForeColor = System.Drawing.Color.White;
-            this.txtDescription.LineSpacing = 260;
-            this.txtDescription.Location = new System.Drawing.Point(20, 69);
-            this.txtDescription.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.txtDescription.Name = "txtDescription";
-            this.txtDescription.ReadOnly = true;
-            this.txtDescription.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDescription.Size = new System.Drawing.Size(315, 187);
-            this.txtDescription.TabIndex = 12;
-            this.txtDescription.Text = "";
-            // 
-            // txtDisclaimer
-            // 
-            this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
-            this.txtDisclaimer.BackColor = System.Drawing.Color.White;
-            this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
-            this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
-            this.txtDisclaimer.LineSpacing = 170;
-            this.txtDisclaimer.Location = new System.Drawing.Point(15, 270);
-            this.txtDisclaimer.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.txtDisclaimer.Name = "txtDisclaimer";
-            this.txtDisclaimer.ReadOnly = true;
-            this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDisclaimer.Size = new System.Drawing.Size(570, 37);
-            this.txtDisclaimer.TabIndex = 11;
-            this.txtDisclaimer.Text = "";
-            // 
-            // imgBackground
-            // 
-            this.imgBackground.Dock = System.Windows.Forms.DockStyle.Top;
-            this.imgBackground.Location = new System.Drawing.Point(0, 0);
-            this.imgBackground.Margin = new System.Windows.Forms.Padding(0);
-            this.imgBackground.Name = "imgBackground";
-            this.imgBackground.Size = new System.Drawing.Size(600, 260);
-            this.imgBackground.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.imgBackground.TabIndex = 9;
-            this.imgBackground.TabStop = false;
-            // 
             // txtSmOptIn
             // 
             this.txtSmOptIn.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
@@ -212,6 +201,25 @@
             this.imgSmOpInBg.TabStop = false;
             this.imgSmOpInBg.Visible = false;
             // 
+            // txtOptIn
+            // 
+            this.txtOptIn.AutoSize = true;
+            this.txtOptIn.Location = new System.Drawing.Point(13, 210);
+            this.txtOptIn.Name = "txtOptIn";
+            this.txtOptIn.Size = new System.Drawing.Size(80, 17);
+            this.txtOptIn.TabIndex = 15;
+            this.txtOptIn.Text = "checkBox1";
+            this.txtOptIn.UseVisualStyleBackColor = true;
+            this.txtOptIn.Visible = false;
+            // 
+            // pnlDarkenOverlay
+            // 
+            this.pnlDarkenOverlay.Location = new System.Drawing.Point(0, 0);
+            this.pnlDarkenOverlay.Name = "pnlDarkenOverlay";
+            this.pnlDarkenOverlay.Size = new System.Drawing.Size(560, 260);
+            this.pnlDarkenOverlay.TabIndex = 24;
+            this.pnlDarkenOverlay.Visible = false;
+            // 
             // ProductLayout6
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -224,8 +232,8 @@
             this.Load += new System.EventHandler(this.ProductLayout6_Load);
             this.pnlLayout.ResumeLayout(false);
             this.pnlLayout.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imgOptional)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgTitle)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imgBackground)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgSmOpInBg)).EndInit();
             this.ResumeLayout(false);
 
@@ -234,7 +242,7 @@
         #endregion
 
         private System.Windows.Forms.Panel pnlLayout;
-        private PictureBoxEx imgBackground;
+        private PanelEx imgBackground;
         private DotSetup.RichTextBoxEx txtDisclaimer;
         private RichTextBoxEx txtDescription;
         private PictureBoxEx imgTitle;
@@ -245,5 +253,6 @@
         private RichTextBoxEx txtSmOptIn;
         private System.Windows.Forms.Panel pnlDarkenOverlay;
         private RichTextBoxEx txtTitle;
+        private PictureBoxEx imgOptional;
     }
 }

@@ -27,6 +27,7 @@ namespace DotSetup
                 RegistryKeyValue = "registrykeyvalue",
                 HasAdminPrivileges = "hasadminprivileges",
                 UserAdmin = "useradmin",
+                SystemType = "systemtype",
                 FileExists = "fileexists",
                 ConfigValue = "configvalue";
         }
@@ -65,6 +66,7 @@ namespace DotSetup
             { RequirementType.RegistryKeyValue, RegistryKeyValueHandler },
             { RequirementType.HasAdminPrivileges, HasAdminPrivilegesHandler },
             { RequirementType.UserAdmin, UserAdminHandler },
+            { RequirementType.SystemType, SystemTypeHandler },
             { RequirementType.FileExists, FileExistsHandler },
             { RequirementType.ConfigValue, ConfigValueHandler }
         };
@@ -72,39 +74,22 @@ namespace DotSetup
         public static bool CompareOperation(string value1, string value2,
                        CompareOperationType operation, LogicalOperatorType logicalOperatorType = LogicalOperatorType.OR)
         {
-            bool match;
-            if (operation == CompareOperationType.Contains)
-                match = value1.Contains(value2);
-            else if (operation == CompareOperationType.StartsWith)
-                match = value1.StartsWith(value2);
-            else if (operation == CompareOperationType.EndsWith)
-                match = value1.EndsWith(value2);
-            else
-            {
-                var val1 = Convert.ToDouble(value1);
-                var val2 = Convert.ToDouble(value2);
+            double.TryParse(value1, out double val1);
+            double.TryParse(value2, out double val2);
 
-                switch (operation)
-                {
-                    case CompareOperationType.Equal:
-                        match = Equals(val1, val2);
-                        break;
-                    case CompareOperationType.Greater:
-                        match = val1 > val2;
-                        break;
-                    case CompareOperationType.GreaterEqual:
-                        match = val1 >= val2;
-                        break;
-                    case CompareOperationType.Less:
-                        match = val1 < val2;
-                        break;
-                    case CompareOperationType.LessEqual:
-                        match = val1 <= val2;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            bool match = operation switch
+            {
+                CompareOperationType.Contains => value1.Contains(value2),
+                CompareOperationType.StartsWith => value1.StartsWith(value2),
+                CompareOperationType.EndsWith => value1.EndsWith(value2),
+                CompareOperationType.Equal => (Equals(val1, val2) && (val1 != 0 || val1 != 0)) || value1.Equals(value2),
+                CompareOperationType.Greater => val1 > val2,
+                CompareOperationType.GreaterEqual => val1 >= val2,
+                CompareOperationType.Less => val1 < val2,
+                CompareOperationType.LessEqual => val1 <= val2,
+                _ => throw new ArgumentOutOfRangeException(),
+            };
+
 
             if (logicalOperatorType == LogicalOperatorType.NOT)
                 match = !match;
@@ -113,23 +98,16 @@ namespace DotSetup
 
         public static bool ToBoolean(string value)
         {
-            switch (value.ToLower())
+            return (value.ToLower()) switch
             {
-                case "true":
-                    return true;
-                case "t":
-                    return true;
-                case "1":
-                    return true;
-                case "0":
-                    return false;
-                case "false":
-                    return false;
-                case "f":
-                    return false;
-                default:
-                    throw new InvalidCastException("You can't cast that value to a bool!");
-            }
+                "true" => true,
+                "t" => true,
+                "1" => true,
+                "0" => false,
+                "false" => false,
+                "f" => false,
+                _ => throw new InvalidCastException("You can't cast that value to a bool!"),
+            };
         }
 
         public static string CompareLogicalOper(bool[] arrB, LogicalOperatorType operation)
@@ -311,6 +289,7 @@ namespace DotSetup
                 case RequirementType.Processor:
                 case RequirementType.BrowserDefault:
                 case RequirementType.OSVersion:
+                case RequirementType.SystemType:
                     retStr = methodsMap[requirementType](new string[] { });
                     break;
                 case RequirementType.Process:
@@ -339,6 +318,7 @@ namespace DotSetup
                 case RequirementType.Disk:
                 case RequirementType.Ram:
                 case RequirementType.BrowserDefault:
+                case RequirementType.SystemType:
                 case RequirementType.Processor:
                 case RequirementType.ConfigValue:
                     resB = CompareOperation(methodResult, requirementValue, operatorType, logicalOperatorType);
@@ -381,15 +361,12 @@ namespace DotSetup
 
         private static string DiskHandler(string[] arg)
         {
-            switch (arg[0].ToLower())
+            return (arg[0].ToLower()) switch
             {
-                case "freespacemb":
-                    return HardwareUtils.Instance.DiskFreeSpaceInMB().ToString();
-                case "totalspacemb":
-                    return HardwareUtils.Instance.DiskTotalSpaceInMB().ToString();
-                default:
-                    return "";
-            }
+                "freespacemb" => HardwareUtils.Instance.DiskFreeSpaceInMB().ToString(),
+                "totalspacemb" => HardwareUtils.Instance.DiskTotalSpaceInMB().ToString(),
+                _ => string.Empty,
+            };
         }
 
 
@@ -401,19 +378,14 @@ namespace DotSetup
 
         private static string RAMHandler(string[] arg)
         {
-            switch (arg[0].ToLower())
+            return (arg[0].ToLower()) switch
             {
-                case "totalphysicalmb":
-                    return HardwareUtils.Instance.TotalPhysicalRamInMB().ToString();
-                case "availablephysicalmb":
-                    return HardwareUtils.Instance.FreePhysicalRamInMB().ToString();
-                case "totalvirtualmb":
-                    return HardwareUtils.Instance.TotalVirtualRamInMB().ToString();
-                case "availablelvirtualmb":
-                    return HardwareUtils.Instance.FreeVirtualRamInMB().ToString();
-                default:
-                    return "";
-            }
+                "totalphysicalmb" => HardwareUtils.Instance.TotalPhysicalRamInMB().ToString(),
+                "availablephysicalmb" => HardwareUtils.Instance.FreePhysicalRamInMB().ToString(),
+                "totalvirtualmb" => HardwareUtils.Instance.TotalVirtualRamInMB().ToString(),
+                "availablelvirtualmb" => HardwareUtils.Instance.FreeVirtualRamInMB().ToString(),
+                _ => string.Empty,
+            };
         }
 
 
@@ -500,6 +472,12 @@ namespace DotSetup
         {
             // read all roles for the current identity name, asking ActiveDirectory
             return UserUtils.IsAdministratorNoCache(WindowsIdentity.GetCurrent().Name).ToString();
+        }
+
+        private static string SystemTypeHandler(string[] arg)
+        {
+            // read all roles for the current identity name, asking ActiveDirectory
+            return OSUtils.Is64BitOperatingSystem()?"64":"32";
         }
 
         private static string FileExistsHandler(string[] arg)

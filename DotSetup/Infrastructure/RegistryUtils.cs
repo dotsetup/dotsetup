@@ -3,6 +3,7 @@
 // https://dotsetup.io/
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -139,32 +140,15 @@ namespace DotSetup
 
         private RegistryKey GetHiveKey(string hiveKey)
         {
-            RegistryKey rk;
-            switch (hiveKey.ToLower())
+            RegistryKey rk = (hiveKey.ToLower()) switch
             {
-                case "hkcu":
-                    rk = Registry.CurrentUser;
-                    break;
-
-                case "hklm":
-                    rk = Registry.LocalMachine;
-                    break;
-
-                case "hku":
-                    rk = Registry.Users;
-                    break;
-
-                case "hkcc":
-                    rk = Registry.CurrentConfig;
-                    break;
-
-                case "hkcr":
-                    rk = Registry.ClassesRoot;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                "hkcu" => Registry.CurrentUser,
+                "hklm" => Registry.LocalMachine,
+                "hku" => Registry.Users,
+                "hkcc" => Registry.CurrentConfig,
+                "hkcr" => Registry.ClassesRoot,
+                _ => throw new ArgumentOutOfRangeException(),
+            };
             return rk;
         }
 
@@ -223,17 +207,23 @@ namespace DotSetup
 
         private const uint ERROR_SUCCESS = 0;
         private const uint ERROR_MORE_DATA = 234;
+        private const uint REG_DWORD = 4;
+        private const uint REG_QWORD = 11;
         public string GetRegKeyValue(string[] arg) //string hkey, string subKey, string subKeyName)
         {
-            string res = "";
             string hive = string.Empty;
             string subKey = string.Empty;
-            string relativeSubKey = string.Empty;
             string subKeyName = string.Empty;
+            ParseRegistryPath(arg, ref hive, ref subKey, ref subKeyName);
+            return GetRegKeyValue(hive, subKey, subKeyName);
+        }
+        
+        public string GetRegKeyValue(string hive, string subKey, string subKeyName)
+        {
+            string res = "";
+
             try
             {
-                ParseRegistryPath(arg, ref hive, ref subKey, ref subKeyName);
-
                 RegistryKey regKey = GetRegKey(hive, subKey);
                 if (regKey == null)
                     return null;
@@ -258,6 +248,8 @@ namespace DotSetup
                     if ((hError == ERROR_SUCCESS) && (valueName.ToString() == subKeyName))
                     {
                         res = lpData.ToString();
+                        if (lpType == REG_DWORD || lpType == REG_QWORD)
+                            res = StringToNumberString(res);
                         break;
                     }
                     lpcchValueName = 1024;
@@ -280,6 +272,23 @@ namespace DotSetup
 #endif
                 return null;
             }
+        }
+
+        private string StringToNumberString(string str)
+        {
+            var codePoints = new List<int>(str.Length);
+            for (int i = 0; i < str.Length; i++)
+            {
+                codePoints.Add(char.ConvertToUtf32(str, i));
+                if (char.IsHighSurrogate(str[i]))
+                    i += 1;
+            }
+            if (codePoints.Count == 1)
+                return codePoints[0].ToString();
+            if (codePoints.Count == 2)
+                return (((long)codePoints[0] << 32) | (uint)codePoints[1]).ToString();
+            else
+                return str;
         }
     }
 }

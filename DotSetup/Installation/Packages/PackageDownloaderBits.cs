@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Timers;
 using BITS = BITSReference1_5;
 using BITS5 = BITSReference5_0;
@@ -23,28 +24,33 @@ namespace DotSetup
     internal class PackageDownloaderBits : PackageDownloader, BITS.IBackgroundCopyCallback
     {
         public static string Method = "bits";
-        private BITS.IBackgroundCopyJob job;
-        private BITS.GUID jobGuid;
-        private readonly Timer aTimer;
-        private int totalPercentage = 0;
-        private static BITS.BackgroundCopyManager1_5 mgr;
-        private int timeCounter = 0;
+        private string _downloadFileName;
+        private BITS.IBackgroundCopyJob _job;
+        private readonly Timer _aTimer;
+        private int _totalPercentage = 0;
+        private int _timeCounter = 0;
         private const int MAX_TIMEOUT_MS = 30_000;
         private const int RETRY_DELAY_SECONDS = 5;
         private const int TIMER_INTERVAL_MS = 500;
 
         public PackageDownloaderBits(InstallationPackage installationPackage) : base(installationPackage)
         {
-            aTimer = new Timer
+            _aTimer = new Timer
             {
                 Interval = TIMER_INTERVAL_MS,
                 Enabled = false
             };
-            aTimer.Elapsed += new ElapsedEventHandler(TimerElapsed);
+            _aTimer.Elapsed += new ElapsedEventHandler(TimerElapsed);
         }
 
         public override bool Download(string downloadLink, string outFilePath)
         {
+            if (!UserUtils.IsSessionUser())
+            {
+                installationPackage.HandleDownloadError("User must be the sessions user to download with Bits.");
+                return false;
+            }
+
             // Already on an MTA thread, so just go for it
             if (System.Threading.Thread.CurrentThread.GetApartmentState() == System.Threading.ApartmentState.MTA)
                 return DownloadMTA(downloadLink, outFilePath);
@@ -80,6 +86,7 @@ namespace DotSetup
 
         private bool DownloadMTA(string downloadLink, string outFilePath)
         {
+            BITS.BackgroundCopyManager1_5 mgr;
             try
             {
                 mgr = new BITS.BackgroundCopyManager1_5();
@@ -99,24 +106,25 @@ namespace DotSetup
             try
             {
                 // A single user can create a maximum of 60 jobs at one time...
-                mgr.CreateJob("DotSetup Installer", BITS.BG_JOB_TYPE.BG_JOB_TYPE_DOWNLOAD, out jobGuid, out job);
-                SetJobProperties(job);
+                mgr.CreateJob("DotSetup Installer", BITS.BG_JOB_TYPE.BG_JOB_TYPE_DOWNLOAD, out _, out _job);
+                SetJobProperties(_job);
 
-                job.AddFile(downloadLink, outFilePath);
+                _downloadFileName = outFilePath;
+                _job.AddFile(downloadLink, outFilePath);
 
-                if (job is BITS5.IBackgroundCopyJob2 job2)
+                if (_job is BITS5.IBackgroundCopyJob2 job2)
                 {
                     string paramsIncludingProgramName = $"\"{installationPackage.RunFileName}\" {installationPackage.RunParams}";
                     job2.SetNotifyCmdLine(installationPackage.RunFileName, paramsIncludingProgramName);
                 }
 
                 //Activating events for job.
-                job.SetNotifyFlags(
+                _job.SetNotifyFlags(
                   (uint)BitsNotifyFlags.JOB_TRANSFERRED
                   + (uint)BitsNotifyFlags.JOB_ERROR);
-                job.SetNotifyInterface(this);
+                _job.SetNotifyInterface(this);
 
-                job.Resume();  //starting the job
+                _job.Resume();  //starting the job
             }
             catch (Exception e)
             {
@@ -125,7 +133,7 @@ namespace DotSetup
                 return false;
             }
 
-            aTimer.Start();
+            _aTimer.Start();
 
             return true;
         }
@@ -163,42 +171,42 @@ namespace DotSetup
         {
             try
             {
-                job.GetState(out BITS.BG_JOB_STATE state);
+                _job.GetState(out BITS.BG_JOB_STATE state);
                 if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_CONNECTING ||
                     state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
                 {
                     //job in a state that that is connecting or in no connection error
-                    if (timeCounter >= MAX_TIMEOUT_MS) //30 seconds of timeout 
+                    if (_timeCounter >= MAX_TIMEOUT_MS) //30 seconds of timeout 
                     {
                         string errdesc = string.Empty;
                         if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
                         {
-                            job.GetError(out BITS.IBackgroundCopyError pError);
+                            _job.GetError(out BITS.IBackgroundCopyError pError);
                             pError.GetErrorDescription((uint)CultureInfo.GetCultureInfo("en-US").LCID, out errdesc);
                         }
 
                         CancelJob();
-                        aTimer.Stop();
+                        _aTimer.Stop();
                         installationPackage.HandleDownloadError("No Internet connection" + (string.IsNullOrEmpty(errdesc) ? "" : $", error: {errdesc}"));
                     }
                     else
                     {
                         if (state == BITS.BG_JOB_STATE.BG_JOB_STATE_TRANSIENT_ERROR)
-                            job.Resume();
+                            _job.Resume();
 
-                        timeCounter += TIMER_INTERVAL_MS;
+                        _timeCounter += TIMER_INTERVAL_MS;
                     }
                 }
                 else
                 {
                     //job in a state that that can continue to download and progress
-                    timeCounter = 0;
-                    job.GetProgress(out BITS._BG_JOB_PROGRESS progress);
+                    _timeCounter = 0;
+                    _job.GetProgress(out BITS._BG_JOB_PROGRESS progress);
 
                     if (progress.BytesTotal != ulong.MaxValue)
                     {
-                        totalPercentage = (int)((double)progress.BytesTransferred / progress.BytesTotal * 100);
-                        installationPackage.SetDownloadProgress(totalPercentage, (long)progress.BytesTransferred, (long)progress.BytesTotal);
+                        _totalPercentage = (int)((double)progress.BytesTransferred / progress.BytesTotal * 100);
+                        installationPackage.SetDownloadProgress(_totalPercentage, (long)progress.BytesTransferred, (long)progress.BytesTotal);
                     }
                     installationPackage.HandleProgress(installationPackage);
                 }
@@ -224,30 +232,60 @@ namespace DotSetup
             // 2. HandleDownloadEnded
             // 3. wait for run event
             // 4. Run
+#if DEBUG
+            Logger.GetLogger().Info($"JobTransferred event on download file: {_downloadFileName}");
+#endif
 
             if (installationPackage.InstallationState > InstallationPackage.State.DownloadStart || installationPackage.InstallationState < InstallationPackage.State.Init)
                 return;
 
-            aTimer.Stop();
+            _aTimer.Stop();
 
             pJob.Complete();
+            try
+            {
+                DateTime now = DateTime.Now;
+#if DEBUG
+                Logger.GetLogger().Info($"setting {_downloadFileName} creation/write/access time to {now}");
+#endif
+                File.SetCreationTime(_downloadFileName, now);
+                File.SetLastWriteTime(_downloadFileName, now);
+                File.SetLastAccessTime(_downloadFileName, now);
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Warning($"unable to set {_downloadFileName} creation/write/access time: {e}");
+#endif
+            }
+
             TimerCalled();
             installationPackage.HandleDownloadEnded();
 
             //wait on event from runner    
             if (installationPackage.RunWithBits && installationPackage.onRunWithBits.WaitOne() && installationPackage.runner.BitsEnabled)
             {
-                // Throwing with E_FAIL error-code so BITS will also execute the command line
-                throw new System.Runtime.InteropServices.COMException("", int.Parse("80004005", NumberStyles.HexNumber));
+#if DEBUG
+                Logger.GetLogger().Info($"running file via BITS: {installationPackage.RunFileName}");
+#endif
+                // Throwing with E_FAIL error-code so BITS will also execute the command line  
+                throw new System.Runtime.InteropServices.COMException("", unchecked((int)0x80004005));
             }
         }
 
         public void JobError(BITS.IBackgroundCopyJob pJob, BITS.IBackgroundCopyError pError)
         {
+#if DEBUG
+            Logger.GetLogger().Info($"JobError event on download file: {_downloadFileName}");
+#endif
             pJob.Cancel();
-            aTimer.Stop();
+            _aTimer.Stop();
             pError.GetErrorDescription((uint)CultureInfo.GetCultureInfo("en-US").LCID, out string errdesc);
-            if (errdesc != null)
+            if (!string.IsNullOrWhiteSpace(errdesc))
             {
                 installationPackage.HandleDownloadError(errdesc);
             }
@@ -266,9 +304,9 @@ namespace DotSetup
 
         public override void Terminate()
         {
-            if (job != null)
+            if (_job != null)
             {
-                job.GetState(out BITS.BG_JOB_STATE state);
+                _job.GetState(out BITS.BG_JOB_STATE state);
 
                 switch (state)
                 {
@@ -293,7 +331,7 @@ namespace DotSetup
         {
             try
             {
-                job?.Cancel();
+                _job?.Cancel();
             }
 #if DEBUG
             catch (Exception e)

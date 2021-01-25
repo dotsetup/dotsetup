@@ -13,13 +13,13 @@ namespace DotSetup
 {
     public class ControlSettings
     {
-        protected string cid, value, location, size,
+        protected string cid, value, location, size, backColor, foreColor,
             fontName, fontSize, fontStyle, rtl,
             encode, decode;
 
         public static class KnownAttribute
         {
-            public const string Location = "location", Size = "size",
+            public const string Location = "location", Size = "size", BackColor = "backColor", ForeColor = "foreColor",
             FontName = "fontName", FontSize = "fontSize", FontStyle = "fontStyle", Rtl = "rtl",
             Encode = "encode", Decode = "decode";
         }
@@ -32,6 +32,8 @@ namespace DotSetup
 
             location = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.Location);
             size = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.Size);
+            backColor = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.BackColor);
+            foreColor = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.ForeColor);
             fontName = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.FontName);
             fontSize = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.FontSize);
             fontStyle = GetAttributeValue(attributes, defaultAttributes, KnownAttribute.FontStyle);
@@ -57,6 +59,7 @@ namespace DotSetup
             SetLocation(control);
             SetSize(control);
             SetFont(control);
+            SetColor(control);
         }
 
         internal virtual void SetLocation(Control control)
@@ -145,6 +148,25 @@ namespace DotSetup
                 control.Font = FontManager.GetManager().GetFont(fontName, fontSize, fontStyle);
 #if DEBUG
                 Logger.GetLogger().Info("Update cid " + cid + " font to " + control.Font.ToString());
+#endif
+            }
+        }
+
+        internal virtual void SetColor(Control control)
+        {
+            if (!string.IsNullOrEmpty(backColor))
+            {
+                control.BackColor = ColorTranslator.FromHtml(backColor);
+#if DEBUG
+                Logger.GetLogger().Info("Update cid " + cid + " BackColor to " + control.BackColor.ToString());
+#endif
+            }
+
+            if (!string.IsNullOrEmpty(foreColor))
+            {
+                control.ForeColor = ColorTranslator.FromHtml(foreColor);
+#if DEBUG
+                Logger.GetLogger().Info("Update cid " + cid + " ForeColor to " + control.ForeColor.ToString());
 #endif
             }
         }

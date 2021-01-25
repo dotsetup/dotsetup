@@ -75,16 +75,15 @@
             this.txtDisclaimer.BackColor = System.Drawing.Color.White;
             this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Top;
             this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
             this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
             this.txtDisclaimer.LineSpacing = 210;
-            this.txtDisclaimer.Location = new System.Drawing.Point(0, 280);
+            this.txtDisclaimer.Location = new System.Drawing.Point(0, 260);
             this.txtDisclaimer.Name = "txtDisclaimer";
-            this.txtDisclaimer.Padding = 2;
             this.txtDisclaimer.ReadOnly = true;
             this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDisclaimer.Size = new System.Drawing.Size(600, 40);
+            this.txtDisclaimer.Size = new System.Drawing.Size(600, 57);
             this.txtDisclaimer.TabIndex = 11;
             this.txtDisclaimer.Text = "";
             // 
@@ -94,9 +93,9 @@
             this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDescription.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtDescription.Font = new System.Drawing.Font("Arial", 9.5F);
             this.txtDescription.ForeColor = System.Drawing.Color.White;
-            this.txtDescription.LineSpacing = 300;
+            this.txtDescription.LineSpacing = 250;
             this.txtDescription.Location = new System.Drawing.Point(10, 46);
             this.txtDescription.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
             this.txtDescription.Name = "txtDescription";
@@ -112,7 +111,7 @@
             this.txtTitle.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtTitle.ForeColor = System.Drawing.Color.White;
-            this.txtTitle.LineSpacing = 300;
+            this.txtTitle.LineSpacing = 375;
             this.txtTitle.Location = new System.Drawing.Point(54, 12);
             this.txtTitle.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
             this.txtTitle.Name = "txtTitle";
@@ -135,10 +134,10 @@
             // 
             this.imgOptional.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.imgOptional.BackColor = System.Drawing.Color.Transparent;
-            this.imgOptional.Location = new System.Drawing.Point(388, 12);
+            this.imgOptional.Location = new System.Drawing.Point(380, 0);
             this.imgOptional.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
             this.imgOptional.Name = "imgOptional";
-            this.imgOptional.Size = new System.Drawing.Size(200, 21);
+            this.imgOptional.Size = new System.Drawing.Size(220, 21);
             this.imgOptional.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.imgOptional.TabIndex = 26;
             this.imgOptional.TabStop = false;

@@ -141,10 +141,8 @@
     <Compile Include="Infrastructure\ControlUtils.cs" />
     <Compile Include="Infrastructure\DockingHelper.cs" />
     <Compile Include="Infrastructure\ProcessUtils.cs" />
-    <Compile Include="Infrastructure\XmlProcessor.cs" />
+    <Compile Include="Infrastructure\XmlProcessor.cs" />    
     <Compile Include="Installation\Configuration\SessionDataConsts.cs" />
-    <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWait.cs" />
-    <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRunAndWaitWithParamsChange.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderWebClient.cs" />
     <Compile Include="Installation\Packages\RequirementHandlers.cs" />
@@ -164,9 +162,7 @@
     <Compile Include="Installation\Configuration\ErrorConsts.cs" />
     <Compile Include="Installation\Configuration\ConfigConsts.cs" />
     <Compile Include="Installation\Configuration\ConfigParser.cs" />
-    <Compile Include="Installation\Configuration\ConfigValidator.cs" />
     <Compile Include="Installation\Events\LoadingEventArgs.cs" />
-    <Compile Include="Installation\SDK\DotSetupInterface.cs" />
     <Compile Include="Installation\WinForm\FormPageManager.cs" />
     <Compile Include="UILayouts\ControlLayout\ButtonsSettings.cs" />
     <Compile Include="UILayouts\ControlLayout\ControlsLayout.cs" />
@@ -195,9 +191,6 @@
     </Compile>
     <Compile Include="UILayouts\ProductLayouts\OptLayout.cs" />
     <Compile Include="Installation\WinForm\ProgressBarUpdater.cs" />
-    <Compile Include="Installation\Packages\CustomPackages\CustomPackage.cs" />
-    <Compile Include="Installation\Packages\CustomPackages\PkgDownloadAndRun.cs" />
-    <Compile Include="Installation\Packages\CustomPackages\PkgRunOnClose.cs" />
     <Compile Include="Infrastructure\Logger.cs" />
     <Compile Include="Infrastructure\EventManager.cs" />
     <Compile Include="Infrastructure\KnownFolders.cs" />
@@ -234,7 +227,7 @@
     <Compile Include="Installation\WinForm\frmParent.Designer.cs">
       <DependentUpon>frmParent.cs</DependentUpon>
     </Compile>
-    <Compile Include="DotSetupManager.cs" />
+    <Compile Include="DotSetupLauncher.cs" />
     <Compile Include="Installation\Packages\InstallationPackage.cs" />
     <Compile Include="Installation\Packages\PackageRunner.cs" />
     <Compile Include="Installation\Packages\PackageManager.cs" />
@@ -343,7 +336,7 @@
     <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.86.0.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.87.0.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

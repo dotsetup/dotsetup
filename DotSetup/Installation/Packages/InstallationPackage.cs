@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using DotSetup.Infrastructure;
 
@@ -29,31 +28,44 @@ namespace DotSetup
 {
     public class InstallationPackage
     {
-        public static class State
+        public enum State
         {
-            public const int Error = -1, Skipped = -3, Discard = -4, Init = 0, DownloadStart = 1, DownloadEnd = 2, ExtractStart = 3, ExtractEnd = 4, RunStart = 5, RunEnd = 6, Done = 7, Confirmed = 100;
-            public static string ToString(int state)
-            {
-                return state switch
-                {
-                    -1 => "ERROR",
-                    -3 => "SKIPPED",
-                    0 => "INIT",
-                    1 => "DOWNLOAD_START",
-                    2 => "DOWNLOAD_END",
-                    3 => "EXTRACT_START",
-                    4 => "EXTRACT_END",
-                    5 => "RUN_START",
-                    6 => "RUN_END",
-                    7 => "DONE",
-                    100 => "CONFIRMED",
-                    _ => "",
-                };
-            }
+            Discard = -4, Skipped = -3, Error = -1, Init, DownloadStart, DownloadEnd, ExtractStart, ExtractEnd, RunStart, RunEnd, Done, Confirmed = 100
         }
         private int _dwnldProgress;
         private string _secondDownloadMethod;
-        public int InstallationState { get; private set; }
+        private State _installationState;
+        public State InstallationState
+        {
+            get => _installationState;
+            set
+            {
+                if (value == _installationState || _installationState < State.Init || _installationState == State.Done)
+                {
+                    return;
+                }
+
+                if (value == State.Confirmed)
+                {
+                    Confirmed = true;
+                }
+                else
+                {
+#if DEBUG
+                    Logger.GetLogger().Info($"[{Name}] Package switching from InstallationState {_installationState} to InstallationState {value}");
+#endif
+                    _installationState = value;
+                }
+
+                if (value < State.Init || value == State.Done)
+                {
+                    isProgressCompleted = true;
+                }
+
+                OnChangeState?.Invoke(value);
+                HandleProgress?.Invoke(this);
+            }
+        }
         private long _dwnldBytesReceived;
         internal long DwnldBytesOffset { get; private set; }
         private long _dwnldBytesTotal;
@@ -78,7 +90,7 @@ namespace DotSetup
         internal bool RunWithBits { get; set; }
         internal bool canRun, firstDownloaded, isProgressCompleted, isUpdatedProgressCompleted, waitForIt;
         internal int msiTimeout, runErrorCode, runExitCode;
-        internal Action<int> OnChangeState;
+        internal Action<State> OnChangeState;
         internal Action OnInstallSuccess, OnUserQuit;
         internal Action<int, string> OnInstallFailed;
         internal Action<InstallationPackage> HandleProgress;
@@ -86,23 +98,90 @@ namespace DotSetup
         internal PackageExtractor extractor;
         internal PackageRunner runner;
         internal ManualResetEvent onRunWithBits = new ManualResetEvent(false);
-
-        public InstallationPackage(string name)
+        // non optional packages must be confirmed before activation
+        private bool _confirmed;
+        internal bool Confirmed
         {
-            Name = name;
+            get => _confirmed;
+            private set
+            {
+                if (value)
+                {
+                    if (!_confirmed)
+                    {
+#if DEBUG
+                        Logger.GetLogger().Info($"[{Name}] package has been confirmed");
+#endif                        
+                    }
+                    _confirmed = true;
+                }
+                else if (_confirmed)
+                {
+#if DEBUG
+                    Logger.GetLogger().Warning($"[{Name}] package has already been confirmed, can't reverse this");
+#endif  
+                }
+            }
+        }
+        private bool downloadAndRun, runOnClose;
+
+        public InstallationPackage(ProductSettings settings)
+        {
+            Name = settings.Name;
+            isOptional = settings.IsOptional;
+            Confirmed = !isOptional;
             extractor = new PackageExtractor(this);
             runner = new PackageRunner(this);
             InstallationState = State.Init;
             OnInstallFailed += HandleInstallFailed;
+
+            if (!SetCustomEvents(settings.ProductEvents) && !string.IsNullOrEmpty(settings.Behavior))
+            {
+                downloadAndRun = settings.Behavior.IndexOf("DownloadAndRun", StringComparison.OrdinalIgnoreCase) >= 0;
+                runOnClose = (settings.Behavior.IndexOf("RunOnClose", StringComparison.OrdinalIgnoreCase) >= 0) && !downloadAndRun;
+                waitForIt = settings.Behavior.IndexOf("RunAndWait", StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+        }
+
+        private bool SetCustomEvents(List<ProductSettings.ProductEvent> productEvents)
+        {
+            bool isSuccess = false;
+            if (productEvents == null)
+                return isSuccess;
+            foreach (ProductSettings.ProductEvent prodEvent in productEvents)
+            {
+                if (prodEvent.Name == "runOn")
+                {
+                    runOnClose = (prodEvent.Triger == "AppClose");
+                    downloadAndRun = !runOnClose;
+                    isSuccess = true;
+                }
+            }
+
+            return isSuccess;
         }
 
         internal bool Activate()
         {
+            if (!Confirmed)
+            {
+#if DEBUG
+                Logger.GetLogger().Info($"[{Name}] package has not been confirmed before activation hence will be skipped");
+#endif
+                InstallationState = State.Skipped;
+                return false;
+            }
+
             InstallationState = State.DownloadStart;
 #if DEBUG
             Logger.GetLogger().Info("[" + Name + "] start downloading from " + DwnldLink + " to location " + _dwnldFileName);
 #endif
-
+            if (string.IsNullOrEmpty(DwnldLink))
+            {
+                HandleDownloadEnded();
+                return true;
+            }
+                
             return downloader.Download(DwnldLink, _dwnldFileName);
         }
 
@@ -117,7 +196,8 @@ namespace DotSetup
                 {
                     FileHash = CryptUtils.ComputeHash(fop, CryptUtils.Hash.SHA1);
 
-                    ChangeState(State.DownloadEnd);
+                    InstallationState = State.DownloadEnd;
+                    InstallationState = State.ExtractStart;
 
                     if (FileUtils.GetMagicNumbers(_dwnldFileName, 2) == "504b" && isExtractable)  //"504b" = "PK" (zip)    
                         extractor.Extract(_dwnldFileName, _extractFilePath);
@@ -125,39 +205,39 @@ namespace DotSetup
                         HandleExtractEnded();
                 }
             }
-#if DEBUG
             catch (IOException e)
-#else
-            catch (IOException)
-#endif
             {
-#if DEBUG
-                Logger.GetLogger().Warning("[" + Name + "] Cannot opening " + _dwnldFileName + " error message: " + e.Message);
-#endif
+                HandleDownloadError(e.Message);
             }
+            if (downloadAndRun)
+                RunDownloadedFile();
         }
 
         public virtual void HandleExtractEnded()
         {
-            ChangeState(State.ExtractEnd);
+            if (runOnClose)
+                isProgressCompleted = true;
+            InstallationState = State.ExtractEnd;
             if (canRun && firstDownloaded)
                 Run();
         }
 
         internal void HandleRunStart()
         {
-            ChangeState(State.RunStart);
+            InstallationState = State.RunStart;
         }
 
         public virtual void HandleRunEnd()
         {
-            ChangeState(State.RunEnd);
+            InstallationState = State.RunEnd;
             OnInstallSuccess();
-            ChangeState(State.Done);
+            InstallationState = State.Done;
         }
 
         public virtual void Quit(bool doRunOnClose)
         {
+            if (runOnClose && doRunOnClose)
+                RunDownloadedFile();
             runner.Terminate();
             downloader?.Terminate();
             OnUserQuit();
@@ -206,14 +286,14 @@ namespace DotSetup
             _dwnldFileName = downloader.UpdateFileNameIfExists(_dwnldFileName);
         }
 
-        public void SetExtractInfo(string compressedFilePath, bool extractable)
+        public void SetExtractInfo(ProductSettings settings)
         {
-            _extractFilePath = compressedFilePath;
-            isExtractable = extractable;
+            _extractFilePath = settings.ExtractPath;
+            isExtractable = settings.IsExtractable;
 
-            if (!string.IsNullOrEmpty(_extractFilePath) && !ResourcesUtils.IsPathDirectory(compressedFilePath))
+            if (!string.IsNullOrEmpty(_extractFilePath) && !ResourcesUtils.IsPathDirectory(_extractFilePath))
             {
-                ErrorMessage = $"Extract path not valid: {compressedFilePath}";
+                ErrorMessage = $"Extract path not valid: {_extractFilePath}";
                 OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, ErrorMessage);
             }
 
@@ -223,9 +303,9 @@ namespace DotSetup
             }
         }
 
-        public void SetRunInfo(string fileName, string runParams, int msiTimeout, bool runWithBits)
+        public void SetRunInfo(ProductSettings settings)
         {
-            RunFileName = fileName;
+            RunFileName = settings.RunPath;
             if (Path.GetExtension(_dwnldFileName) == ".zip" && isExtractable)
             {
                 if (string.IsNullOrEmpty(RunFileName) || ResourcesUtils.IsPathDirectory(RunFileName))
@@ -241,14 +321,16 @@ namespace DotSetup
                 RunFileName = _dwnldFileName;
             }
 
+            msiTimeout = settings.MsiTimeoutMS;
+
             if (msiTimeout == 0)
             {
                 msiTimeout = 120000; //2 min default
             }
 
-            this.msiTimeout = msiTimeout;
-            RunParams = runParams;
-            RunWithBits = runWithBits;
+            RunParams = settings.RunParams;
+            RunWithBits = settings.RunWithBits;
+            waitForIt = settings.RunAndWait;
         }
 
         internal bool HandleFisrtDownloadEnded(object sender, EventArgs e)
@@ -299,7 +381,7 @@ namespace DotSetup
 #if DEBUG
             Logger.GetLogger().Error("[" + Name + "](" + ErrCode + ") " + ErrMsg);
 #endif
-            ChangeState(State.Error);
+            InstallationState = State.Error;
         }
 
         internal void SetDownloadProgress(int progressPercentage, long bytesReceived = -1, long totalBytes = -1)
@@ -319,67 +401,25 @@ namespace DotSetup
             }
         }
 
-        public void ChangeState(int newState)
-        {
-            if (InstallationState >= State.Init && InstallationState != State.Done)
-            {
-#if DEBUG
-                Logger.GetLogger().Info("[" + Name + "] Package switching from InstallationState " + InstallationState + "(" + State.ToString(InstallationState) +
-                    ") to InstallationState " + newState + "(" + State.ToString(newState) + ")");
-#endif
-                InstallationState = newState;
-                if (newState < State.Init || newState == State.Done)
-                {
-                    isProgressCompleted = true;
-                }
-
-                OnChangeState?.Invoke(InstallationState);
-                HandleProgress?.Invoke(this);
-            }
-        }
-
         public static string ChooseDownloadFileName(ProductSettings settings)
         {
             var res = settings.Filename;
             if (!string.IsNullOrEmpty(res) && !Path.HasExtension(res))
                 res += ".exe";
             if (!(Path.IsPathRooted(res) && !Path.GetPathRoot(res).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)))
-            {
-                if (!settings.IsOptional)
-                {
-                    try
-                    {
-                        res = Path.Combine(KnownFolders.GetPath(KnownFolder.Downloads), res);
-                    }
-#if DEBUG
-                    catch (Exception e)
-#else
-                    catch (Exception)
-#endif
-                    {
-#if DEBUG
-                        Logger.GetLogger().Warning("Cannot find downloads folder: " + e.Message);
-#endif
-                        res = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), res);
-                    }
-                }
-                else
-                {
-                    res = Path.Combine(ConfigParser.GetConfig().workDir, res);
-                }
-            }
+                res = Path.Combine(ConfigParser.GetConfig().workDir, res);
 
             return res;
         }
 
         internal void HandleDownloadError(string error)
         {
-            if (!string.IsNullOrEmpty(ErrorMessage))
+            if (!string.IsNullOrWhiteSpace(ErrorMessage))
                 ErrorMessage = $"Exception while downloading: {error}";
             else
                 ErrorMessage += $", {error}";
 
-            if (String.IsNullOrEmpty(_secondDownloadMethod))
+            if (string.IsNullOrEmpty(_secondDownloadMethod))
             {
                 OnInstallFailed(ErrorConsts.ERR_DOWNLOAD_GENERAL, ErrorMessage);
                 HandleProgress(this);
@@ -387,7 +427,7 @@ namespace DotSetup
             else
             {
                 if (_secondDownloadMethod.ToLower() == PackageDownloaderWebClient.Method)
-                    downloader = new PackageDownloaderWebClient(this); 
+                    downloader = new PackageDownloaderWebClient(this);
                 else
                     downloader = new PackageDownloaderBits(this);
                 _secondDownloadMethod = "";

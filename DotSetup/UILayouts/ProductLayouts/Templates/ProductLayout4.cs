@@ -15,7 +15,7 @@ namespace DotSetup
         public static extern long ShowCaret(IntPtr hwnd);
         [DllImport("user32.dll", EntryPoint = "HideCaret")]
         public static extern long HideCaret(IntPtr hwnd);
-        private ControlsLayout _controlsLayout;
+
         public ProductLayout4(ControlsLayout controlsLayout)
         {
             InitializeComponent();
@@ -28,29 +28,18 @@ namespace DotSetup
                 txtDescription.ForeColor = FontColor;
             }
 
-            _controlsLayout = controlsLayout;
             controlsLayout.SetLayout(pnlLayout.Controls);
 
             Dock = DockStyle.Fill;
         }
 
-        private void SetFontSize()
-        {
-            var percent = (float)Parent.Width / Width;
-
-            txtTitle.Font = new Font(txtTitle.Font.FontFamily, (float)(txtTitle.Font.SizeInPoints * percent));
-            txtTitle.Width = (int)(txtTitle.Width * percent);
-            txtTitle.LineSpacing = (int)(txtTitle.LineSpacing * percent);
-            txtDescription.Font = new Font(txtDescription.Font.FontFamily, (float)(txtDescription.Font.SizeInPoints * percent));
-            txtDescription.LineSpacing = (int)(txtDescription.LineSpacing * percent);
-        }
-
         public override void HandleChanges()
         {
-            //SetFontSize();
             ProductLayoutUtils.MoveOptionalBadge(Parent, imgOptional);
+            ProductLayoutUtils.MoveDisclaimer(Parent, txtDisclaimer);
+            ProductLayoutUtils.SetFontSize(Parent, Width, txtTitle, txtDescription);
 
-            _controlsLayout.SetLayout(pnlLayout.Controls);
+            txtDescription.Height = txtDisclaimer.Location.Y;
         }
 
         public override void HandleChanges(object sender, EventArgs e)
@@ -60,7 +49,7 @@ namespace DotSetup
 
         private void ProductLayout4_Load(object sender, EventArgs e)
         {
-            txtDisclaimer.Focus(); //prevents a need to click twice on a link
+            txtDisclaimer.Focus();
             HandleChanges();
         }
     }

@@ -39,6 +39,8 @@ namespace DotSetup
             totalVirtualRam = myCompInfo.TotalVirtualMemory;
             freeVirtualRam = myCompInfo.AvailableVirtualMemory;
             osName = myCompInfo.OSVersion;
+            if(osName.EndsWith(".0"))
+                osName= osName.Substring(0, osName.Length - 1) + GetOSReleaseNumber();
 
             DriveInfo myDriveInfo = new DriveInfo(Path.GetPathRoot(Environment.SystemDirectory));
             if (myDriveInfo.IsReady)
@@ -48,6 +50,16 @@ namespace DotSetup
             }
 
             GetPwrCapabilities(out systemPowerCapabilites);
+        }
+
+        private string GetOSReleaseNumber()
+        {
+            string releaseNum = RegistryUtils.Instance.GetRegKeyValue("HKLM", @"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "UBR");
+            if (string.IsNullOrEmpty(releaseNum)) 
+                releaseNum = RegistryUtils.Instance.GetRegKeyValue("HKLM", @"SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion", "UBR");
+            if (string.IsNullOrEmpty(releaseNum))
+                releaseNum = "0";
+            return releaseNum;
         }
 
         public ulong TotalPhysicalRamInMB()

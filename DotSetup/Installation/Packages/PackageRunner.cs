@@ -45,9 +45,8 @@ namespace DotSetup
 #if DEBUG
                             Logger.GetLogger().Info($"Running {runName} {runParam}");
 #endif
-                            bool isRunnable = FileUtils.IsRunnableFile(runName);
 
-                            if (_installationPackage.RunWithBits && !isRunnable)
+                            if (_installationPackage.RunWithBits && !FileUtils.IsRunnableFile(runName))
                             {
 #if DEBUG
                                 Logger.GetLogger().Info($"{runName} sets to run with BITS but it's not an executable file. BITS is not going to be used");
@@ -64,7 +63,7 @@ namespace DotSetup
                                 p = new Process();
                                 p.StartInfo.FileName = runName;
                                 p.StartInfo.Arguments = runParam;
-                                p.StartInfo.UseShellExecute = !FileUtils.IsRunnableFile(runName);
+                                p.StartInfo.UseShellExecute = !FileUtils.IsRunnableFileExtension(runName);
                             }
 
                             if (Path.GetExtension(runName).ToLower() == ".msi")

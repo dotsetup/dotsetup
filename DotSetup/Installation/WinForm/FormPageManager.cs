@@ -15,6 +15,7 @@ namespace DotSetup
         private int currntPageIndex;
         private FrmParent frmParent;
         private IFormPageBinder pageBinder;
+        internal Action<string> OnLoadForm = null;
 
         private static FormPageManager instance = null;
         public static FormPageManager GetManager()
@@ -32,10 +33,9 @@ namespace DotSetup
 
         public void Bind(FrmParent frmParent, IFormPageBinder pageBinder)
         {
-
             this.frmParent = frmParent;
             this.pageBinder = pageBinder;
-            DotSetupManager dotSetupManager = DotSetupManager.GetManager();
+            DotSetupLauncher dotSetupManager = DotSetupLauncher.Instance;
             formsDictionary = dotSetupManager.configLoader.FormsDictionary(frmParent, pageBinder);
             dotSetupManager.configLoader.UpdateParentDesign(frmParent);
             frmParent.Load += new System.EventHandler(FrmParent_Load);
@@ -76,6 +76,7 @@ namespace DotSetup
                     currentForm.Activate();
                 });
                 ConfigParser.GetConfig().SetStringValue(SessionDataConsts.ROOT + SessionDataConsts.CURRENT_FORM, currentForm.Name);
+                OnLoadForm?.Invoke(currentForm.Name);
             }
         }
 
@@ -123,7 +124,7 @@ namespace DotSetup
         {
             frmParent.PerformSafely(() =>
             {
-                DotSetupManager.GetManager().configLoader.DecorateForms(formsDictionary);
+                DotSetupLauncher.Instance.configLoader.DecorateForms(formsDictionary);
             });
         }
 
@@ -132,14 +133,14 @@ namespace DotSetup
             if (formsDictionary != null)
                 LoadNextForm();
             else
-                DotSetupManager.GetManager().FinalizeInstaller(false);
+                DotSetupLauncher.Instance.FinalizeInstaller(false);
         }
 
         public void SetProductLayouts()
         {
             frmParent.PerformSafely(() =>
             {
-                ProductLayoutManager productLayoutManager = DotSetupManager.GetManager().packageManager.productLayoutManager;
+                ProductLayoutManager productLayoutManager = DotSetupLauncher.Instance.packageManager.productLayoutManager;
                 productLayoutManager.AddProductLayouts();
                 pageBinder.SetProductLayouts(productLayoutManager);
             });

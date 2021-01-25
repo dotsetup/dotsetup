@@ -1,4 +1,4 @@
-// Copyright (c) dotSetup. All Rights Reserved.
+﻿// Copyright (c) dotSetup. All Rights Reserved.
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
@@ -118,6 +118,7 @@ namespace DotSetup
         private const int WM_MOUSEWHEEL = 0x020A;
         private HorizontalAlignment _Alignment = HorizontalAlignment.Left;
         private int _Padding = 0;
+        private string _OriginalText = "";
 
         private struct HyperLinkText
         {
@@ -221,6 +222,7 @@ namespace DotSetup
             get => base.Text;
             set
             {
+                _OriginalText = value;
                 linkTextArray = new List<HyperLinkText>();
                 styledTextArray = new List<StyledText>();
 
@@ -241,6 +243,11 @@ namespace DotSetup
                     Visible = true;
                 }
             }
+        }
+
+        public void RefreshStyle()
+        {
+            Text = _OriginalText;
         }
 
         public HorizontalAlignment Alignment

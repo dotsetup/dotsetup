@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using Shell32;
 
 namespace DotSetup
 {
@@ -84,10 +85,15 @@ namespace DotSetup
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
-            Shell32.Shell objShell = new Shell32.Shell();
-            Shell32.Folder destinationFolder = objShell.NameSpace(folderPath);
-            Shell32.Folder sourceFile = objShell.NameSpace(zipFile);
-            Shell32.FolderItems items = sourceFile.Items();
+            // implemented according to https://stackoverflow.com/a/26717274
+            // using reflection, rather than referencing specific types with specific versions\libraries
+            Type shellAppType = Type.GetTypeFromProgID("Shell.Application");
+            object objShell = Activator.CreateInstance(shellAppType);
+
+            Folder destinationFolder = (Folder)shellAppType.InvokeMember("NameSpace", System.Reflection.BindingFlags.InvokeMethod, null, objShell, new[] { folderPath });
+            Folder sourceFile = (Folder)shellAppType.InvokeMember("NameSpace", System.Reflection.BindingFlags.InvokeMethod, null, objShell, new[] { zipFile });
+
+            FolderItems items = sourceFile.Items();
             // Flags are: No progress displayed, Respond with 'Yes to All' for any dialog, no UI on error
             // I added 1024 although not sure it's relevant with Zip files. 
             // See https://msdn.microsoft.com/en-us/library/windows/desktop/bb787866%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396

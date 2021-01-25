@@ -183,7 +183,7 @@ namespace DotSetup
             if ((OS.Platform == PlatformID.Win32NT) && ((OS.Version.Major > 6) || ((OS.Version.Major == 6) && (OS.Version.Minor >= 1))))
                 result = GetPath(KnownFolder.LocalAppData);
             else
-                result = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                result = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             return result;
         }
 
@@ -222,8 +222,15 @@ namespace DotSetup
             string res = "";
             try
             {
-                KnownFolder knownFolder = (KnownFolder)Enum.Parse(typeof(KnownFolder), enumName, true);
-                res = GetPath(knownFolder);
+                if (enumName.ToLower() == "workdir")
+                {
+                    res = ConfigParser.GetConfig().workDir;
+                }
+                else
+                {
+                    KnownFolder knownFolder = (KnownFolder)Enum.Parse(typeof(KnownFolder), enumName, true);
+                    res = GetPath(knownFolder);
+                }
             }
 
 #if DEBUG

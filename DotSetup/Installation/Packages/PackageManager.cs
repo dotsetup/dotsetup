@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using DotSetup.CustomPackages;
 
 namespace DotSetup
 {
@@ -22,13 +21,12 @@ namespace DotSetup
         private double currentProgress, avgDwnldSpeed;
         private int pkgCompletedCounter, pkgRunningCounter, progressSampleCnt;
         private long dwnldBytesReceived, dwnldBytesTotal, lastDwnldBytesReceived;
-        private readonly Dictionary<string, InstallationPackage> packageDictionary;
+        protected readonly Dictionary<string, InstallationPackage> packageDictionary;
         private readonly object progressLock = new object();
         private DateTime progressSampleTime;
         internal ProductLayoutManager productLayoutManager;
-        internal Action<InstallationPackage, ProductSettings> OnCreatePackage, OnDiscardPackage;
-        private bool isActivated = false;
-        public bool Activated => isActivated;
+
+        public bool Activated { get; private set; } = false;
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName, MoveFileFlags dwFlags);  //Mark for deletion
         private readonly List<string> productClasses;
@@ -104,25 +102,31 @@ namespace DotSetup
                     if (!string.IsNullOrEmpty(prodSettings.Name))
                     {
                         pkg.Value.SetDownloadInfo(prodSettings);
-                        pkg.Value.SetExtractInfo(prodSettings.ExtractPath, prodSettings.IsExtractable);
+                        pkg.Value.SetExtractInfo(prodSettings);
 
                         string extraParams = ConfigParser.GetConfig().GetConfigValue("EXTRA_PARAMS");
                         prodSettings.RunParams += string.IsNullOrEmpty(extraParams) ? string.Empty : (" " + extraParams);
-                        pkg.Value.SetRunInfo(prodSettings.RunPath, prodSettings.RunParams, prodSettings.MsiTimeoutMS, prodSettings.RunWithBits);
+                        pkg.Value.SetRunInfo(prodSettings);
                         pkgStartedCount += (pkg.Value.Activate()) ? 1 : 0;
                     }
                 }
             }
-            isActivated = true;
+            Activated = true;
             return pkgStartedCount;
         }
 
-        public InstallationPackage CreatePackage(string productLogic, string name)
+        public virtual InstallationPackage CreatePackage(ProductSettings settings)
         {
-            InstallationPackage pkg = CustomPackage.CreateCustomPackage(productLogic, name);
-            pkg.HandleProgress = HandleProgressUpdate;
-            packageDictionary.Add(name, pkg);
+
+            InstallationPackage pkg = new InstallationPackage(settings);
+            packageDictionary.Add(pkg.Name, pkg);
             return pkg;
+        }
+
+        public virtual void DiscardPackage(ProductSettings settings)
+        {
+            if (packageDictionary.ContainsKey(settings.Name))
+                packageDictionary.Remove(settings.Name);
         }
 
         internal void SetProductsSettings(List<ProductSettings> productsSettings)
@@ -168,7 +172,7 @@ namespace DotSetup
 
                     if (!res)
                     {
-                        OnDiscardPackage(null, tmpProdSettings);
+                        DiscardPackage(tmpProdSettings);
                         continue;
                     }
                 }
@@ -179,14 +183,15 @@ namespace DotSetup
                 if (prodSettings.IsOptional)
                     optionalProducts++;
 
-                InstallationPackage pkg = CreatePackage(prodSettings.Behavior, prodSettings.Name);
+                InstallationPackage pkg = CreatePackage(prodSettings);
+                pkg.HandleProgress = HandleProgressUpdate;
                 productLayoutManager.AddProductSettings(prodSettings);
-                OnCreatePackage(pkg, prodSettings);
             }
         }
 
         internal bool HandleInstallerQuit(bool doRunOnClose)
         {
+            ProgressBarUpdater.Close();
             foreach (KeyValuePair<string, InstallationPackage> pkg in packageDictionary)
             {
                 pkg.Value.Quit(doRunOnClose);
@@ -195,22 +200,34 @@ namespace DotSetup
             return true;
         }
 
-        internal void DeclinePackge(string name)
+        internal void DeclinePackage(string name)
         {
             if (packageDictionary.ContainsKey(name))
             {
                 InstallationPackage pkgToDecline = packageDictionary[name];
-                pkgToDecline.ChangeState(InstallationPackage.State.Skipped);
+                pkgToDecline.InstallationState = InstallationPackage.State.Skipped;
             }
         }
 
-        internal void SkipAll()
+        internal void ConfirmPackage(string name)
         {
+            if (packageDictionary.ContainsKey(name))
+            {
+                InstallationPackage pkgToConfirm = packageDictionary[name];
+                pkgToConfirm.InstallationState = InstallationPackage.State.Confirmed;
+            }
+        }
+
+        internal void SkipAll(string nameOfCurrentPackage)
+        {
+            DeclinePackage(nameOfCurrentPackage);
+
             foreach (var pkg in packageDictionary)
             {
-                if (pkg.Value.isOptional)
+                if (pkg.Value.isOptional && !pkg.Value.Confirmed && pkg.Value.InstallationState != InstallationPackage.State.Skipped)
                 {
-                    pkg.Value.ChangeState(InstallationPackage.State.Skipped);
+                    pkg.Value.ErrorMessage = "user skipped all";
+                    pkg.Value.InstallationState = InstallationPackage.State.Discard;
                 }
             }
         }
@@ -221,7 +238,7 @@ namespace DotSetup
             {
                 InstallationPackage pkgToDiscard = packageDictionary[name];
                 pkgToDiscard.ErrorMessage = errorMessage;
-                pkgToDiscard.ChangeState(InstallationPackage.State.Discard);
+                pkgToDiscard.InstallationState = InstallationPackage.State.Discard;
             }
         }
 
@@ -234,10 +251,7 @@ namespace DotSetup
             return optionalsCount;
         }
 
-        internal bool Started()
-        {
-            return (packageDictionary.Count == pkgRunningCounter + pkgCompletedCounter);
-        }
+        internal bool Started() => (packageDictionary.Count == pkgRunningCounter + pkgCompletedCounter);
 
         internal void HandleProgressUpdate(InstallationPackage pkg)
         {

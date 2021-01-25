@@ -15,6 +15,7 @@ namespace DotSetup
         public static extern long ShowCaret(IntPtr hwnd);
         [DllImport("user32.dll", EntryPoint = "HideCaret")]
         public static extern long HideCaret(IntPtr hwnd);
+
         public ProductLayout6(ControlsLayout controlsLayout)
         {
             InitializeComponent();
@@ -32,9 +33,24 @@ namespace DotSetup
             Dock = DockStyle.Fill;
         }
 
+        public override void HandleChanges()
+        {
+            ProductLayoutUtils.ResizeBackground(Parent, imgBackground, txtDisclaimer);
+            ProductLayoutUtils.MoveOptionalBadge(Parent, imgOptional);
+            ProductLayoutUtils.MoveDisclaimer(Parent, txtDisclaimer);
+
+            txtDescription.Height = txtDisclaimer.Location.Y;
+            txtDescription.Width = Parent.Width / 2;
+        }
+
+        public override void HandleChanges(object sender, EventArgs e)
+        {
+            HandleChanges();
+        }
+
         private void ProductLayout6_Load(object sender, EventArgs e)
         {
-            txtDisclaimer.Focus(); //prevents a need to click twice on a link
+            txtDisclaimer.Focus();
 
             if (imgTitle.Image == null)
             {
@@ -43,9 +59,10 @@ namespace DotSetup
             }
             else
             {
-                imgTitle.BackColor = System.Drawing.Color.Transparent;
+                imgTitle.BackColor = Color.Transparent;
                 imgTitle.Parent = imgBackground;
             }
+            HandleChanges();
         }
     }
 }

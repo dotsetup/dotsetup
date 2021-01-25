@@ -44,6 +44,7 @@ namespace DotSetup_UnitTest
                 Assert.AreEqual(CustomVar.SelectSingleNode("//ChromeNotInstalled").InnerText, "false", "No custom variable ChromeNotInstalled");
                 Assert.AreEqual(CustomVar.SelectSingleNode("//AreFilesExists").InnerText, "true", "No custom variable AreFilesExists");
                 Assert.AreNotEqual(CustomVar.SelectSingleNode("//CheckConfigValue").InnerText, "", "No custom variable CheckConfigValue");
+                Assert.AreNotEqual(CustomVar.SelectSingleNode("//CheckSystemType").InnerText, "", "No custom variable CheckSystemType");
             }
         }
     }

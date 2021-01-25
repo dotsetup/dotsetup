@@ -10,7 +10,7 @@ namespace DotSetup
 {
     public partial class FrmParent : Form
     {
-        public Panel pnlContent;
+        public PanelEx pnlContent;
 
         public FrmParent()
         {

@@ -26,8 +26,8 @@ namespace DotSetup
             Stream res = null;
             try
             {
-                string reasourceFileName = assembly.GetManifestResourceNames().Single(str => str.EndsWith(resourceName));
-                res = assembly.GetManifestResourceStream(reasourceFileName);
+                string reasourceFileName = assembly?.GetManifestResourceNames().Single(str => str.EndsWith(resourceName));
+                res = assembly?.GetManifestResourceStream(reasourceFileName);
             }
             catch (Exception)
             {

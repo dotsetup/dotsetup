@@ -18,12 +18,24 @@ namespace DotSetup
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
         }
 
+        protected override CreateParams CreateParams
+        {
+            get
+            {                
+                CreateParams handleParam = base.CreateParams;
+                if (ProductLayoutUtils.isSDK)
+                    return handleParam;
+                handleParam.ExStyle |= 0x02000000;   // WS_EX_COMPOSITED       
+                return handleParam;
+            }
+        }
+
         protected override void OnPaintBackground(PaintEventArgs e)
         // Paint background with underlying graphics from other controls
         {
             base.OnPaintBackground(e);
 
-            if (BackColor == System.Drawing.Color.Transparent)
+            if (BackColor == Color.Transparent)
             {
                 Graphics g = e.Graphics;
 

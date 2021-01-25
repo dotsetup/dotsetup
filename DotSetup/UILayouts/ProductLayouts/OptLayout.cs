@@ -112,10 +112,8 @@ namespace DotSetup
                 G.CopyFromScreen(controlRefLocation.PointToScreen(new Point(0, 0)), new Point(0, 0), controlToDarken.Size);
                 double percent = 0.60;
                 Color darken = Color.FromArgb((int)(255 * percent), Color.Black);
-                using (Brush brsh = new SolidBrush(darken))
-                {
-                    G.FillRectangle(brsh, controlToDarken.DisplayRectangle);
-                }
+                using Brush brsh = new SolidBrush(darken);
+                G.FillRectangle(brsh, controlToDarken.DisplayRectangle);
             }
             return bmp;
         }

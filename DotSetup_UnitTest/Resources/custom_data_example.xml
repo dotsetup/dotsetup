@@ -41,5 +41,8 @@
         </Key>
       </Keys>
     </CustomVar>
+    <CustomVar name="CheckSystemType">
+      <Type>SystemType</Type>
+    </CustomVar>
   </CustomVars>
 </CustomData>
