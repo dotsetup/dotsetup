@@ -57,7 +57,7 @@ namespace DotSetup
         {
             try
             {
-                System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(path)
+                DirectoryInfo dir = new DirectoryInfo(path)
                 {
                     Attributes = FileAttributes.Normal
                 };
@@ -71,11 +71,32 @@ namespace DotSetup
                 if (Directory.Exists(path))
                     MoveFileEx(path, null, MoveFileFlags.DelayUntilReboot);
             }
+#if DEBUG
+            catch (IOException e)
+#else
             catch (IOException)
+#endif
             {
 #if DEBUG
-                Logger.GetLogger().Info("Could not fully delete working directory: " + path);
+                Logger.GetLogger().Info($"Could not mark all the files in {path} for deletion, error: {e}");
 #endif
+            }
+            finally
+            {
+                try
+                {
+                    Directory.Delete(path, true);
+                }
+#if DEBUG
+                catch (Exception e)
+#else
+                catch (Exception)
+#endif
+                {
+#if DEBUG
+                    Logger.GetLogger().Info($"Could not fully delete working dir {path}, error: {e}");
+#endif
+                }
             }
         }
 
@@ -182,11 +203,13 @@ namespace DotSetup
 
                 if (prodSettings.IsOptional)
                     optionalProducts++;
-
+                
                 InstallationPackage pkg = CreatePackage(prodSettings);
                 pkg.HandleProgress = HandleProgressUpdate;
                 productLayoutManager.AddProductSettings(prodSettings);
             }
+
+            productLayoutManager.WaitForProductsSettingsControlsResources(ConfigParser.GetConfig().GetIntValue("//Config/" + ConfigConsts.REMOTE_LAYOUTS_RESOURCES_MAX_GRACETIME_MS, 0));
         }
 
         internal bool HandleInstallerQuit(bool doRunOnClose)
@@ -242,6 +265,8 @@ namespace DotSetup
             }
         }
 
+        internal InstallationPackage GetPackageByName(string name) => packageDictionary[name];
+
         internal int GetOptionalsCount()
         {
             int optionalsCount = 0;
@@ -277,7 +302,7 @@ namespace DotSetup
                         pkgRunningCounter--;
                     pkg.isUpdatedProgressCompleted = true;
 #if DEBUG
-                    Logger.GetLogger().Info(string.Format("[{0}] Package Progress completed", pkg.Name));
+                    Logger.GetLogger().Info($"[{pkg.Name}] Package progress completed");
 #endif
                 }
 

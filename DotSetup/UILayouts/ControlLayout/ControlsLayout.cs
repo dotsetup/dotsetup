@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -12,11 +13,15 @@ namespace DotSetup
 {
     public class ControlsLayout : IComparable
     {
-        private readonly Dictionary<string, ControlSettings> controlSettings;
+        private readonly Dictionary<string, ControlSettings> _controlSettings;
+        private Thread _preparingResourcesThread = null;
+        
+        public bool ResourcesReady { get; private set; }
 
         public ControlsLayout(XmlNodeList[] xmlNodeList, Dictionary<string, string> defaultControlDesign)
         {
-            controlSettings = new Dictionary<string, ControlSettings>();
+            _controlSettings = new Dictionary<string, ControlSettings>();
+            ResourcesReady = true;
             foreach (XmlNodeList nodeList in xmlNodeList)
             {
                 foreach (XmlNode node in nodeList)
@@ -32,14 +37,14 @@ namespace DotSetup
                     else
                         cntlSettings = new ControlSettings(cid, node, defaultControlDesign);
 
-                    if (controlSettings.ContainsKey(cid))
+                    if (_controlSettings.ContainsKey(cid))
                     {
 #if DEBUG
                         Logger.GetLogger().Error("Page control settings contains already cid " + cid);
 #endif
                     }
                     else
-                        controlSettings.Add(cid, cntlSettings);
+                        _controlSettings.Add(cid, cntlSettings);
                 }
             }
         }
@@ -53,9 +58,9 @@ namespace DotSetup
         {
             foreach (Control control in controls)
             {
-                if (controlSettings.ContainsKey(control.Name))
+                if (_controlSettings.ContainsKey(control.Name))
                 {
-                    controlSettings[control.Name].SetLayout(control);
+                    _controlSettings[control.Name].SetLayout(control);
                 }
 
                 if (control.HasChildren)
@@ -72,10 +77,47 @@ namespace DotSetup
                 return -1;
 
             if (obj is ControlsLayout otherControls)
-                return ((controlSettings.Count == otherControls.controlSettings.Count)
-                    && controlSettings.Values.SequenceEqual(otherControls.controlSettings.Values)) ? 0 : 1;
+                return ((_controlSettings.Count == otherControls._controlSettings.Count)
+                    && _controlSettings.Values.SequenceEqual(otherControls._controlSettings.Values)) ? 0 : 1;
             else
                 return 1;
+        }
+
+        public void PrepareResources(CountdownEvent onReady)
+        {
+            ResourcesReady = false;
+            CountdownEvent preparingResources = new CountdownEvent(_controlSettings.Count);
+            foreach (KeyValuePair<string, ControlSettings> kvp in _controlSettings)
+            {                
+                kvp.Value.PrepareResources(preparingResources);
+            };
+
+            _preparingResourcesThread = new Thread(() =>
+            {
+                preparingResources.Wait();
+                preparingResources.Dispose();                
+                ResourcesReady = true;
+                foreach (KeyValuePair<string, ControlSettings> kvp in _controlSettings)
+                {
+#if DEBUG
+                    Logger.GetLogger().Info($"{kvp.Key} control settings are " + (kvp.Value.IsReady ? "ready" : "not ready"), Logger.Level.MEDIUM_DEBUG_LEVEL);
+#endif
+                    ResourcesReady &= kvp.Value.IsReady;
+                };
+                onReady?.Signal();
+            })
+            {
+                IsBackground = true
+            };
+            _preparingResourcesThread.Start();
+        }
+
+        public void StopWaitingForResources()
+        {
+            if (_preparingResourcesThread != null)
+            {
+                _preparingResourcesThread.Abort();
+            }
         }
     }
 }

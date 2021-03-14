@@ -28,9 +28,59 @@ namespace DotSetup
             return "{" + string.Join(",", entries) + "}";
         }
 
-        public static string Escape(string json)
+        public static string Escape(string s)
         {
-            return json.Replace("\b", @"\b").Replace("\f", @"\f").Replace("\n", @"\n").Replace("\r", @"\r").Replace("\t", @"\t").Replace("\"", "\\\"");
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
+
+            char c;
+            int len = s.Length;
+            StringBuilder sb = new StringBuilder(len + 4);
+
+            for (int i = 0; i < len; i += 1)
+            {
+                c = s[i];
+                switch (c)
+                {
+                    case '\\':
+                    case '"':
+                        sb.Append('\\');
+                        sb.Append(c);
+                        break;
+                    case '/':                        
+                        sb.Append(c);
+                        break;
+                    case '\b':
+                        sb.Append(@"\b");
+                        break;
+                    case '\t':
+                        sb.Append(@"\t");
+                        break;
+                    case '\n':
+                        sb.Append(@"\n");
+                        break;
+                    case '\f':
+                        sb.Append(@"\f");
+                        break;
+                    case '\r':
+                        sb.Append(@"\r");
+                        break;
+                    default:
+                        if (c >= 32 && c <= 127)
+                        {
+                            sb.Append(c);
+                        }
+                        else
+                        {
+                            sb.Append("\\u");
+                            sb.Append(((int)c).ToString("x04"));
+                        }
+                        break;
+                }
+            }
+            return sb.ToString();
         }
 
         // From https://stackoverflow.com/questions/1207731/how-can-i-deserialize-json-to-a-simple-dictionarystring-string-in-asp-net

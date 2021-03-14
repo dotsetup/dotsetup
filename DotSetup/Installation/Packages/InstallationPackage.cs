@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using DotSetup.Infrastructure;
 
@@ -152,7 +153,7 @@ namespace DotSetup
             {
                 if (prodEvent.Name == "runOn")
                 {
-                    runOnClose = (prodEvent.Triger == "AppClose");
+                    runOnClose = (prodEvent.Trigger == "AppClose");
                     downloadAndRun = !runOnClose;
                     isSuccess = true;
                 }
@@ -163,6 +164,9 @@ namespace DotSetup
 
         internal bool Activate()
         {
+            if (InstallationState != State.Init)
+                return false;
+
             if (!Confirmed)
             {
 #if DEBUG
@@ -173,31 +177,36 @@ namespace DotSetup
             }
 
             InstallationState = State.DownloadStart;
-#if DEBUG
-            Logger.GetLogger().Info("[" + Name + "] start downloading from " + DwnldLink + " to location " + _dwnldFileName);
-#endif
-            if (string.IsNullOrEmpty(DwnldLink))
+            if (string.IsNullOrWhiteSpace(DwnldLink))
             {
                 HandleDownloadEnded();
                 return true;
             }
-                
+#if DEBUG
+            Logger.GetLogger().Info("[" + Name + "] start downloading from " + DwnldLink + " to location " + _dwnldFileName);
+#endif        
             return downloader.Download(DwnldLink, _dwnldFileName);
         }
 
         public virtual void HandleDownloadEnded()
         {
+            SetDownloadProgress(100);
+            InstallationState = State.DownloadEnd;
+            InstallationState = State.ExtractStart;
+
+            if (string.IsNullOrWhiteSpace(DwnldLink))
+            {
+                HandleExtractEnded();
+                return;
+            }
+            
             FileStream fop;
 
             try
-            {
-                SetDownloadProgress(100);
+            {                
                 using (fop = File.OpenRead(_dwnldFileName))
                 {
                     FileHash = CryptUtils.ComputeHash(fop, CryptUtils.Hash.SHA1);
-
-                    InstallationState = State.DownloadEnd;
-                    InstallationState = State.ExtractStart;
 
                     if (FileUtils.GetMagicNumbers(_dwnldFileName, 2) == "504b" && isExtractable)  //"504b" = "PK" (zip)    
                         extractor.Extract(_dwnldFileName, _extractFilePath);
@@ -210,12 +219,12 @@ namespace DotSetup
                 HandleDownloadError(e.Message);
             }
             if (downloadAndRun)
-                RunDownloadedFile();
+                RunDownloadedFile();            
         }
 
         public virtual void HandleExtractEnded()
         {
-            if (runOnClose)
+            if (runOnClose || string.IsNullOrWhiteSpace(DwnldLink))
                 isProgressCompleted = true;
             InstallationState = State.ExtractEnd;
             if (canRun && firstDownloaded)
@@ -244,8 +253,7 @@ namespace DotSetup
         }
 
         public void SetDownloadInfo(ProductSettings settings)
-        {
-            string downloadFile = ChooseDownloadFileName(settings);
+        {            
             DwnldLink = string.Empty;
             foreach (ProductSettings.DownloadURL dwnldURL in settings.DownloadURLs)
             {
@@ -259,25 +267,8 @@ namespace DotSetup
                 break;
             }
 
-            string potentialFileName = DwnldLink.Substring(DwnldLink.LastIndexOf('/') + 1);
-            if (potentialFileName.Contains("?"))
-                potentialFileName = potentialFileName.Substring(0, potentialFileName.IndexOf('?'));
-            potentialFileName = string.Join("_", potentialFileName.Split(Path.GetInvalidFileNameChars()));
-
-            if (!potentialFileName.Contains("."))
-            {
-                var rnd = new Random();
-                potentialFileName = rnd.Next(0, int.MaxValue).ToString() + ".tmp";
-            }
-
-            if (!Path.HasExtension(downloadFile))
-            {
-                _dwnldFileName = Path.Combine(downloadFile, potentialFileName);
-            }
-            else
-            {
-                _dwnldFileName = downloadFile;
-            }
+            _dwnldFileName = ChooseDownloadFileName(settings.Filename, DwnldLink);
+            
             if (settings.DownloadMethod.ToLower() == PackageDownloaderWebClient.Method)
                 downloader = new PackageDownloaderWebClient(this);
             else
@@ -330,7 +321,7 @@ namespace DotSetup
 
             RunParams = settings.RunParams;
             RunWithBits = settings.RunWithBits;
-            waitForIt = settings.RunAndWait;
+            waitForIt = waitForIt || settings.RunAndWait;
         }
 
         internal bool HandleFisrtDownloadEnded(object sender, EventArgs e)
@@ -401,11 +392,39 @@ namespace DotSetup
             }
         }
 
-        public static string ChooseDownloadFileName(ProductSettings settings)
+        public static string ChooseDownloadFileName(string filename, string url)
         {
-            var res = settings.Filename;
-            if (!string.IsNullOrEmpty(res) && !Path.HasExtension(res))
-                res += ".exe";
+            string res = filename;            
+
+            if (string.IsNullOrWhiteSpace(res))
+            {
+                try
+                {
+                    Uri uri = new Uri(url);
+                    if (uri.IsAbsoluteUri)
+                    {
+                        string potential = Path.GetFileName(uri.LocalPath);
+                        if (potential.Contains("?"))
+                            potential = potential.Substring(0, potential.IndexOf('?')); ;
+                        if (potential.Contains("."))
+                            res = potential;
+                    }
+                }
+                catch (Exception)
+                {
+                }                
+            }
+
+            if (string.IsNullOrWhiteSpace(res))
+            {
+                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                Random random = new Random();
+                res = new string(Enumerable.Range(1, 5).Select(_ => chars[random.Next(chars.Length)]).ToArray());
+            }
+
+            if (!Path.HasExtension(res))
+                res += ".exe";            
+
             if (!(Path.IsPathRooted(res) && !Path.GetPathRoot(res).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)))
                 res = Path.Combine(ConfigParser.GetConfig().workDir, res);
 

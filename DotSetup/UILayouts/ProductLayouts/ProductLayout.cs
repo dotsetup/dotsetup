@@ -9,6 +9,7 @@ namespace DotSetup
     {
         internal string productName, errorMsg;
         internal ProductControl productLayout;
+        internal readonly ControlsLayout controlLayout;
 
         public ProductLayout(string productName, string layoutName, ControlsLayout controlLayout)
         {
@@ -16,13 +17,10 @@ namespace DotSetup
             try
             {
                 this.productName = productName;
+                this.controlLayout = controlLayout;
 
-                if (layoutName == typeof(ProductLayout1).Name)
-                    productLayout = new ProductLayout1(controlLayout);
-                else if (layoutName == typeof(ProductLayout2).Name)
+                if (layoutName == typeof(ProductLayout2).Name)
                     productLayout = new ProductLayout2(controlLayout);
-                else if (layoutName == typeof(ProductLayout3).Name)
-                    productLayout = new ProductLayout3(controlLayout);
                 else if (layoutName == typeof(ProductLayout4).Name)
                     productLayout = new ProductLayout4(controlLayout);
                 else if (layoutName == typeof(ProductLayout5).Name)

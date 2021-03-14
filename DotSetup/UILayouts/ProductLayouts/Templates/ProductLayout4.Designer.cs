@@ -75,12 +75,13 @@
             this.txtDisclaimer.BackColor = System.Drawing.Color.White;
             this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.txtDisclaimer.Font = new System.Drawing.Font("Ariel", 8F);
             this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
             this.txtDisclaimer.LineSpacing = 210;
-            this.txtDisclaimer.Location = new System.Drawing.Point(0, 260);
+            this.txtDisclaimer.Location = new System.Drawing.Point(0, 263);
             this.txtDisclaimer.Name = "txtDisclaimer";
+            this.txtDisclaimer.Padding = 2;
             this.txtDisclaimer.ReadOnly = true;
             this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
             this.txtDisclaimer.Size = new System.Drawing.Size(600, 57);

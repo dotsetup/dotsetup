@@ -36,8 +36,8 @@ namespace DotSetup
         public override void HandleChanges()
         {
             ProductLayoutUtils.MoveOptionalBadge(Parent, imgOptional);
-            ProductLayoutUtils.MoveDisclaimer(Parent, txtDisclaimer);
             ProductLayoutUtils.SetFontSize(Parent, Width, txtTitle, txtDescription);
+            ProductLayoutUtils.MoveDisclaimer(Parent, txtDisclaimer);
 
             txtDescription.Height = txtDisclaimer.Location.Y;
         }
@@ -50,7 +50,6 @@ namespace DotSetup
         private void ProductLayout4_Load(object sender, EventArgs e)
         {
             txtDisclaimer.Focus();
-            HandleChanges();
         }
     }
 }

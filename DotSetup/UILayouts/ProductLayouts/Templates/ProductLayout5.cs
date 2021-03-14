@@ -62,7 +62,6 @@ namespace DotSetup
                 imgTitle.BackColor = Color.Transparent;
                 imgTitle.Parent = imgBackground;
             }
-            HandleChanges();
         }
     }
 }

@@ -23,7 +23,7 @@ namespace DotSetup
 
         public struct ProductEvent
         {
-            public string Name, Type, Triger;
+            public string Name, Value, Trigger;
         }
         public List<ProductEvent> ProductEvents;
 
@@ -69,10 +69,11 @@ namespace DotSetup
 
     public class ConfigParser
     {
-        private XmlDocument xmlDoc;
-        private FormDesign formDesign;
-        private List<PageDesign> pagesDesign;
-        private List<ProductSettings> productsSettings;
+        private XmlDocument _xmlDoc;
+        private FormDesign _formDesign;
+        private List<PageDesign> _pagesDesign;
+        private List<ProductSettings> _productsSettings;
+        private bool _isProductSettingsParsed = false;
 
         public string LocaleCode { get; private set; }
         public string workDir;
@@ -122,13 +123,13 @@ namespace DotSetup
             ReadProductsSettings();
 
             if (CmdReader.CmdParams.ContainsKey("saveconfig"))
-                xmlDoc.Save(CmdReader.CmdParams["saveconfig"]);
+                _xmlDoc.Save(CmdReader.CmdParams["saveconfig"]);
         }
 
         public ConfigParser(XmlDocument xmlDoc)
         {
             instance = this;
-            this.xmlDoc = xmlDoc;
+            _xmlDoc = xmlDoc;
         }
 
         private void ReadXmlFiles(Stream[] xmlFileStreams)
@@ -137,16 +138,18 @@ namespace DotSetup
             {
                 if (xmlStream != null)
                 {
-                    if (xmlDoc == null)
+                    _isProductSettingsParsed = false;
+
+                    if (_xmlDoc == null)
                     {
-                        xmlDoc = new XmlDocument();
-                        xmlDoc.Load(xmlStream);
+                        _xmlDoc = new XmlDocument();
+                        _xmlDoc.Load(xmlStream);                       
                     }
                     else
                     {
                         XmlDocument tempDoc = new XmlDocument();
                         tempDoc.Load(xmlStream);
-                        XmlParser.SetNode(xmlDoc, tempDoc.DocumentElement);
+                        XmlParser.SetNode(_xmlDoc, tempDoc.DocumentElement);
                     }
                 }
             }
@@ -258,7 +261,7 @@ namespace DotSetup
 #endif
             if (LocaleCode != locale)
             {
-                XmlNode oldLocaleNode = xmlDoc?.DocumentElement?.SelectSingleNode("//Locale");
+                XmlNode oldLocaleNode = _xmlDoc?.DocumentElement?.SelectSingleNode("//Locale");
                 oldLocaleNode?.ParentNode?.RemoveChild(oldLocaleNode);
                 SetLocaleCode();
                 SetPagesDesign();
@@ -310,8 +313,9 @@ namespace DotSetup
 
                 XmlDocument overrideDoc = new XmlDocument();
                 overrideDoc.Load(overrideStream);
-                xmlDoc = overrideDoc;
-                //XmlParser.SetNode(xmlDoc, overrideDoc.DocumentElement);
+                _isProductSettingsParsed = false;
+                _xmlDoc = overrideDoc;
+                //XmlParser.SetNode(_xmlDoc, overrideDoc.DocumentElement);
             }
 
         }
@@ -325,16 +329,17 @@ namespace DotSetup
                 XmlDocument remoteConfigHeader = (XmlDocument)remoteConfig.CloneNode(true);
                 remoteConfigHeader?.SelectSingleNode("//RemoteConfiguration")?.RemoveChild(remoteConfigHeader?.SelectSingleNode("//RemoteConfiguration/Products"));
 
-                XmlParser.SetNode(xmlDoc, remoteConfigHeader.DocumentElement);
+                XmlParser.SetNode(_xmlDoc, remoteConfigHeader.DocumentElement);
                 XmlNodeList remoteProducts = remoteConfig.SelectNodes("//RemoteConfiguration/Products/Product");
 
                 // add the products lists to Products
                 if (remoteProducts.Count > 0)
                 {
+                    _isProductSettingsParsed = false;
                     for (int i = (remoteProducts.Count - 1); i >= 0; i--)
                     {
                         XmlNode remoteProduct = remoteProducts[i];
-                        XmlParser.SetNode(xmlDoc, xmlDoc.SelectSingleNode("//Products"), remoteProduct, false);
+                        XmlParser.SetNode(_xmlDoc, _xmlDoc.SelectSingleNode("//Products"), remoteProduct, false);
                     }
                 }
             }
@@ -343,9 +348,9 @@ namespace DotSetup
 
         private void SetPagesDesign()
         {
-            pagesDesign = new List<PageDesign>();
+            _pagesDesign = new List<PageDesign>();
             int pageIndex = 0;
-            XmlNodeList PagesList = xmlDoc.SelectNodes("//Flow/Page");
+            XmlNodeList PagesList = _xmlDoc.SelectNodes("//Flow/Page");
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Page Flow:", Logger.Level.MEDIUM_DEBUG_LEVEL);
 #endif
@@ -357,32 +362,32 @@ namespace DotSetup
                 };
 
                 XmlNodeList controlList = page["Controls"].ChildNodes;
-                pageDesign.ControlsLayouts = new ControlsLayout(new XmlNodeList[] { controlList }, formDesign.DefaultControlDesign);
+                pageDesign.ControlsLayouts = new ControlsLayout(new XmlNodeList[] { controlList }, _formDesign.DefaultControlDesign);
                 pageDesign.Index = pageIndex++;
-                pagesDesign.Add(pageDesign);
+                _pagesDesign.Add(pageDesign);
             }
         }
 
         private void SetFormDesign()
         {
-            formDesign = new FormDesign();
-            XmlNode formDesignNode = xmlDoc.SelectSingleNode("//FormDesign");
+            _formDesign = new FormDesign();
+            XmlNode formDesignNode = _xmlDoc.SelectSingleNode("//FormDesign");
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Form Design:", Logger.Level.MEDIUM_DEBUG_LEVEL);
 #endif
             if (formDesignNode == null)
                 return;
 
-            formDesign.Height = XmlParser.GetIntValue(formDesignNode, "Height");
-            formDesign.Width = XmlParser.GetIntValue(formDesignNode, "Width");
-            formDesign.ClientHeight = XmlParser.GetIntValue(formDesignNode, "ClientHeight");
-            formDesign.ClientWidth = XmlParser.GetIntValue(formDesignNode, "ClientWidth");
+            _formDesign.Height = XmlParser.GetIntValue(formDesignNode, "Height");
+            _formDesign.Width = XmlParser.GetIntValue(formDesignNode, "Width");
+            _formDesign.ClientHeight = XmlParser.GetIntValue(formDesignNode, "ClientHeight");
+            _formDesign.ClientWidth = XmlParser.GetIntValue(formDesignNode, "ClientWidth");
 
-            formDesign.BackgroundColor = XmlParser.GetColorValue(formDesignNode, "BackgroundColor");
+            _formDesign.BackgroundColor = XmlParser.GetColorValue(formDesignNode, "BackgroundColor");
 
-            formDesign.FormName = XmlParser.GetStringValue(formDesignNode, "FormName");
+            _formDesign.FormName = XmlParser.GetStringValue(formDesignNode, "FormName");
 
-            formDesign.DefaultControlDesign = XmlParser.GetXpathRefAttributes(formDesignNode.SelectSingleNode("DefaultControlDesign"));
+            _formDesign.DefaultControlDesign = XmlParser.GetXpathRefAttributes(formDesignNode.SelectSingleNode("DefaultControlDesign"));
         }
 
         private bool SetWorkDir(string installerWorkDir)
@@ -435,9 +440,12 @@ namespace DotSetup
 
         internal virtual void ReadProductsSettings()
         {
-            productsSettings = new List<ProductSettings>();
-            foreach (XmlNode productSettingsNode in xmlDoc.SelectNodes("//Products/Product"))
-                productsSettings.Add(ExtractProductSettings(productSettingsNode));
+            if (_isProductSettingsParsed)
+                return;
+            _productsSettings = new List<ProductSettings>();
+            _isProductSettingsParsed = true;
+            foreach (XmlNode productSettingsNode in _xmlDoc.SelectNodes("//Products/Product"))
+                _productsSettings.Add(ExtractProductSettings(productSettingsNode));
         }
 
         public ProductSettings ExtractProductSettings(XmlNode productSettingsNode)
@@ -475,7 +483,7 @@ namespace DotSetup
                 productSettings.DownloadURLs.Add(downloadURL);
             }
 
-            bool runWithBitsDefault = XmlParser.GetBoolValue(xmlDoc.SelectSingleNode("//Config"), ConfigConsts.RUN_WITH_BITS, true);
+            bool runWithBitsDefault = XmlParser.GetBoolValue(_xmlDoc.SelectSingleNode("//Config"), ConfigConsts.RUN_WITH_BITS, true);
 
             foreach (XmlNode productLogicNode in productStaticData.SelectNodes("Logic"))
             {
@@ -497,9 +505,10 @@ namespace DotSetup
                         ProductSettings.ProductEvent productEvent = new ProductSettings.ProductEvent
                         {
                             Name = EventNode.Attributes.Item(0).Name,
-                            Type = XmlParser.GetStringValue(EventNode)
+                            Trigger = XmlParser.GetStringAttribute(EventNode, EventNode.Attributes.Item(0).Name),
+                            Value = XmlParser.GetStringValue(EventNode)                            
                         };
-                        productEvent.Triger = XmlParser.GetStringAttribute(EventNode, productEvent.Name);
+                        
                         productSettings.ProductEvents.Add(productEvent);
                     }
                 }
@@ -525,10 +534,10 @@ namespace DotSetup
                 foreach (XmlNode localeNode in Locales)
                 {
                     if (XmlParser.GetBoolAttribute(localeNode, "default"))
-                        defLocaleControlsLayout = new ControlsLayout(new XmlNodeList[] { localeNode.SelectNodes("Texts/Text"), localeNode.SelectNodes("Images/Image"), localeNode.SelectNodes("UILayouts") }, formDesign.DefaultControlDesign);
+                        defLocaleControlsLayout = new ControlsLayout(new XmlNodeList[] { localeNode.SelectNodes("Texts/Text"), localeNode.SelectNodes("Images/Image"), localeNode.SelectNodes("UILayouts") }, _formDesign.DefaultControlDesign);
                     string localeLanguage = XmlParser.GetStringAttribute(localeNode, "name");
                     if (localeLanguage == LocaleCode)
-                        productSettings.ControlsLayouts = new ControlsLayout(new XmlNodeList[] { localeNode.SelectNodes("Texts/Text"), localeNode.SelectNodes("Images/Image"), localeNode.SelectNodes("UILayouts") }, formDesign.DefaultControlDesign);
+                        productSettings.ControlsLayouts = new ControlsLayout(new XmlNodeList[] { localeNode.SelectNodes("Texts/Text"), localeNode.SelectNodes("Images/Image"), localeNode.SelectNodes("UILayouts") }, _formDesign.DefaultControlDesign);
                 }
 
                 if (productSettings.ControlsLayouts == null)
@@ -638,7 +647,7 @@ namespace DotSetup
                     string newElementName = XmlParser.GetStringAttribute(CustomVar, "name");
                     if (newElementName != "")
                     {
-                        XmlElement elem = xmlDoc.CreateElement(newElementName);
+                        XmlElement elem = _xmlDoc.CreateElement(newElementName);
                         elem.InnerText = reqHandlers.EvalRequirement(requirement);
                         productCustomVars.AppendChild(elem);
                     }
@@ -647,25 +656,25 @@ namespace DotSetup
         }
         public FormDesign GetFormDesign()
         {
-            return formDesign;
+            return _formDesign;
         }
         public List<PageDesign> GetPagesDesign()
         {
-            return pagesDesign;
+            return _pagesDesign;
         }
 
         public List<ProductSettings> GetProductsSettings()
         {
             ReadProductsSettings();
-            return productsSettings;
+            return _productsSettings;
         }
 
         public string GetStringValue(string Xpath, string defaultValue = "")
         {
             string res = defaultValue;
-            if (xmlDoc != null)
+            if (_xmlDoc != null)
             {
-                XmlNode node = xmlDoc.SelectSingleNode(Xpath);
+                XmlNode node = _xmlDoc.SelectSingleNode(Xpath);
                 if (node != null)
                     res = XmlParser.GetStringValue(node);
             }
@@ -674,9 +683,9 @@ namespace DotSetup
         public int GetIntValue(string Xpath, int defaultValue = 0)
         {
             int res = defaultValue;
-            if (xmlDoc != null)
+            if (_xmlDoc != null)
             {
-                XmlNode node = xmlDoc.SelectSingleNode(Xpath);
+                XmlNode node = _xmlDoc.SelectSingleNode(Xpath);
                 if (node != null)
                     res = XmlParser.GetIntValue(node);
             }
@@ -686,14 +695,14 @@ namespace DotSetup
         public Color GetColorValue(string Xpath)
         {
             Color res = Color.White;
-            if (xmlDoc != null)
-                res = XmlParser.GetColorValue(xmlDoc.SelectSingleNode(Xpath));
+            if (_xmlDoc != null)
+                res = XmlParser.GetColorValue(_xmlDoc.SelectSingleNode(Xpath));
             return res;
         }
 
         public string GetConfigValue(string key, string defaultValue = "")
         {
-            XmlNode configNode = xmlDoc.SelectSingleNode("//Config");
+            XmlNode configNode = _xmlDoc.SelectSingleNode("//Config");
             string res = XmlParser.GetStringValue(configNode, key);
             if (string.IsNullOrEmpty(res))
             {
@@ -708,14 +717,17 @@ namespace DotSetup
 
         public bool GetConfigValueAsBool(string key, bool defaultValue = false)
         {
-            XmlNode configNode = xmlDoc.SelectSingleNode("//Config");
+            XmlNode configNode = _xmlDoc.SelectSingleNode("//Config");
             return XmlParser.GetBoolValue(configNode, key, defaultValue);
         }
 
         public void SetStringValue(string xpath, string value)
         {
-            if (xmlDoc != null)
-                XmlParser.SetStringValue(xmlDoc, xpath, value);
+            if (_xmlDoc != null)
+            {
+                XmlParser.SetStringValue(_xmlDoc, xpath, value);
+                _isProductSettingsParsed = false;
+            }
         }
     }
 }

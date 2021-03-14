@@ -23,7 +23,7 @@ namespace DotSetup
 
         public static string GetStringValue(XmlNode xmlNode)
         {
-            string ret = "";
+            string ret = string.Empty;
             try
             {
                 if (xmlNode != null && xmlNode.HasChildNodes)
@@ -38,15 +38,13 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning(e.Message + " Source node: " + xmlNode.InnerXml);
+                Logger.GetLogger().Error($"Cannot retrieve the value of {xmlNode.LocalName}, \nerror: {e}, \nnode value: {xmlNode.InnerXml}");
 #endif
             }
-            finally
-            {
-            }
+            
 
 #if DEBUG
-            Logger.GetLogger().Info((xmlNode == null ? "Unamed" : xmlNode.Name) + "=" + ret, Logger.Level.MEDIUM_DEBUG_LEVEL);
+            Logger.GetLogger().Info((xmlNode == null ? "Unnamed" : xmlNode.Name) + "=" + ret, Logger.Level.HIGH_DEBUG_LEVEL);
 #endif
             return ret;
         }
@@ -83,7 +81,7 @@ namespace DotSetup
                 ret = xmlNode.Attributes[attribute].Value;
             }
 #if DEBUG
-            Logger.GetLogger().Info(xmlNode.Name + "[" + attribute + "]=" + ret, Logger.Level.MEDIUM_DEBUG_LEVEL);
+            Logger.GetLogger().Info(xmlNode.Name + "[" + attribute + "]=" + ret, Logger.Level.HIGH_DEBUG_LEVEL);
 #endif
             return ret;
         }
@@ -96,7 +94,7 @@ namespace DotSetup
                 ret = xmlNode[key].Attributes[attribute].Value;
             }
 #if DEBUG
-            Logger.GetLogger().Info(xmlNode.Name + "[" + attribute + "]=" + ret, Logger.Level.MEDIUM_DEBUG_LEVEL);
+            Logger.GetLogger().Info(xmlNode.Name + "[" + attribute + "]=" + ret, Logger.Level.HIGH_DEBUG_LEVEL);
 #endif
             return ret;
         }
@@ -174,12 +172,6 @@ namespace DotSetup
                             res += GetRecursiveStringValue(newPathNode.ChildNodes, recursiveLevel + 1);
                         else if (xmlNode.Attributes != null && xmlNode.Attributes[XPATH_ATTR_DEFAULT] != null)
                             res += xmlNode.Attributes[XPATH_ATTR_DEFAULT].Value;
-                        else
-                        {
-#if DEBUG
-                            Logger.GetLogger().Warning("The path " + XPath + " is not valid and thus will be ignored.");
-#endif
-                        }
                     }
                 }
                 else if (xmlNode.Name == KNOWN_PATH_NAME && xmlNode.HasChildNodes)
@@ -210,11 +202,24 @@ namespace DotSetup
                 {
                     if (xmlNode != null && xmlNode.Name == XPATH_REF_NAME)
                     {
-                        string XPath = GetStringValue(xmlNode);
-                        if (XPath == "")
-                            continue;
-
-                        AddAllAttributes(dict, xmlNode.SelectSingleNode(XPath));
+                        string XPath = string.Empty; ;
+                        try
+                        {
+                            XPath = GetStringValue(xmlNode);
+                            if (string.IsNullOrEmpty(XPath))
+                                continue;
+                            AddAllAttributes(dict, xmlNode.SelectSingleNode(XPath));
+                        }
+#if DEBUG
+                        catch (Exception e)
+#else
+                        catch (Exception)
+#endif
+                        {
+#if DEBUG
+                            Logger.GetLogger().Error($"Cannot resolving X-Path: {XPath}, error: {e}");
+#endif
+                        }
                     }
                 }
             }

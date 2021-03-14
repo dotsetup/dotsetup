@@ -50,11 +50,11 @@
             // pnlLayout
             // 
             this.pnlLayout.BackColor = System.Drawing.Color.Transparent;
+            this.pnlLayout.Controls.Add(this.txtDisclaimer);
             this.pnlLayout.Controls.Add(this.imgOptional);
             this.pnlLayout.Controls.Add(this.imgTitle);
             this.pnlLayout.Controls.Add(this.txtTitle);
             this.pnlLayout.Controls.Add(this.txtDescription);
-            this.pnlLayout.Controls.Add(this.txtDisclaimer);
             this.pnlLayout.Controls.Add(this.imgBackground);
             this.pnlLayout.Controls.Add(this.txtSmOptInY);
             this.pnlLayout.Controls.Add(this.txtSmOptInN);
@@ -125,19 +125,19 @@
             // txtDisclaimer
             // 
             this.txtDisclaimer.Alignment = System.Windows.Forms.HorizontalAlignment.Left;
-            this.txtDisclaimer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDisclaimer.BackColor = System.Drawing.Color.White;
             this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+			this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.txtDisclaimer.Font = new System.Drawing.Font("Ariel", 8F);
             this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
             this.txtDisclaimer.LineSpacing = 210;
             this.txtDisclaimer.Location = new System.Drawing.Point(10, 258);
             this.txtDisclaimer.Name = "txtDisclaimer";
+            this.txtDisclaimer.Padding = 2;
             this.txtDisclaimer.ReadOnly = true;
             this.txtDisclaimer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.txtDisclaimer.Size = new System.Drawing.Size(580, 62);
+            this.txtDisclaimer.Size = new System.Drawing.Size(600, 62);
             this.txtDisclaimer.TabIndex = 11;
             this.txtDisclaimer.Text = "";
             // 

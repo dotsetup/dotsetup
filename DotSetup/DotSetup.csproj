@@ -102,6 +102,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>DEMO;TRACE</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BITSReference10_1">
       <HintPath>Installation\Packages\BITSReferenceDLLs\BITSReference10_1.dll</HintPath>
@@ -197,12 +200,6 @@
     <Compile Include="Infrastructure\XmlParser.cs" />
     <Compile Include="Installation\Packages\PackageExtractor.cs" />
     <Compile Include="UILayouts\ProductLayouts\ProductLayout.cs" />
-    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout3.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout3.Designer.cs">
-      <DependentUpon>ProductLayout3.cs</DependentUpon>
-    </Compile>
     <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout2.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -233,12 +230,6 @@
     <Compile Include="Installation\Packages\PackageManager.cs" />
     <Compile Include="Installation\Events\ProgressEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout1.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout1.Designer.cs">
-      <DependentUpon>ProductLayout1.cs</DependentUpon>
-    </Compile>
     <Compile Include="UILayouts\UIComponents\RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -274,20 +265,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout3.resx">
-      <DependentUpon>ProductLayout3.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout2.resx">
       <DependentUpon>ProductLayout2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UILayouts\ProductLayouts\Templates\ProductLayout1.resx">
-      <DependentUpon>ProductLayout1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UILayouts\UIComponents\SimplePageIndicator.resx">
       <DependentUpon>SimplePageIndicator.cs</DependentUpon>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="app.config" />
+    <None Include="app.manifest" />
     <None Include="ClassDiagram.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -336,7 +322,8 @@
     <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call "$(ProjectDir)buildScripts\prebatchbuild.bat" Version:1.87.0.AutoRevisionNumber AssemblyPath:"$(ProjectDir)Properties\AssemblyInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -16,6 +16,7 @@ namespace DotSetup
         ERR_UNHANDLED = -95, // unknown error
         ERR_MAIN_THREAD_FAIL = -96, // main installer thread has failed
         ERR_PKG_PROCESS_FAIL = -97, // package internal processing failed
+        ERR_PKG_MISSING_LAYOUT_RESOURCES = -98, //cannot load all the required layout resources
 
         ERR_ARCHIVE_CORRUPTED = -101,
         ERR_NEED_ADMIN = -102,

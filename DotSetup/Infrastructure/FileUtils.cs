@@ -8,20 +8,8 @@ using System.Linq;
 
 namespace DotSetup.Infrastructure
 {
-    public sealed class FileUtils
-    {
-        private static readonly FileUtils instance = new FileUtils();
-
-        static FileUtils()
-        {
-        }
-
-        private FileUtils()
-        {
-        }
-
-        public static FileUtils Instance => instance;
-
+    public static class FileUtils
+    {    
         public static string GetMagicNumbers(string filepath, int bytesCount)
         {
             using var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read);

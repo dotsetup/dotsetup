@@ -48,7 +48,6 @@ namespace DotSetup
         private void ProductLayout2_Load(object sender, EventArgs e)
         {
             txtDisclaimer.Focus();
-            HandleChanges();
         }
     }
 }

@@ -2,10 +2,7 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-using System;
 using System.Drawing;
-using System.IO;
-using System.Net;
 using System.Windows.Forms;
 using DotSetup.UILayouts.UIComponents;
 
@@ -63,62 +60,7 @@ namespace DotSetup
             }
         }
 
-        private Stream Base64ToStream(Stream responseStream, string decode)
-        {
-            StreamReader reader = new StreamReader(responseStream, System.Text.Encoding.UTF8);
-            string responseString = reader.ReadToEnd();
-            responseStream = CryptUtils.Decode(responseString, decode);
-            return responseStream;
-        }
 
-        public void SetImage(string imageName, string decode)
-        {
-            string imageUrl = imageName;
-            if (imageUrl.StartsWith("//"))
-                imageUrl = "https:" + imageUrl;
-            bool isImageFromUrl = Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-
-            if (isImageFromUrl)
-            {
-                try
-                {
-                    WebRequest request = WebRequest.Create(imageUrl);
-                    Action wrapperAction = () =>
-                    {
-                        request.BeginGetResponse(new AsyncCallback((arg) =>
-                        {
-                            var response = (HttpWebResponse)((HttpWebRequest)arg.AsyncState).EndGetResponse(arg);
-                            Stream responseStream = response.GetResponseStream();
-                            if (decode.ToLower() == CryptUtils.EncDec.BASE64)
-                                responseStream = Base64ToStream(responseStream, decode);
-                            BackgroundImage = System.Drawing.Image.FromStream(responseStream);
-                        }), request);
-                    };
-                    wrapperAction.BeginInvoke(new AsyncCallback((arg) =>
-                    {
-                        var action = (Action)arg.AsyncState;
-                        action.EndInvoke(arg);
-                    }), wrapperAction);
-
-                }
-#if DEBUG
-                catch (Exception e)
-#else
-                catch (Exception)
-#endif
-                {
-#if DEBUG
-                    Logger.GetLogger().Error("PanelEx SetImage error while trying to load from URL - " + e.Message);
-#endif
-                }
-                finally
-                {
-                }
-            }
-            else
-            {
-                BackgroundImage = UICommon.LoadImage(imageName, decode);
-            }
-        }
+        public void SetImage(string imageName, string decode) => BackgroundImage = UICommon.PrepareImage(imageName, decode, (img) => { BackgroundImage = img; });
     }
 }

@@ -22,6 +22,7 @@ namespace DotSetup
                 Process = "process",
                 BrowserVersion = "browserversion",
                 OSVersion = "osversion",
+                PlatformVersion = "platformversion",
                 BrowserInstalled = "browserinstalled",
                 BrowserDefault = "browserdefault",
                 RegistryKeyValue = "registrykeyvalue",
@@ -61,6 +62,7 @@ namespace DotSetup
             { RequirementType.Process, ProcessesHandler },
             { RequirementType.BrowserVersion, BrowserVersionHandler },
             { RequirementType.OSVersion, OSVersionHandler },
+            { RequirementType.PlatformVersion, PlatformVersionHandler },
             { RequirementType.BrowserInstalled, BrowsersInstalledHandler },
             { RequirementType.BrowserDefault, BrowserDefaultHandler },
             { RequirementType.RegistryKeyValue, RegistryKeyValueHandler },
@@ -149,38 +151,25 @@ namespace DotSetup
             return KeyReqList.ToArray(); //requirement.Keys.ToArray();          
         }
 
-        public static bool IsVersionOnly(string str)
-        {
-
-            string[] partsOfString = str.Split('.');
-            if ((partsOfString.Length < 2) || (partsOfString.Length > 4))
-                return false;
-            foreach (var strPart in partsOfString)
-            {
-                if (!strPart.All(char.IsDigit))
-                    return false;
-            }
-
-            return true;
-        }
+        public static bool IsVersionOnly(string str) => Version.TryParse(str, out Version _);
 
         public static bool CompareTwoVersions(string value1, string value2, CompareOperationType operation)
         {
-            bool match = true;
+            if (operation == CompareOperationType.Contains || operation == CompareOperationType.StartsWith || operation == CompareOperationType.EndsWith)
+                return CompareOperation(value1, value2, operation);
 
-            string[] val1 = value1.Split('.');
-            string[] val2 = value2.Split('.');
+            if (!Version.TryParse(value1, out Version ver1) || !Version.TryParse(value2, out Version ver2))
+                return true;
 
-            int min = Math.Min(val1.Length, val2.Length);
-
-            for (int i = 0; i < min; i++)
+            return operation switch
             {
-                match = CompareOperation(val1[i], val2[i], operation);
-                if (!match)
-                    break;
-            }
-
-            return match;
+                CompareOperationType.Less => ver1 < ver2,
+                CompareOperationType.Greater => ver1 > ver2,
+                CompareOperationType.LessEqual => ver1 <= ver2,
+                CompareOperationType.GreaterEqual => ver1 >= ver2,                
+                CompareOperationType.Equal => ver1 == ver2,
+                _ => true
+            };            
         }
 
         public bool HandlersResult(ref ProductSettings.ProductRequirements requirements)
@@ -289,6 +278,7 @@ namespace DotSetup
                 case RequirementType.Processor:
                 case RequirementType.BrowserDefault:
                 case RequirementType.OSVersion:
+                case RequirementType.PlatformVersion:
                 case RequirementType.SystemType:
                     retStr = methodsMap[requirementType](new string[] { });
                     break;
@@ -309,7 +299,6 @@ namespace DotSetup
             return retStr;
         }
 
-
         private bool EvalOperator(string methodResult, string requirementType, string requirementValue, CompareOperationType operatorType, LogicalOperatorType logicalOperatorType)
         {
             bool resB = true;
@@ -324,8 +313,8 @@ namespace DotSetup
                     resB = CompareOperation(methodResult, requirementValue, operatorType, logicalOperatorType);
                     break;
                 case RequirementType.OSVersion:
-                    int index = methodResult.IndexOf('.');
-                    resB = CompareOperation(methodResult.Substring(0, index + 2), requirementValue, operatorType, logicalOperatorType);
+                case RequirementType.PlatformVersion:
+                    resB = CompareTwoVersions(methodResult, requirementValue, operatorType);
                     break;
                 case RequirementType.BrowserVersion:
                 case RequirementType.RegistryKeyValue:
@@ -369,12 +358,10 @@ namespace DotSetup
             };
         }
 
-
         private static string ProcessorHandler(string[] arg)
         {
             return HardwareUtils.Instance.ProcessorSpeedInGHz();
         }
-
 
         private static string RAMHandler(string[] arg)
         {
@@ -387,7 +374,6 @@ namespace DotSetup
                 _ => string.Empty,
             };
         }
-
 
         private static string RegistryKeyExistsHandler(string[] arg)
         {
@@ -423,32 +409,26 @@ namespace DotSetup
             return (Array.IndexOf(procData, resultFileName) >= 0).ToString();
         }
 
-        private static string BrowserVersionHandler(string[] arg)
-        {
-            return UriUtils.Instance.GetBrowserVer(arg[0].ToLower());
-        }
+        private static string BrowserVersionHandler(string[] arg) => UriUtils.Instance.GetBrowserVer(arg[0].ToLower());
 
+        private static string OSVersionHandler(string[] arg) => HardwareUtils.Instance.OsName();
 
-        private static string OSVersionHandler(string[] arg)
-        {
-            return HardwareUtils.Instance.OsName();
-        }
-
+        private static string PlatformVersionHandler(string[] arg) => ResourcesUtils.libraryAssembly.GetName().Version.ToString();
 
         private static string BrowsersInstalledHandler(string[] arg)
         {
             switch (arg[0].ToLower())
             {
                 case "ie":
-                    return ((UriUtils.Instance.GetIEExe() != null) ? "true" : "false");
+                    return (UriUtils.Instance.GetIEExe() != null) ? "true" : "false";
                 case "chrome":
-                    return ((UriUtils.Instance.GetChromeExe() != null) ? "true" : "false");
+                    return (UriUtils.Instance.GetChromeExe() != null) ? "true" : "false";
                 case "firefox":
-                    return ((UriUtils.Instance.GetFirefoxExe() != null) ? "true" : "false");
+                    return (UriUtils.Instance.GetFirefoxExe() != null) ? "true" : "false";
                 case "opera":
-                    return ((UriUtils.Instance.GetOperaEXE() != null) ? "true" : "false");
+                    return (UriUtils.Instance.GetOperaEXE() != null) ? "true" : "false";
                 case "edge":
-                    return ((UriUtils.Instance.GetEdgeExe() != null) ? "true" : "false");
+                    return (UriUtils.Instance.GetEdgeExe() != null) ? "true" : "false";
                 default:
 #if DEBUG
                     Logger.GetLogger().Warning(arg[0].ToLower() + " browser not supported.");

@@ -69,9 +69,14 @@ namespace DotSetup
             disclaimer.Size = new Size(parent.Width, newHeight);
         }
 
-        public static void SetFontSize(Control parent, int Width, RichTextBoxEx title, RichTextBoxEx description)
+        public static void SetFontSize(Control parent, int width, RichTextBoxEx title, RichTextBoxEx description)
         {
-            var percent = (float)(parent.Width / Width);
+            if (width == 0)
+                return;
+            var percent = (float)parent.Width / width;
+
+            if (percent == 0)
+                return;
 
             title.Font = new Font(title.Font.FontFamily, (float)(title.Font.SizeInPoints * percent));
             title.Width = (int)(title.Width * percent);

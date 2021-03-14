@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -16,6 +17,8 @@ namespace DotSetup
         protected string cid, value, location, size, backColor, foreColor,
             fontName, fontSize, fontStyle, rtl,
             encode, decode;
+
+        public bool IsReady {get; protected set; }
 
         public static class KnownAttribute
         {
@@ -111,7 +114,7 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("Updateing cid " + cid + " with " + valStr + " failed: " + e.Message);
+                Logger.GetLogger().Warning("Updating cid " + cid + " with " + valStr + " failed: " + e.Message);
 #endif
             }
             finally
@@ -170,5 +173,12 @@ namespace DotSetup
 #endif
             }
         }
+
+        internal virtual void PrepareResources(CountdownEvent onReady)
+        {
+            IsReady = true;
+            onReady?.Signal();
+        }
+
     }
 }

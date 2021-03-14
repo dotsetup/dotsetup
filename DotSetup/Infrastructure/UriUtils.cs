@@ -46,11 +46,6 @@ namespace DotSetup
 
         public static UriUtils Instance => instance;
 
-        public void OpenUrl()
-        {
-
-        }
-
         public string GetEdgeExe()
         {
             string WinDir = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.System)).ToString();
@@ -343,6 +338,8 @@ namespace DotSetup
             }
             return defaultBrowser;
         }
-    }
+
+        public static bool CheckURLValid(string url) => Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+    }    
 }
 
