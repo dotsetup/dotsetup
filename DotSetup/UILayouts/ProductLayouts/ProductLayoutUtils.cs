@@ -6,8 +6,10 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
+using DotSetup.UILayouts.UIComponents;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ProductLayouts
 {
     public static class ProductLayoutUtils
     {
@@ -38,7 +40,7 @@ namespace DotSetup
                 double heightPercent = (double)parent.Height / imageHeight;
                 int heightByWidth = (int)(imageHeight * widthPercent);
                 int heightByHeight = (int)(imageHeight * heightPercent) - bottom.Height;
-                background.Height = (heightByWidth > bottom.Location.Y) ? heightByHeight : heightByWidth;
+                background.Height = heightByWidth > bottom.Location.Y ? heightByHeight : heightByWidth;
             }
 
 #if DEBUG

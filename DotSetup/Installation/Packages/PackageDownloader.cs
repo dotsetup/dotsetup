@@ -2,14 +2,15 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
+using System.Diagnostics;
 using System.IO;
+using DotSetup.Installation.Configuration;
 
-
-namespace DotSetup
+namespace DotSetup.Installation.Packages
 {
     internal abstract class PackageDownloader
     {
-        protected InstallationPackage installationPackage;
+        protected InstallationPackage installationPackage;        
 
         public PackageDownloader(InstallationPackage installationPackage)
         {
@@ -37,6 +38,9 @@ namespace DotSetup
         }
 
         public virtual void Terminate() { }
+
+        protected void UpdateDownloadTime(long durationMS) => 
+            ConfigParser.GetConfig().SetProductSettingsXml(installationPackage.ProdSettings, "StaticData/CustomData/DownloadData/DownloadTimeMS", durationMS.ToString());
 
     }
 }

@@ -30,8 +30,11 @@ namespace DotSetup.Infrastructure
         public static bool IsRunnableFileExtension(string fileName) =>
             new string[]{ ".msi", ".exe" }.Any(Path.GetExtension(fileName).ToLower().Equals);
 
+        public static bool IsExeFileExtension(string fileName) =>
+            new string[] { ".exe" }.Any(Path.GetExtension(fileName).ToLower().Equals);
 
-        public static bool IsRunnableFile(string fileName)
+
+        public static bool IsRunnableFile(string fileName, bool includeMsi = false)
         {
             bool res = false;
             FileStream fs = null;
@@ -40,9 +43,9 @@ namespace DotSetup.Infrastructure
             try
             {
                 fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                if (IsRunnableFileExtension(fileName) ||
+                if ((includeMsi ? IsRunnableFileExtension(fileName) : IsExeFileExtension(fileName)) ||
                     GetMagicNumbers(fs, 2) == "4d5a" || //MZ = exe
-                    GetMagicNumbers(fs, 8) == "d0cf11e0a1b11ae1")  //msi
+                    (includeMsi && GetMagicNumbers(fs, 8) == "d0cf11e0a1b11ae1"))  //msi
                     res = true;
             }
             catch (Exception)

@@ -60,11 +60,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Packages_UnitTest.cs" />
-    <Compile Include="RequirementUtils_UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UIComponents_UnitTest.cs" />
     <Compile Include="XmlParser_UnitTest.cs" />
-    <Compile Include="Utils_UnitTest.cs" />    
+    <Compile Include="Utils_UnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotSetup\DotSetup.csproj">

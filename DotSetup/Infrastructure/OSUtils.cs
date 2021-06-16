@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public class OSUtils
     {
@@ -28,8 +28,8 @@ namespace DotSetup
             {
                 // Detect whether the current process is a 32-bit process 
                 // running on a 64-bit system.
-                return ((DoesWin32MethodExist("kernel32.dll", "IsWow64Process") &&
-                    IsWow64Process(GetCurrentProcess(), out bool flag)) && flag);
+                return DoesWin32MethodExist("kernel32.dll", "IsWow64Process") &&
+                    IsWow64Process(GetCurrentProcess(), out bool flag) && flag;
             }
         }
 
@@ -70,7 +70,7 @@ namespace DotSetup
             {
                 return false;
             }
-            return (GetProcAddress(moduleHandle, methodName) != IntPtr.Zero);
+            return GetProcAddress(moduleHandle, methodName) != IntPtr.Zero;
         }
 
         [DllImport("kernel32.dll")]

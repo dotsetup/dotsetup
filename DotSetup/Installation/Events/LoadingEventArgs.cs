@@ -4,7 +4,7 @@
 
 using System;
 
-namespace DotSetup
+namespace DotSetup.Installation.Events
 {
     public class LoadingEventArgs : EventArgs
     {

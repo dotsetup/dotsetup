@@ -7,11 +7,11 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public static class CryptUtils
     {
-        public static class Hash { public const string SHA1 = "SHA1", MD5 = "MD5"; }
+        public static class Hash { public const string SHA1 = "sha1", MD5 = "md5"; }
         public static class EncDec { public const string BASE64 = "base64", BASE62 = "base62"; }
 
         public static string ComputeHash(string str, string hashName)
@@ -35,7 +35,7 @@ namespace DotSetup
 
         public static Stream Encode(byte[] bytes, string algo)
         {
-            return (algo.ToLower().Trim()) switch
+            return algo.ToLower().Trim() switch
             {
                 EncDec.BASE64 => new MemoryStream(Encoding.UTF8.GetBytes(Convert.ToBase64String(bytes))),
                 EncDec.BASE62 => new MemoryStream(ToBaseX(bytes, BASE62_ALPHABET)),
@@ -50,7 +50,7 @@ namespace DotSetup
 
         public static Stream Decode(byte[] bytes, string algo)
         {
-            return (algo.ToLower().Trim()) switch
+            return algo.ToLower().Trim() switch
             {
                 EncDec.BASE64 => new MemoryStream(Convert.FromBase64String(Encoding.UTF8.GetString(bytes).Replace("\r\n", string.Empty).Replace(" ", string.Empty))),
                 EncDec.BASE62 => new MemoryStream(FromBaseX(bytes, BASE62_ALPHABET)),

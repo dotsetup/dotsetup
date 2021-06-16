@@ -10,24 +10,24 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public class PipeCmdEventArgs : EventArgs
     {
-        private readonly string mData;
-        public PipeCmdEventArgs(string _myData)
+        private readonly string _mData;
+        public PipeCmdEventArgs(string myData)
         {
-            mData = _myData;
+            _mData = myData;
         }
 
-        public string Data => mData;
+        public string Data => _mData;
     }
 
     public delegate void PipeCmdDelegate(PipeCmdEventArgs _args);
 
     public class SingleInstance
     {
-        private readonly string pipeName, mutexName;
+        private readonly string _pipeName, _mutexName;
         private readonly object _namedPiperServerThreadLock = new object();
         private NamedPipeServerStream _namedPipeServerStream;
         private bool _firstApplicationInstance;
@@ -39,8 +39,8 @@ namespace DotSetup
             string formattedAppID = appID.ToUpper().Replace(" ", "_");
             formattedAppID = string.Join(string.Empty, formattedAppID.Split(Path.GetInvalidFileNameChars())); // no invalid filename characters
             formattedAppID = formattedAppID.Substring(0, Math.Min(formattedAppID.Length, 50)); // max length 50
-            pipeName = "PIPE_" + formattedAppID;
-            mutexName = "MUTEX_" + formattedAppID;
+            _pipeName = "PIPE_" + formattedAppID;
+            _mutexName = "MUTEX_" + formattedAppID;
 
             // If are the first instance then we start the named pipe server listening and allow the form to load
             if (IsApplicationFirstInstance())
@@ -64,7 +64,7 @@ namespace DotSetup
             // Allow for multiple runs but only try and get the mutex once
             if (_mutexApplication == null)
             {
-                _mutexApplication = new Mutex(true, mutexName, out _firstApplicationInstance);
+                _mutexApplication = new Mutex(true, _mutexName, out _firstApplicationInstance);
                 GC.KeepAlive(_mutexApplication);
             }
 
@@ -77,13 +77,13 @@ namespace DotSetup
         private void NamedPipeServerCreateServer()
         {
             // Create a new pipe accessible by local authenticated users, disallow network
-            var sidNetworkService = new SecurityIdentifier(WellKnownSidType.NetworkServiceSid, null);
-            var sidWorld = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+            SecurityIdentifier sidNetworkService = new SecurityIdentifier(WellKnownSidType.NetworkServiceSid, null);
+            SecurityIdentifier sidWorld = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
 
-            var pipeSecurity = new PipeSecurity();
+            PipeSecurity pipeSecurity = new PipeSecurity();
 
             // Deny network access to the pipe
-            var accessRule = new PipeAccessRule(sidNetworkService, PipeAccessRights.ReadWrite, AccessControlType.Deny);
+            PipeAccessRule accessRule = new PipeAccessRule(sidNetworkService, PipeAccessRights.ReadWrite, AccessControlType.Deny);
             pipeSecurity.AddAccessRule(accessRule);
 
             // Alow Everyone to read/write
@@ -100,7 +100,7 @@ namespace DotSetup
 
             // Create pipe and start the async connection wait
             _namedPipeServerStream = new NamedPipeServerStream(
-                pipeName,
+                _pipeName,
                 PipeDirection.In,
                 1,
                 PipeTransmissionMode.Byte,
@@ -176,7 +176,7 @@ namespace DotSetup
         {
             try
             {
-                using (var namedPipeClientStream = new NamedPipeClientStream(".", pipeName, PipeDirection.Out))
+                using (NamedPipeClientStream namedPipeClientStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.Out))
                 {
                     namedPipeClientStream.Connect(3000); // Maximum wait 3 seconds
                     namedPipeClientStream.Write(Encoding.UTF8.GetBytes(cmd), 0, cmd.Length);

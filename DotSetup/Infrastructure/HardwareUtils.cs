@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using Microsoft.VisualBasic.Devices;
 using Microsoft.Win32;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public sealed class HardwareUtils
     {
@@ -39,8 +39,8 @@ namespace DotSetup
             totalVirtualRam = myCompInfo.TotalVirtualMemory;
             freeVirtualRam = myCompInfo.AvailableVirtualMemory;
             osName = myCompInfo.OSVersion;
-            if(osName.EndsWith(".0"))
-                osName= osName.Substring(0, osName.Length - 1) + GetOSReleaseNumber();
+            if (osName.EndsWith(".0"))
+                osName = osName.Substring(0, osName.Length - 1) + GetOSReleaseNumber();
 
             DriveInfo myDriveInfo = new DriveInfo(Path.GetPathRoot(Environment.SystemDirectory));
             if (myDriveInfo.IsReady)
@@ -64,32 +64,32 @@ namespace DotSetup
 
         public ulong TotalPhysicalRamInMB()
         {
-            return (totalPhysicalRam / BYTES_PER_MEGABYTES);
+            return totalPhysicalRam / BYTES_PER_MEGABYTES;
         }
 
         public ulong FreePhysicalRamInMB()
         {
-            return (freePhysicalRam / BYTES_PER_MEGABYTES);
+            return freePhysicalRam / BYTES_PER_MEGABYTES;
         }
 
         public ulong TotalVirtualRamInMB()
         {
-            return (totalVirtualRam / BYTES_PER_MEGABYTES);
+            return totalVirtualRam / BYTES_PER_MEGABYTES;
         }
 
         public ulong FreeVirtualRamInMB()
         {
-            return (freeVirtualRam / BYTES_PER_MEGABYTES);
+            return freeVirtualRam / BYTES_PER_MEGABYTES;
         }
 
         public long DiskTotalSpaceInMB()
         {
-            return (diskTotalSpace / BYTES_PER_MEGABYTES);
+            return diskTotalSpace / BYTES_PER_MEGABYTES;
         }
 
         public long DiskFreeSpaceInMB()
         {
-            return (diskFreeSpace / BYTES_PER_MEGABYTES);
+            return diskFreeSpace / BYTES_PER_MEGABYTES;
         }
 
         public string OsName()
@@ -225,7 +225,7 @@ namespace DotSetup
             {
                 if (drive.IsReady && drive.Name == driveName)
                 {
-                    return (drive.AvailableFreeSpace / (1024 * 1024));
+                    return drive.AvailableFreeSpace / (1024 * 1024);
                 }
             }
             return -1;

@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public sealed class Logger
     {
@@ -115,7 +115,7 @@ namespace DotSetup
 
             string pretext = "[" + Process.GetCurrentProcess().Id.ToString().PadLeft(4, '0') + "][";
             pretext += Thread.CurrentThread.ManagedThreadId.ToString().PadLeft(4, '0') + "]\t";
-            pretext += System.DateTime.Now.ToString(datetimeFormat);
+            pretext += DateTime.Now.ToString(datetimeFormat);
             switch (level)
             {
                 case LogType.TRACE:
@@ -149,7 +149,7 @@ namespace DotSetup
             if (frame != null)
             {
                 string frameFileName = frame.GetFileName();
-                frameFileName = string.IsNullOrWhiteSpace(frameFileName) ? (frame.GetMethod()).ReflectedType.Name : $"{Path.GetFileNameWithoutExtension(frameFileName)}({frame.GetFileLineNumber()})";
+                frameFileName = string.IsNullOrWhiteSpace(frameFileName) ? frame.GetMethod().ReflectedType.Name : $"{Path.GetFileNameWithoutExtension(frameFileName)}({frame.GetFileLineNumber()})";
                 pretext += $"\t[{frameFileName}]\t";
             }
             WriteLine(pretext + text);

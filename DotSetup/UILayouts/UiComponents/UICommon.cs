@@ -6,6 +6,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using DotSetup.Infrastructure;
 
 namespace DotSetup.UILayouts.UIComponents
 {

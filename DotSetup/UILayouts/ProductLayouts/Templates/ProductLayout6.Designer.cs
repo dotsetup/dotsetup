@@ -1,4 +1,6 @@
-﻿namespace DotSetup
+﻿using DotSetup.UILayouts.UIComponents;
+
+namespace DotSetup.UILayouts.ControlLayout.Templates
 {
     partial class ProductLayout6
     {
@@ -29,16 +31,16 @@
         private void InitializeComponent()
         {
             this.pnlLayout = new System.Windows.Forms.Panel();
-            this.imgOptional = new DotSetup.PictureBoxEx();
-            this.imgTitle = new DotSetup.PictureBoxEx();
-            this.txtTitle = new DotSetup.RichTextBoxEx();
-            this.txtDescription = new DotSetup.RichTextBoxEx();
-            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
-            this.imgBackground = new DotSetup.PanelEx();
+            this.imgOptional = new PictureBoxEx();
+            this.imgTitle = new PictureBoxEx();
+            this.txtTitle = new RichTextBoxEx();
+            this.txtDescription = new RichTextBoxEx();
+            this.txtDisclaimer = new RichTextBoxEx();
+            this.imgBackground = new PanelEx();
             this.txtSmOptInY = new System.Windows.Forms.RadioButton();
             this.txtSmOptInN = new System.Windows.Forms.RadioButton();
-            this.txtSmOptIn = new DotSetup.RichTextBoxEx();
-            this.imgSmOpInBg = new DotSetup.PictureBoxEx();
+            this.txtSmOptIn = new RichTextBoxEx();
+            this.imgSmOpInBg = new PictureBoxEx();
             this.txtOptIn = new System.Windows.Forms.CheckBox();
             this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
             this.pnlLayout.SuspendLayout();
@@ -243,7 +245,7 @@
 
         private System.Windows.Forms.Panel pnlLayout;
         private PanelEx imgBackground;
-        private DotSetup.RichTextBoxEx txtDisclaimer;
+        private RichTextBoxEx txtDisclaimer;
         private RichTextBoxEx txtDescription;
         private PictureBoxEx imgTitle;
         private System.Windows.Forms.CheckBox txtOptIn;

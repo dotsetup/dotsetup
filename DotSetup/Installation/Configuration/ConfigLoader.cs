@@ -7,8 +7,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
+using DotSetup.Installation.WinForm;
 
-namespace DotSetup
+namespace DotSetup.Installation.Configuration
 {
     internal class ConfigLoader
     {
@@ -31,9 +33,6 @@ namespace DotSetup
 #if DEBUG
                 Logger.GetLogger().Error("Configuration error - " + e);
 #endif
-            }
-            finally
-            {
             }
         }
 

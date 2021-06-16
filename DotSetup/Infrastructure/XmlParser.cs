@@ -10,7 +10,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public static class XmlParser
     {
@@ -19,6 +19,7 @@ namespace DotSetup
         public const string KNOWN_PATH_NAME = "Known-path";
         public const string PROCESSOR_NAME = "Processor";
         public const string PROCESSOR_ATTR_ACTION = "action";
+        public const string PROCESSOR_ATTR_VALUE = "value";
         public const int MAX_RECURSIVE_LEVEL = 10;
 
         public static string GetStringValue(XmlNode xmlNode)
@@ -41,7 +42,7 @@ namespace DotSetup
                 Logger.GetLogger().Error($"Cannot retrieve the value of {xmlNode.LocalName}, \nerror: {e}, \nnode value: {xmlNode.InnerXml}");
 #endif
             }
-            
+
 
 #if DEBUG
             Logger.GetLogger().Info((xmlNode == null ? "Unnamed" : xmlNode.Name) + "=" + ret, Logger.Level.HIGH_DEBUG_LEVEL);
@@ -56,7 +57,7 @@ namespace DotSetup
             {
                 if (xmlNode[key] != null)
                     ret = GetStringValue(xmlNode[key]);
-                else if (key == "")
+                else if (string.IsNullOrEmpty(key))
                     ret = GetStringValue(xmlNode);
             }
             return ret;
@@ -122,10 +123,7 @@ namespace DotSetup
             return string.IsNullOrEmpty(strRes) ? 0 : int.Parse(strRes);
         }
 
-        public static Color GetColorValue(XmlNode xmlNode, string key = "")
-        {
-            return ColorTranslator.FromHtml(GetStringValue(xmlNode, key));
-        }
+        public static Color GetColorValue(XmlNode xmlNode, string key = "") => ColorTranslator.FromHtml(GetStringValue(xmlNode, key));
 
         public static bool GetBoolValue(XmlNode xmlNode, string key = "", bool ifEmpty = false)
         {
@@ -143,9 +141,11 @@ namespace DotSetup
             return result;
         }
 
+        public static Func<string, string> OnXpathProcessing = null;
+
         public static string GetRecursiveStringValue(XmlNodeList xmlChildNodes, int recursiveLevel = 0)
         {
-            string res = "";
+            string res = string.Empty;
 
             foreach (XmlNode xmlNode in xmlChildNodes)
             {
@@ -167,11 +167,20 @@ namespace DotSetup
                         if (XPath == "")
                             continue;
 
-                        XmlNode newPathNode = xmlNode.SelectSingleNode(XPath);
-                        if (newPathNode != null && newPathNode.HasChildNodes)
-                            res += GetRecursiveStringValue(newPathNode.ChildNodes, recursiveLevel + 1);
-                        else if (xmlNode.Attributes != null && xmlNode.Attributes[XPATH_ATTR_DEFAULT] != null)
-                            res += xmlNode.Attributes[XPATH_ATTR_DEFAULT].Value;
+                        string parsedXpath = OnXpathProcessing?.Invoke(XPath);
+
+                        if (!string.IsNullOrEmpty(parsedXpath))
+                        {
+                            res += parsedXpath;
+                        } 
+						else
+                        {
+                            XmlNode newPathNode = xmlNode.SelectSingleNode(XPath);
+                            if (newPathNode != null && newPathNode.HasChildNodes)
+                                res += GetRecursiveStringValue(newPathNode.ChildNodes, recursiveLevel + 1);
+                            else if (xmlNode.Attributes != null && xmlNode.Attributes[XPATH_ATTR_DEFAULT] != null)
+                                res += xmlNode.Attributes[XPATH_ATTR_DEFAULT].Value;
+                        }                       
                     }
                 }
                 else if (xmlNode.Name == KNOWN_PATH_NAME && xmlNode.HasChildNodes)
@@ -180,7 +189,8 @@ namespace DotSetup
                 }
                 else if (xmlNode.Name == PROCESSOR_NAME && xmlNode.HasChildNodes && xmlNode.Attributes[PROCESSOR_ATTR_ACTION] != null)
                 {
-                    res += XmlProcessor.Process(xmlNode.Attributes[PROCESSOR_ATTR_ACTION].Value, GetRecursiveStringValue(xmlNode.ChildNodes, recursiveLevel + 1).Trim());
+                    string value = xmlNode.Attributes[PROCESSOR_ATTR_VALUE] != null ? xmlNode.Attributes[PROCESSOR_ATTR_VALUE].Value : string.Empty;
+                    res += XmlProcessor.Process(xmlNode.Attributes[PROCESSOR_ATTR_ACTION].Value, GetRecursiveStringValue(xmlNode.ChildNodes, recursiveLevel + 1).Trim(), value);
                 }
                 else
                 {
@@ -227,11 +237,32 @@ namespace DotSetup
             return dict;
         }
 
-
-        public static void SetNode(XmlDocument doc, XmlNode newNode)
+        public static Dictionary<string, string> GetChildNodesValues(XmlNode node)
         {
-            SetNode(doc, doc.DocumentElement, newNode);
+            Dictionary<string, string> res = new Dictionary<string, string>();
+
+            if (node == null)
+                return res;
+
+            if (node.ChildNodes.Count == 1)
+            {
+                string nodeName = string.IsNullOrWhiteSpace(node.ChildNodes[0].Name) ? "_" : node.ChildNodes[0].Name;
+                string nodeValue = GetStringValue(node.ChildNodes[0]);
+                if (string.IsNullOrWhiteSpace(nodeValue))
+                    nodeValue = GetStringValue(node);
+                res.Add(nodeName, nodeValue);
+            }
+            else
+            {
+                foreach (XmlNode childNode in node.ChildNodes)
+                    res.Add(childNode.Name, GetStringValue(childNode));
+            }
+
+            return res;
         }
+
+
+        public static void SetNode(XmlDocument doc, XmlNode newNode) => SetNode(doc, doc.DocumentElement, newNode);
 
         public static void SetNode(XmlDocument doc, XmlNode parent, XmlNode newNode, bool append = true)
         {
@@ -357,11 +388,22 @@ namespace DotSetup
         public static void SetStringValue(XmlDocument xmlDoc, string xpath, string newValue)
         {
             XmlNode xmlNode = xmlDoc.SelectSingleNode(xpath);
-            if (xmlNode == null)
+            SetStringValue(xmlDoc, xmlNode, (xmlNode == null) ? xpath : string.Empty, newValue);
+        }
+
+        public static void SetStringValue(XmlDocument xmlDoc, XmlNode parent, string xpath, string newValue)
+        {
+            if (parent == null)
             {
-                xmlNode = MakeXPath(xmlDoc, xpath);
+                parent = MakeXPath(xmlDoc, xpath);
             }
-            xmlNode.InnerText = newValue;
+            else
+            {
+                parent = MakeXPath(xmlDoc, parent, xpath);
+            }
+
+            if (parent != null)
+                parent.InnerText = newValue;
         }
 
         public static XElement ToXElement(this XmlNode node)

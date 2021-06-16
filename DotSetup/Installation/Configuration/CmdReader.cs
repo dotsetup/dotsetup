@@ -4,8 +4,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using DotSetup.Infrastructure;
 
-namespace DotSetup
+namespace DotSetup.Installation.Configuration
 {
     public class CmdReader
     {

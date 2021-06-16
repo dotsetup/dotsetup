@@ -5,8 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
+using DotSetup.Installation.Configuration;
+using DotSetup.UILayouts.ProductLayouts;
 
-namespace DotSetup
+namespace DotSetup.Installation.WinForm
 {
     public class FormPageManager
     {
@@ -38,7 +41,7 @@ namespace DotSetup
             DotSetupLauncher dotSetupManager = DotSetupLauncher.Instance;
             formsDictionary = dotSetupManager.configLoader.FormsDictionary(frmParent, pageBinder);
             dotSetupManager.configLoader.UpdateParentDesign(frmParent);
-            frmParent.Load += new System.EventHandler(FrmParent_Load);
+            frmParent.Load += new EventHandler(FrmParent_Load);
         }
 
         public void LoadFormName(string pageName)
@@ -75,7 +78,7 @@ namespace DotSetup
                     currentForm.Show();
                     currentForm.Activate();
                 });
-                ConfigParser.GetConfig().SetStringValue(SessionDataConsts.ROOT + SessionDataConsts.CURRENT_FORM, currentForm.Name);
+                ConfigParser.GetConfig().SessionData[SessionDataConsts.CURRENT_FORM] = currentForm.Name;
                 OnLoadForm?.Invoke(currentForm.Name);
             }
         }
@@ -140,7 +143,7 @@ namespace DotSetup
         {
             frmParent.PerformSafely(() =>
             {
-                ProductLayoutManager productLayoutManager = DotSetupLauncher.Instance.packageManager.productLayoutManager;
+                ProductLayoutManager productLayoutManager = DotSetupLauncher.Instance.PkgManager.productLayoutManager;
                 productLayoutManager.AddProductLayouts();
                 pageBinder.SetProductLayouts(productLayoutManager);
             });

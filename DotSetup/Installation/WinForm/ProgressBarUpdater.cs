@@ -4,8 +4,11 @@
 
 using System;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
+using DotSetup.Installation.Configuration;
+using DotSetup.Installation.Events;
 
-namespace DotSetup
+namespace DotSetup.Installation.WinForm
 {
 
     public class ProgressBarUpdater
@@ -25,11 +28,11 @@ namespace DotSetup
         public static void SetComponents(ProgressBar _pbProgressBar, Control _lblProgressValue, Control _lblProgressUpperText, Button _btnRetry, Button _btnFinish)
         {
             isActive = true;
-            statText = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STAT_TEXT");
-            statInst = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STAT_INSTALLING");
-            statFinished = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STAT_FINISHED");
-            statMain = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STATUS_MAIN");
-            statCompleted = ConfigParser.GetConfig().GetStringValue("//Locale/PROGRESS_STATUS");
+            statText = ConfigParser.GetLocalizedMessage("PROGRESS_STAT_TEXT", "out of");
+            statInst = ConfigParser.GetLocalizedMessage("PROGRESS_STAT_INSTALLING", "Installing...");
+            statFinished = ConfigParser.GetLocalizedMessage("PROGRESS_STAT_FINISHED");
+            statMain = ConfigParser.GetLocalizedMessage("PROGRESS_STATUS_MAIN");
+            statCompleted = ConfigParser.GetLocalizedMessage("PROGRESS_STATUS");
             pbProgressBar = _pbProgressBar;
             lblProgressValue = _lblProgressValue;
             lblProgressUpperText = _lblProgressUpperText;
@@ -50,7 +53,7 @@ namespace DotSetup
         {
             fakeProgressTimer.Interval = rand.Next(3000, 5000);
 
-            if ((pbProgressBar != null) && (currentProgress == TimerProgress) && (TimerProgress < 10))
+            if (pbProgressBar != null && currentProgress == TimerProgress && TimerProgress < 10)
             {
                 TimerProgress = currentProgress + 1;
                 ProgressEventArgs progressEvent = new ProgressEventArgs("", TimerProgress, 0, 0, 0, false);

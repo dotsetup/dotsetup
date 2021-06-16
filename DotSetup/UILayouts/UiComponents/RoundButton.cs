@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.UIComponents
 {
     public class RoundButton : Button
     {

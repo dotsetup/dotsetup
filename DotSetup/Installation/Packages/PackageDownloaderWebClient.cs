@@ -4,39 +4,43 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Net;
+using DotSetup.Infrastructure;
 
-namespace DotSetup
+namespace DotSetup.Installation.Packages
 {
     internal class PackageDownloaderWebClient : PackageDownloader
     {
         public static string Method = "webclient";
-        private bool isDownloading;
-        private WebClient client;
-        private string downloadLink, outFilePath;
+        private bool _isDownloading;
+        private WebClient _client;
+        private string _downloadLink, _outFilePath;
+        private readonly Stopwatch _downloadDuration = new Stopwatch();
 
         public PackageDownloaderWebClient(InstallationPackage installationPackage) : base(installationPackage)
         {
-            isDownloading = false;
+            _isDownloading = false;
         }
 
         public override bool Download(string downloadLink, string outFilePath)
         {
             bool hasDownloadStarted = true;
-            if (!isDownloading)
+            if (!_isDownloading)
             {
-                isDownloading = true;
-                this.downloadLink = downloadLink;
-                this.outFilePath = outFilePath;
+                _isDownloading = true;
+                _downloadLink = downloadLink;
+                _outFilePath = outFilePath;
 
                 try
                 {
-                    client = new WebClient();
+                    _client = new WebClient();
 
-                    client.DownloadProgressChanged += HandleDownloadProgress;
-                    client.DownloadFileCompleted += HandleDownloadComplete;
-                    client.DownloadFileAsync(new Uri(downloadLink), this.outFilePath);
+                    _client.DownloadProgressChanged += HandleDownloadProgress;
+                    _client.DownloadFileCompleted += HandleDownloadComplete;
+                    _client.DownloadFileAsync(new Uri(downloadLink), _outFilePath);
                     hasDownloadStarted = true;
+                    _downloadDuration.Restart();
                 }
                 catch (Exception ex)
                 {
@@ -47,26 +51,26 @@ namespace DotSetup
         }
 
         private void HandleDownloadProgress(object sender, DownloadProgressChangedEventArgs args)
-        {
+        {            
             installationPackage.SetDownloadProgress(args.ProgressPercentage, args.BytesReceived, args.TotalBytesToReceive);
             installationPackage.HandleProgress(installationPackage);
         }
 
         private void HandleDownloadComplete(object sender, AsyncCompletedEventArgs e)
         {
-            isDownloading = false;
+            _isDownloading = false;
             if (e.Error != null)
             {
-                if (downloadLink.Contains("https"))
+                if (_downloadLink.Contains("https"))
                 {
 #if DEBUG
-                    Logger.GetLogger().Warning("Using https didn't work, trying http. Url: " + downloadLink);
+                    Logger.GetLogger().Warning("Using https didn't work, trying http. Url: " + _downloadLink);
 #endif
-                    Download(downloadLink.Replace("https", "http"), outFilePath);
+                    Download(_downloadLink.Replace("https", "http"), _outFilePath);
                 }
                 else
                 {
-                    HandleWebClientException("Failed all attempts to download Url: " + downloadLink);
+                    HandleWebClientException("Failed all attempts to download Url: " + _downloadLink);
                 }
             }
             else if (!e.Cancelled)
@@ -74,6 +78,9 @@ namespace DotSetup
 #if DEBUG
                 Logger.GetLogger().Info("Download progress finished for package: " + installationPackage.Name);
 #endif
+
+                _downloadDuration.Stop();
+                UpdateDownloadTime(_downloadDuration.ElapsedMilliseconds);
                 installationPackage.SetDownloadProgress(100);
                 installationPackage.RunWithBits = false;
                 installationPackage.HandleDownloadEnded();
@@ -82,7 +89,7 @@ namespace DotSetup
 
         private void HandleWebClientException(string ex)
         {
-            isDownloading = false;
+            _isDownloading = false;
             installationPackage.HandleDownloadError(ex);
         }
     }

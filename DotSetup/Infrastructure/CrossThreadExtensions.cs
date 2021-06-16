@@ -5,7 +5,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public static class CrossThreadExtensions
     {

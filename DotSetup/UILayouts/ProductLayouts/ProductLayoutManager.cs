@@ -9,8 +9,11 @@ using System.Diagnostics;
 #endif
 using System.Threading;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
+using DotSetup.Installation.Configuration;
+using DotSetup.Installation.Packages;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ProductLayouts
 {
     public class ProductLayoutManager
     {
@@ -23,8 +26,9 @@ namespace DotSetup
         private Panel _pnlLayout;
         private OptLayout _optLayout;
         internal Action<string, int> OnLayoutShown, OnLayoutError;
+        private bool _layoutsLoaded = false;
 
-        public int RemainingProducts => (_productLayouts != null) ? _productLayouts.Count - _productIndex : 0;
+        public int RemainingProducts => _productLayouts != null ? _productLayouts.Count - _productIndex : 0;
 
         public ProductLayoutManager(PackageManager packageManager)
         {
@@ -45,12 +49,12 @@ namespace DotSetup
             {
                 _preparingResources = new CountdownEvent(1);
                 _waitForProductsSettingsControlsResources = false;
-            } 
+            }
             else if (_preparingResources.IsSet)
                 _preparingResources.Reset(1);
             else
                 _preparingResources.AddCount();
-            
+
             prodSettings.ControlsLayouts.PrepareResources(_preparingResources);
             _productSettings.Add(prodSettings);
         }
@@ -80,7 +84,7 @@ namespace DotSetup
 
         public bool AddProductLayouts()
         {
-            bool isSuccess = true;
+            bool isSuccess = true;            
             try
             {
                 foreach (ProductSettings prodSettings in _productSettings)
@@ -92,7 +96,7 @@ namespace DotSetup
                     }
                     else
                     {
-                        _packageManager.DiscardPackge(prodSettings.Name, productLayout.errorMsg);
+                        _packageManager.DiscardPackage(prodSettings.Name, productLayout.errorMsg);
                         isSuccess = false;
                     }
                 }
@@ -108,6 +112,8 @@ namespace DotSetup
 #endif
                 isSuccess = false;
             }
+
+            _layoutsLoaded = true;
             return isSuccess;
         }
 
@@ -123,16 +129,25 @@ namespace DotSetup
             }
         }
 
-        public bool IsPnlLayoutSet() => (_pnlLayout != null) && (_currntLayout != null);
+        public bool IsPnlLayoutSet() => _pnlLayout != null && _currntLayout != null;
 
-        public bool HasProducts() => _productLayouts != null && _productLayouts.Count > _internalSkippedProducts;
+        public bool HasProducts(bool mustBeLoaded = true)
+        {
+            if (_layoutsLoaded)
+                return _productLayouts?.Count > _internalSkippedProducts;
+
+            if (!mustBeLoaded)
+                return _productSettings?.Count > 0;
+
+            return false;
+        }
 
         public bool NextLayout()
         {
             if (_productLayouts != null && _productIndex < _productLayouts.Count)
             {
                 _currntLayout = _productLayouts[_productIndex];
-                
+
                 if (!_currntLayout.controlLayout.ResourcesReady)
                 {
                     InstallationPackage package = _packageManager.GetPackageByName(_currntLayout.productName);
@@ -140,7 +155,7 @@ namespace DotSetup
                     {
                         package.ErrorMessage = $"missing resource for control layout";
                         OnLayoutError(_currntLayout.productName, _productIndex);
-                        package?.OnInstallFailed(ErrorConsts.ERR_PKG_MISSING_LAYOUT_RESOURCES, package.ErrorMessage);
+                        package.OnInstallFailed?.Invoke(ErrorConsts.ERR_PKG_MISSING_LAYOUT_RESOURCES, package.ErrorMessage);
                     }
                     _productIndex++;
                     _internalSkippedProducts++;
@@ -148,7 +163,7 @@ namespace DotSetup
                     _currntLayout = null;
                     return NextLayout();
                 }
-                
+
                 if (_pnlLayout.Controls.Count > 0)
                     _pnlLayout.Resize -= ((ProductControl)_pnlLayout.Controls[0]).HandleChanges;
 
@@ -186,6 +201,8 @@ namespace DotSetup
                 {
                     _optLayout.RemoveDarken();
                     _packageManager.ConfirmPackage(_currntLayout.productName);
+                    if (_packageManager.MaxConfirmedPackagesReached)
+                        return false;
                     hasNext = NextLayout();
                 }
                 else if (_optLayout.smOptInN.Checked)
@@ -196,7 +213,8 @@ namespace DotSetup
             else
             {
                 _packageManager.ConfirmPackage(_currntLayout.productName);
-                hasNext = NextLayout();
+                if (!_packageManager.MaxConfirmedPackagesReached)
+                    hasNext = NextLayout();
             }
             return hasNext;
         }

@@ -4,21 +4,21 @@
 
 using System.Drawing;
 using System.Windows.Forms;
-using DotSetup.UILayouts.UIComponents;
+using DotSetup.UILayouts.ProductLayouts;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.UIComponents
 {
     public class PanelEx : Panel
     {
         public PanelEx() : base()
         {
-            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.DoubleBuffer | ControlStyles.OptimizedDoubleBuffer, true);
         }
 
         protected override CreateParams CreateParams
         {
             get
-            {                
+            {
                 CreateParams handleParam = base.CreateParams;
                 if (ProductLayoutUtils.isSDK)
                     return handleParam;

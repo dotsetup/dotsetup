@@ -1,4 +1,6 @@
 ﻿using DotSetup;
+using DotSetup.Installation.Configuration;
+using DotSetup.Installation.Packages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 

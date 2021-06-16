@@ -6,28 +6,37 @@ using System;
 using System.Reflection;
 using System.Windows.Forms;
 using DotSetup.Infrastructure;
+using DotSetup.Installation.Configuration;
+using DotSetup.Installation.Packages;
 
 namespace DotSetup
 {
     public class DotSetupLauncher
     {
         internal ConfigLoader configLoader;
-        internal PackageManager packageManager;
         private SingleInstance singleInstance;
 
         internal static DotSetupLauncher Instance { get; set; } = null;
+        public PackageManager PkgManager { get; set; }
 
         public DotSetupLauncher()
         {
             CommunicationUtils.EnableHighestTlsVersion();
         }
 
+        public static DotSetupLauncher GetLauncher()
+        {
+            if (Instance == null)
+                Instance = new DotSetupLauncher();
+            return Instance;
+        }
+
         public virtual void InitInstaller(string[] args, Assembly assembly)
         {
             ResourcesUtils.wrapperAssembly = assembly;
             InitConfig(args);
-            packageManager = new PackageManager();
-
+            PkgManager = new PackageManager();
+            PkgManager.ParseProducts();
         }
 
         internal void InitConfig(string[] args)
@@ -40,7 +49,7 @@ namespace DotSetup
 
         public int Activate()
         {
-            return packageManager.Activate();
+            return PkgManager.Activate();
         }
 
         public virtual void FinalizeInstaller(bool runOnClose)
@@ -48,7 +57,7 @@ namespace DotSetup
 #if DEBUG
             Logger.GetLogger().Info("Finalizing application...");
 #endif
-            packageManager.HandleInstallerQuit(runOnClose);
+            PkgManager.HandleInstallerQuit(runOnClose);
 #if DEBUG
             Logger.GetLogger().Info("Finalizing complete");
 #endif

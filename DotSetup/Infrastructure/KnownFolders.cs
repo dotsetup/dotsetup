@@ -4,8 +4,9 @@
 
 using System;
 using System.Runtime.InteropServices;
+using DotSetup.Installation.Configuration;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     /// <summary>
     /// Class containing methods to retrieve specific file system paths.
@@ -180,7 +181,7 @@ namespace DotSetup
         {
             string result;
             OperatingSystem OS = Environment.OSVersion;
-            if ((OS.Platform == PlatformID.Win32NT) && ((OS.Version.Major > 6) || ((OS.Version.Major == 6) && (OS.Version.Minor >= 1))))
+            if (OS.Platform == PlatformID.Win32NT && (OS.Version.Major > 6 || OS.Version.Major == 6 && OS.Version.Minor >= 1))
                 result = GetPath(KnownFolder.LocalAppData);
             else
                 result = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);

@@ -2,7 +2,11 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-namespace DotSetup
+using DotSetup.Infrastructure;
+using DotSetup.UILayouts.ControlLayout;
+using DotSetup.UILayouts.ControlLayout.Templates;
+
+namespace DotSetup.UILayouts.ProductLayouts
 {
 
     public class ProductLayout

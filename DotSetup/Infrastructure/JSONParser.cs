@@ -7,16 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-
-
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public static class JSONParser
     {
         public static string ObjToJSON(object obj)
         {
-            string json = (obj != null) ? obj.ToString() : "";
-            if (string.IsNullOrEmpty(json) || (json[0] != '{'))
+            string json = obj != null ? obj.ToString() : "";
+            if (string.IsNullOrEmpty(json) || json[0] != '{')
                 json = "{" + json + "}";
             json = json.Replace(" =", "\":").Replace(", ", ",\"").Replace("{ ", "{\"");
             return json;
@@ -49,7 +47,7 @@ namespace DotSetup
                         sb.Append('\\');
                         sb.Append(c);
                         break;
-                    case '/':                        
+                    case '/':
                         sb.Append(c);
                         break;
                     case '\b':

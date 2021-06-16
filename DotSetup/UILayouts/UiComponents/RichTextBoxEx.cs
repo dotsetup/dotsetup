@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.UIComponents
 {
     public class RichTextBoxEx : RichTextBox
     {
@@ -119,6 +119,8 @@ namespace DotSetup
         private HorizontalAlignment _Alignment = HorizontalAlignment.Left;
         private int _Padding = 0;
         private string _OriginalText = "";
+        private bool _AnnotateText = true;
+        private bool _SelectableText = false;
 
         private struct HyperLinkText
         {
@@ -143,13 +145,16 @@ namespace DotSetup
             switch (m.Msg)
             {
                 case WM_SETFOCUS:
-                    m.Msg = WM_KILLFOCUS;
+                    if (!_SelectableText)
+                    {
+                        m.Msg = WM_KILLFOCUS;
+                    }
                     break;
                 case WM_SETCURSOR: // stops the flickering on hover
                     Cursor.Current = Cursor;
                     return;
                 case WM_MOUSEWHEEL:
-                    if (Control.ModifierKeys == Keys.Control)
+                    if (ModifierKeys == Keys.Control)
                     {
                         m.WParam = IntPtr.Zero;
                         m.Result = IntPtr.Zero;
@@ -229,9 +234,13 @@ namespace DotSetup
                 string[] IgnoreList = { "*", "^", "_" };
 
                 base.Text = RemoveLinkBrackets(value);
-                base.Text = ReplaceTags(base.Text, @"\*", FontStyle.Bold, IgnoreList);
-                base.Text = ReplaceTags(base.Text, @"_", FontStyle.Underline, IgnoreList);
-                base.Text = ReplaceTags(base.Text, @"\^", FontStyle.Italic, IgnoreList);
+
+                if (_AnnotateText)
+                {
+                    base.Text = ReplaceTags(base.Text, @"\*", FontStyle.Bold, IgnoreList);
+                    base.Text = ReplaceTags(base.Text, @"_", FontStyle.Underline, IgnoreList);
+                    base.Text = ReplaceTags(base.Text, @"\^", FontStyle.Italic, IgnoreList);
+                }
 
                 SetLinks();
                 SetFonts();
@@ -257,6 +266,26 @@ namespace DotSetup
             {
                 _Alignment = value;
                 SetAlignment();
+            }
+        }
+
+        public bool SelectableText
+        {
+            get => _SelectableText;
+            set
+            {
+                _SelectableText = value;
+                RefreshStyle();
+            }
+        }
+
+        public bool AnnotateText
+        {
+            get => _AnnotateText;
+            set
+            {
+                _AnnotateText = value;
+                RefreshStyle();
             }
         }
 
@@ -330,12 +359,12 @@ namespace DotSetup
 
                 string sub = m.Value.Substring(1, m.Value.Length - 2);
 
-                int exists = styledTextArray.FindIndex((StyledText sT) => sT.StartPosition == baseIndex);
+                int exists = styledTextArray.FindIndex((sT) => sT.StartPosition == baseIndex);
 
                 StyledText styledText;
                 styledText.StartPosition = baseIndex;
                 styledText.Text = sub.Replace(indicator, "");
-                styledText.FontStyle = (exists > -1) ? fontStyle | styledTextArray[exists].FontStyle : fontStyle;
+                styledText.FontStyle = exists > -1 ? fontStyle | styledTextArray[exists].FontStyle : fontStyle;
 
                 text = text.Remove(unbuffedIndex, m.Value.Length).Insert(unbuffedIndex, sub);
 
@@ -343,8 +372,8 @@ namespace DotSetup
                 {
                     styledTextArray[index] = new StyledText()
                     {
-                        StartPosition = (styledTextArray[index].StartPosition > baseIndex) ? styledTextArray[index].StartPosition - 2 : styledTextArray[index].StartPosition,
-                        Text = (styledTextArray[index].StartPosition == styledText.StartPosition) ? styledText.Text : styledTextArray[index].Text,
+                        StartPosition = styledTextArray[index].StartPosition > baseIndex ? styledTextArray[index].StartPosition - 2 : styledTextArray[index].StartPosition,
+                        Text = styledTextArray[index].StartPosition == styledText.StartPosition ? styledText.Text : styledTextArray[index].Text,
                         FontStyle = styledTextArray[index].FontStyle
                     };
                 }
@@ -369,7 +398,7 @@ namespace DotSetup
         private void SetAlignment()
         {
             SelectAll();
-            base.SelectionAlignment = _Alignment;
+            SelectionAlignment = _Alignment;
             DeselectAll();
         }
 

@@ -8,14 +8,15 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using DotSetup.Infrastructure;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ControlLayout
 {
     public class ControlsLayout : IComparable
     {
         private readonly Dictionary<string, ControlSettings> _controlSettings;
         private Thread _preparingResourcesThread = null;
-        
+
         public bool ResourcesReady { get; private set; }
 
         public ControlsLayout(XmlNodeList[] xmlNodeList, Dictionary<string, string> defaultControlDesign)
@@ -77,8 +78,8 @@ namespace DotSetup
                 return -1;
 
             if (obj is ControlsLayout otherControls)
-                return ((_controlSettings.Count == otherControls._controlSettings.Count)
-                    && _controlSettings.Values.SequenceEqual(otherControls._controlSettings.Values)) ? 0 : 1;
+                return _controlSettings.Count == otherControls._controlSettings.Count
+                    && _controlSettings.Values.SequenceEqual(otherControls._controlSettings.Values) ? 0 : 1;
             else
                 return 1;
         }
@@ -88,14 +89,14 @@ namespace DotSetup
             ResourcesReady = false;
             CountdownEvent preparingResources = new CountdownEvent(_controlSettings.Count);
             foreach (KeyValuePair<string, ControlSettings> kvp in _controlSettings)
-            {                
+            {
                 kvp.Value.PrepareResources(preparingResources);
             };
 
             _preparingResourcesThread = new Thread(() =>
             {
                 preparingResources.Wait();
-                preparingResources.Dispose();                
+                preparingResources.Dispose();
                 ResourcesReady = true;
                 foreach (KeyValuePair<string, ControlSettings> kvp in _controlSettings)
                 {

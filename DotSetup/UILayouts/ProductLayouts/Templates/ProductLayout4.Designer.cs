@@ -1,4 +1,6 @@
-﻿namespace DotSetup
+﻿using DotSetup.UILayouts.UIComponents;
+
+namespace DotSetup.UILayouts.ControlLayout.Templates
 {
     partial class ProductLayout4
     {
@@ -29,18 +31,18 @@
         private void InitializeComponent()
         {
             this.pnlLayout = new System.Windows.Forms.Panel();
-            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
-            this.txtDescription = new DotSetup.RichTextBoxEx();
-            this.txtTitle = new DotSetup.RichTextBoxEx();
-            this.imgTitle = new DotSetup.PictureBoxEx();
-            this.imgOptional = new DotSetup.PictureBoxEx();
+            this.txtDisclaimer = new RichTextBoxEx();
+            this.txtDescription = new RichTextBoxEx();
+            this.txtTitle = new RichTextBoxEx();
+            this.imgTitle = new PictureBoxEx();
+            this.imgOptional = new PictureBoxEx();
             this.txtSmOptInY = new System.Windows.Forms.RadioButton();
             this.txtSmOptInN = new System.Windows.Forms.RadioButton();
-            this.txtSmOptIn = new DotSetup.RichTextBoxEx();
-            this.imgSmOpInBg = new DotSetup.PictureBoxEx();
+            this.txtSmOptIn = new RichTextBoxEx();
+            this.imgSmOpInBg = new PictureBoxEx();
             this.txtOptIn = new System.Windows.Forms.CheckBox();
             this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
-            this.imgBackground = new DotSetup.PictureBoxEx();
+            this.imgBackground = new PictureBoxEx();
             this.pnlLayout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imgTitle)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imgOptional)).BeginInit();
@@ -246,7 +248,7 @@
 
         private System.Windows.Forms.Panel pnlLayout;
         private PictureBoxEx imgBackground;
-        private DotSetup.RichTextBoxEx txtDisclaimer;
+        private RichTextBoxEx txtDisclaimer;
         private RichTextBoxEx txtDescription;
         private PictureBoxEx imgTitle;
         private System.Windows.Forms.CheckBox txtOptIn;

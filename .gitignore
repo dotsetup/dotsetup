@@ -353,5 +353,3 @@ healthchecksdb
 
 # Temp unit tests results  
 TestResults/
-
-AssemblyInfo.cs

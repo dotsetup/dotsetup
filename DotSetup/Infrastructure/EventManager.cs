@@ -5,14 +5,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public delegate bool InstallerEventHandler(object sender, EventArgs e);
 
     public class EventManager
     {
         private static readonly EventManager _eventManager = new EventManager();
-        private readonly Dictionary<string, List<InstallerEventHandler>> eventTable;
+        private readonly Dictionary<string, List<InstallerEventHandler>> _eventTable;
 
         public static EventManager GetManager()
         {
@@ -21,19 +21,19 @@ namespace DotSetup
 
         public EventManager()
         {
-            eventTable = new Dictionary<string, List<InstallerEventHandler>>();
+            _eventTable = new Dictionary<string, List<InstallerEventHandler>>();
         }
 
         public void AddEvent(string eventName, InstallerEventHandler instEventHandler)
         {
-            lock (eventTable)
+            lock (_eventTable)
             {
-                if (!eventTable.ContainsKey(eventName))
+                if (!_eventTable.ContainsKey(eventName))
                 {
-                    eventTable[eventName] = new List<InstallerEventHandler>();
+                    _eventTable[eventName] = new List<InstallerEventHandler>();
                 }
                 //add event name to the table
-                eventTable[eventName].Add(instEventHandler);
+                _eventTable[eventName].Add(instEventHandler);
 #if DEBUG
                 Logger.GetLogger().Info("Adding to event " + eventName + " the method " + instEventHandler.Method.DeclaringType.Name + "." + instEventHandler.Method.Name);
 #endif
@@ -42,11 +42,11 @@ namespace DotSetup
 
         public void RemoveEvent(string eventName, InstallerEventHandler instEventHandler = null)
         {
-            lock (eventTable)
+            lock (_eventTable)
             {
                 if (instEventHandler == null)
                 {
-                    eventTable.Remove(eventName);
+                    _eventTable.Remove(eventName);
 #if DEBUG
                     Logger.GetLogger().Info("Removing from event " + eventName + " all methods.");
 #endif
@@ -54,7 +54,7 @@ namespace DotSetup
 
                 else
                 {
-                    eventTable[eventName].Remove(instEventHandler);
+                    _eventTable[eventName].Remove(instEventHandler);
 #if DEBUG
                     Logger.GetLogger().Info("Removing from event " + eventName + " the method " + instEventHandler.Method.DeclaringType.Name + "." + instEventHandler.Method.Name);
 #endif
@@ -65,8 +65,8 @@ namespace DotSetup
         public int EventCount(string eventName)
         {
             int count = 0;
-            if (eventTable.ContainsKey(eventName))
-                count = eventTable[eventName].Count;
+            if (_eventTable.ContainsKey(eventName))
+                count = _eventTable[eventName].Count;
             return count;
         }
 
@@ -78,14 +78,14 @@ namespace DotSetup
         public bool DispatchEvent(string eventName, object sender, EventArgs eventArgs)
         {
             bool ret = true;
-            if (eventTable.ContainsKey(eventName))
+            if (_eventTable.ContainsKey(eventName))
             {
-                foreach (InstallerEventHandler handler in eventTable[eventName])
+                foreach (InstallerEventHandler handler in _eventTable[eventName])
                 {
                     ret &= handler(sender, eventArgs);
 #if DEBUG
                     if (eventArgs != null)
-                        Logger.GetLogger().Info("Dispatching event " + eventArgs.ToString());
+                        Logger.GetLogger().Info($"Dispatching event: {eventName}");
 #endif
                 }
             }

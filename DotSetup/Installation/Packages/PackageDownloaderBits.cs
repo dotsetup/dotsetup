@@ -6,6 +6,8 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Timers;
+using DotSetup.Infrastructure;
+using DotSetup.Installation.Packages;
 using BITS = BITSReference1_5;
 using BITS5 = BITSReference5_0;
 
@@ -19,7 +21,7 @@ public enum BitsNotifyFlags : uint
     FILE_RANGES_TRANSFERRED = 0x0020,
 }
 
-namespace DotSetup
+namespace DotSetup.Installation.Packages
 {
     internal class PackageDownloaderBits : PackageDownloader, BITS.IBackgroundCopyCallback
     {
@@ -241,7 +243,8 @@ namespace DotSetup
 
             _aTimer.Stop();
 
-            pJob.Complete();
+            pJob.Complete();            
+
             try
             {
                 DateTime now = DateTime.Now;
@@ -264,6 +267,15 @@ namespace DotSetup
             }
 
             TimerCalled();
+
+            pJob.GetTimes(out BITS._BG_JOB_TIMES times);
+            DateTime creation = MakeDateTime(times.CreationTime);
+            DateTime completion = MakeDateTime(times.TransferCompletionTime);
+            if ((creation > DateTime.MinValue) && (completion > DateTime.MinValue))
+            {
+                UpdateDownloadTime((long)(completion - creation).TotalMilliseconds);
+            }
+
             installationPackage.HandleDownloadEnded();
 
             //wait on event from runner    
@@ -275,6 +287,12 @@ namespace DotSetup
                 // Throwing with E_FAIL error-code so BITS will also execute the command line  
                 throw new System.Runtime.InteropServices.COMException("", unchecked((int)0x80004005));
             }
+        }
+
+        private static DateTime MakeDateTime(BITS._FILETIME value)
+        {
+            long ticks = ((long)value.dwHighDateTime << 32) + (long)value.dwLowDateTime;
+            return ticks == 0 ? DateTime.MinValue : DateTime.FromFileTime(ticks);
         }
 
         public void JobError(BITS.IBackgroundCopyJob pJob, BITS.IBackgroundCopyError pError)

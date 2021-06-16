@@ -2,7 +2,7 @@
 // Licensed under the GPL License, version 3.0.
 // https://dotsetup.io/
 
-namespace DotSetup
+namespace DotSetup.Installation.Configuration
 {
     public static class ErrorConsts
     {

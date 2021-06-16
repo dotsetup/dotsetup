@@ -8,50 +8,12 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Xml;
+using DotSetup.Infrastructure;
+using DotSetup.Installation.Packages;
+using DotSetup.UILayouts.ControlLayout;
 
-namespace DotSetup
+namespace DotSetup.Installation.Configuration
 {
-    public struct ProductSettings
-    {
-        public string Name, Filename, RunPath, ExtractPath, RunParams, LayoutName, Behavior, Class, DownloadMethod, SecondaryDownloadMethod;
-
-        public struct DownloadURL
-        {
-            public string Arch, URL;
-        }
-        public List<DownloadURL> DownloadURLs;
-
-        public struct ProductEvent
-        {
-            public string Name, Value, Trigger;
-        }
-        public List<ProductEvent> ProductEvents;
-
-        public struct RequirementKey
-        {
-            public string KeyType;
-            public string KeyValue;
-        }
-
-        public struct ProductRequirement
-        {
-            public List<RequirementKey> Keys;
-            public string Type, Value, LogicalOperator, ValueOperator, Delta;
-        }
-        public struct ProductRequirements
-        {
-            public List<ProductRequirement> RequirementList;
-            public List<ProductRequirements> RequirementsList;
-            public string LogicalOperator, UnfulfilledRequirementType, UnfulfilledRequirementDelta;
-        }
-        public ProductRequirements PreInstall;
-        public ProductRequirements PostInstall;
-        public ControlsLayout ControlsLayouts;
-        public bool IsOptional, IsExtractable, RunWithBits, RunAndWait;
-        public int MsiTimeoutMS;
-        public object Other;
-    }
-
     public struct FormDesign
     {
         public int Height, Width, ClientHeight, ClientWidth, BottomPanelHeight;
@@ -73,6 +35,7 @@ namespace DotSetup
         private FormDesign _formDesign;
         private List<PageDesign> _pagesDesign;
         private List<ProductSettings> _productsSettings;
+        internal SessionData SessionData = new SessionData();
         private bool _isProductSettingsParsed = false;
 
         public string LocaleCode { get; private set; }
@@ -87,12 +50,22 @@ namespace DotSetup
             return instance;
         }
 
-        public ConfigParser()
+        public static string GetLocalizedMessage(string message, string defaultValue = "") => GetConfig().GetStringValue($"//Locale/{message}", defaultValue);
+
+        protected ConfigParser()
         {
         }
 
-        internal void Init()
+        private string ParseSessionData(string key)
         {
+            if (!key.StartsWith(SessionDataConsts.ROOT))
+                return string.Empty;
+
+            return SessionData[key];
+        }
+
+        internal void Init()
+        {            
             Stream mainXmlStream = ResourcesUtils.GetEmbeddedResourceStream(null, "main.xml");
             if (mainXmlStream == null)
                 mainXmlStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("<Main><Products></Products></Main>"));
@@ -106,6 +79,7 @@ namespace DotSetup
 #endif
             }
 
+            XmlParser.OnXpathProcessing += ParseSessionData;
             ReadXmlFiles(new Stream[] { mainXmlStream, configXmlStream });
 
             ReadResourcesToXml();
@@ -143,7 +117,7 @@ namespace DotSetup
                     if (_xmlDoc == null)
                     {
                         _xmlDoc = new XmlDocument();
-                        _xmlDoc.Load(xmlStream);                       
+                        _xmlDoc.Load(xmlStream);
                     }
                     else
                     {
@@ -196,10 +170,6 @@ namespace DotSetup
                 Logger.GetLogger().Warning("Cannot parse config value of key: " + entryKey + ". Value set to " + entryValue + ". " + e.Message);
 #endif
             }
-            finally
-            {
-            }
-
             return entryValue;
         }
 
@@ -231,7 +201,7 @@ namespace DotSetup
                         tmpLocale = localeCodeCandidate;
                     break;
                 case "userselected":
-                    tmpLocale = (string.IsNullOrEmpty(userSelectedLocale)) ? tmpLocale : userSelectedLocale;
+                    tmpLocale = string.IsNullOrEmpty(userSelectedLocale) ? tmpLocale : userSelectedLocale;
                     break;
             }
 
@@ -438,7 +408,7 @@ namespace DotSetup
             return !string.IsNullOrEmpty(workDir);
         }
 
-        internal virtual void ReadProductsSettings()
+        private void ReadProductsSettings()
         {
             if (_isProductSettingsParsed)
                 return;
@@ -448,16 +418,27 @@ namespace DotSetup
                 _productsSettings.Add(ExtractProductSettings(productSettingsNode));
         }
 
-        public ProductSettings ExtractProductSettings(XmlNode productSettingsNode)
+        private ProductSettings ExtractProductSettings(XmlNode productSettingsNode)
         {
 #if DEBUG
             Logger.GetLogger().Info("Read config file - Product Settings:", Logger.Level.MEDIUM_DEBUG_LEVEL);
-#endif            
-            var productSettings = new ProductSettings
+#endif                        
+            ProductSettings productSettings = new ProductSettings
             {
                 IsOptional = XmlParser.GetBoolAttribute(productSettingsNode, "optional"),
-                IsExtractable = XmlParser.GetBoolAttribute(productSettingsNode, "extractable", true)
+                IsExtractable = XmlParser.GetBoolAttribute(productSettingsNode, "extractable", true),
+                Exclusive = XmlParser.GetBoolAttribute(productSettingsNode, "exclusive", false)                
             };
+
+            string guid = XmlParser.GetStringValue(productSettingsNode, "Guid");
+
+            if (string.IsNullOrEmpty(guid))
+            {
+                guid = Guid.NewGuid().ToString();
+                XmlParser.SetStringValue(_xmlDoc, productSettingsNode, "Guid", guid);
+            }
+
+            productSettings.Guid = guid;
 
             XmlNode productStaticData = productSettingsNode.SelectSingleNode("StaticData");
             XmlNode productDynamicData = productSettingsNode.SelectSingleNode("DynamicData");
@@ -484,6 +465,7 @@ namespace DotSetup
             }
 
             bool runWithBitsDefault = XmlParser.GetBoolValue(_xmlDoc.SelectSingleNode("//Config"), ConfigConsts.RUN_WITH_BITS, true);
+            productSettings.ProductEvents = new List<ProductSettings.ProductEvent>();
 
             foreach (XmlNode productLogicNode in productStaticData.SelectNodes("Logic"))
             {
@@ -496,19 +478,18 @@ namespace DotSetup
                 productSettings.SecondaryDownloadMethod = XmlParser.GetStringValue(productLogicNode, "SecondaryDownloadMethod");
                 if (string.IsNullOrEmpty(productSettings.SecondaryDownloadMethod))
                     productSettings.SecondaryDownloadMethod = GetConfigValue(ConfigConsts.SECONDARY_DOWNLOAD_METHOD);
-                productSettings.MsiTimeoutMS = XmlParser.GetIntValue(productLogicNode, "MsiTimeoutMs");
-                productSettings.ProductEvents = new List<ProductSettings.ProductEvent>();
-                foreach (XmlNode EventNode in productLogicNode.SelectNodes("Events/Event"))
+                productSettings.MsiTimeoutMS = XmlParser.GetIntValue(productLogicNode, "MsiTimeoutMs");                
+                
+                foreach (XmlNode eventNode in productLogicNode.SelectNodes("Events/Event"))
                 {
-                    if (EventNode.Attributes.Count > 0)
+                    if (eventNode.Attributes.Count > 0)
                     {
                         ProductSettings.ProductEvent productEvent = new ProductSettings.ProductEvent
                         {
-                            Name = EventNode.Attributes.Item(0).Name,
-                            Trigger = XmlParser.GetStringAttribute(EventNode, EventNode.Attributes.Item(0).Name),
-                            Value = XmlParser.GetStringValue(EventNode)                            
+                            Name = eventNode.Attributes.Item(0).Name,
+                            Trigger = XmlParser.GetStringAttribute(eventNode, eventNode.Attributes.Item(0).Name)                            
                         };
-                        
+
                         productSettings.ProductEvents.Add(productEvent);
                     }
                 }
@@ -519,7 +500,7 @@ namespace DotSetup
             {
                 string RunParam = XmlParser.GetStringValue(runParamsNode).Trim();
 
-                productSettings.RunParams += (string.IsNullOrEmpty(productSettings.RunParams) ? RunParam : " " + RunParam);
+                productSettings.RunParams += string.IsNullOrEmpty(productSettings.RunParams) ? RunParam : " " + RunParam;
             }
             productSettings.PreInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PreInstall/Requirements"));
             productSettings.PostInstall = ExtractProductRequirementsRoot(productStaticData.SelectNodes("PostInstall/Requirements"));
@@ -548,7 +529,8 @@ namespace DotSetup
                     Logger.GetLogger().Error("Missing locale for product: " + productSettings.Name + " language code: " + LocaleCode);
 #endif
             }
-            AddAdditionalSettings(ref productSettings, productStaticData, productDynamicData);
+            AddAdditionalSettings(ref productSettings, productStaticData, productDynamicData); 
+
             return productSettings;
         }
 
@@ -606,8 +588,8 @@ namespace DotSetup
                 foreach (XmlNode requirementKey in requirementNode.SelectNodes("Keys/Key"))
                 {
                     ProductSettings.RequirementKey reqKey;
-                    reqKey.KeyValue = XmlParser.GetStringValue(requirementKey);
-                    reqKey.KeyType = XmlParser.GetStringAttribute(requirementKey, "type");
+                    reqKey.Value = XmlParser.GetStringValue(requirementKey);
+                    reqKey.Type = XmlParser.GetStringAttribute(requirementKey, "type");
                     requirement.Keys.Add(reqKey);
                 }
 
@@ -639,8 +621,8 @@ namespace DotSetup
                     foreach (XmlNode requirementKey in CustomVar.SelectNodes("Keys/Key"))
                     {
                         ProductSettings.RequirementKey reqKey;
-                        reqKey.KeyValue = XmlParser.GetStringValue(requirementKey);
-                        reqKey.KeyType = XmlParser.GetStringAttribute(requirementKey, "type");
+                        reqKey.Value = XmlParser.GetStringValue(requirementKey);
+                        reqKey.Type = XmlParser.GetStringAttribute(requirementKey, "type");
 
                         requirement.Keys.Add(reqKey);
                     }
@@ -654,6 +636,7 @@ namespace DotSetup
                 }
             }
         }
+
         public FormDesign GetFormDesign()
         {
             return _formDesign;
@@ -680,6 +663,7 @@ namespace DotSetup
             }
             return res;
         }
+
         public int GetIntValue(string Xpath, int defaultValue = 0)
         {
             int res = defaultValue;
@@ -728,6 +712,64 @@ namespace DotSetup
                 XmlParser.SetStringValue(_xmlDoc, xpath, value);
                 _isProductSettingsParsed = false;
             }
+        }
+
+        private XmlNode GetOnlineProductSettings(ProductSettings productSettings)
+        {
+            XmlNode onlineProductSettings = null;
+
+            foreach (XmlNode productSettingsNode in _xmlDoc.SelectNodes("//Products/Product"))
+            {
+                if (XmlParser.GetStringValue(productSettingsNode, "Guid") == productSettings.Guid)
+                {
+                    onlineProductSettings = productSettingsNode;
+                    break;
+                }
+            }
+
+            return onlineProductSettings;
+        }
+
+        public Dictionary<string,string> GetEventParameters(ProductSettings productSettings, int eventIndex)
+        {
+            Dictionary<string, string> res = new Dictionary<string, string>();
+            XmlNode onlineProductSettings = GetOnlineProductSettings(productSettings);
+            
+            if (onlineProductSettings == null)
+                return res;
+
+            int currentIndex = 0;
+
+            foreach (XmlNode productLogicNode in onlineProductSettings.SelectNodes("StaticData/Logic"))
+                foreach (XmlNode eventNode in productLogicNode.SelectNodes("Events/Event"))
+                {
+                    if (currentIndex == eventIndex)
+                        return XmlParser.GetChildNodesValues(eventNode);
+                    currentIndex++;
+                }
+            return res;
+        }
+
+        public bool SetProductSettingsXml(ProductSettings productSettings, string xpath, string value)
+        {
+            if (_xmlDoc == null || string.IsNullOrWhiteSpace(value))
+                return false;
+
+            XmlNode onlineProductSettings = GetOnlineProductSettings(productSettings);
+
+            if (onlineProductSettings == null)
+                return false;
+
+            try
+            {
+                XmlParser.SetStringValue(_xmlDoc, onlineProductSettings, xpath, value);
+                _isProductSettingsParsed = false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

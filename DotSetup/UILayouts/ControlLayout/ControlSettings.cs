@@ -9,8 +9,9 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using DotSetup.Infrastructure;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ControlLayout
 {
     public class ControlSettings
     {
@@ -18,7 +19,7 @@ namespace DotSetup
             fontName, fontSize, fontStyle, rtl,
             encode, decode;
 
-        public bool IsReady {get; protected set; }
+        public bool IsReady { get; protected set; }
 
         public static class KnownAttribute
         {
@@ -50,7 +51,7 @@ namespace DotSetup
             string res = "";
             if (attributes.ContainsKey(knownAttribute))
                 res = attributes[knownAttribute];
-            else if ((defaultAttributes != null) && defaultAttributes.ContainsKey(knownAttribute))
+            else if (defaultAttributes != null && defaultAttributes.ContainsKey(knownAttribute))
                 res = defaultAttributes[knownAttribute];
 
             return res;
@@ -102,7 +103,7 @@ namespace DotSetup
                 {
                     char op = valStr[0];
                     valStr = valStr.Substring(1, valStr.Length - 1);
-                    retValue = baseValue + ((op == '+') ? 1 : -1) * int.Parse(valStr);
+                    retValue = baseValue + (op == '+' ? 1 : -1) * int.Parse(valStr);
                 }
                 else
                     retValue = int.Parse(valStr);
@@ -144,7 +145,7 @@ namespace DotSetup
                 {
                     char op = fontSize[0];
                     fontSize = fontSize.Substring(1, fontSize.Length - 1);
-                    fontSize = (control.Font.SizeInPoints + ((op == '+') ? 1 : -1) * float.Parse(fontSize)).ToString();
+                    fontSize = (control.Font.SizeInPoints + (op == '+' ? 1 : -1) * float.Parse(fontSize)).ToString();
                     fontSize = fontSize.ToString();
                 }
 

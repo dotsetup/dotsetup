@@ -5,9 +5,10 @@
 using System;
 using System.IO;
 using System.Threading;
+using DotSetup.Installation.Configuration;
 using Shell32;
 
-namespace DotSetup
+namespace DotSetup.Installation.Packages
 {
     public class PackageExtractor
     {
@@ -24,7 +25,7 @@ namespace DotSetup
             {
                 UnZipFromMTAThread(compresedFile, uncompresedDir);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 installationPackage.ErrorMessage = e.Message;
                 installationPackage.OnInstallFailed(ErrorConsts.ERR_EXTRACT_GENERAL, installationPackage.ErrorMessage);

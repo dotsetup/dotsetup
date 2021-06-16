@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ControlLayout
 {
     internal class TextSettings : ControlSettings
     {

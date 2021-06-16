@@ -3,8 +3,9 @@
 // https://dotsetup.io/
 
 using System.Windows.Forms;
+using DotSetup.UILayouts.ProductLayouts;
 
-namespace DotSetup
+namespace DotSetup.Installation.WinForm
 {
     public class FormPageUtils
     {

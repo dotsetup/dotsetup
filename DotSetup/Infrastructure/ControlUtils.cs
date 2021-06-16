@@ -6,7 +6,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     internal class ControlUtils
     {

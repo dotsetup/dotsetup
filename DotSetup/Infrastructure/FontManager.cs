@@ -8,8 +8,9 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using System.Linq;
+using DotSetup.Installation.Configuration;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public class FontManager
     {
@@ -36,7 +37,7 @@ namespace DotSetup
         {
             bool res;
             Font testFont = new Font(fontName, 8);
-            res = (0 == string.Compare(fontName, testFont.Name, StringComparison.InvariantCultureIgnoreCase));
+            res = 0 == string.Compare(fontName, testFont.Name, StringComparison.InvariantCultureIgnoreCase);
             return res;
         }
 

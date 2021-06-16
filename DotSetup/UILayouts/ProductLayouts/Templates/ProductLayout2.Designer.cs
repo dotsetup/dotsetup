@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
+using DotSetup.UILayouts.UIComponents;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ControlLayout.Templates
 {
     partial class ProductLayout2
     {
@@ -31,17 +32,17 @@ namespace DotSetup
         private void InitializeComponent()
         {
             this.pnlLayout = new System.Windows.Forms.Panel();
-            this.txtDisclaimer = new DotSetup.RichTextBoxEx();
-            this.imgBackground = new DotSetup.PanelEx();
-            this.imgOptional = new DotSetup.PictureBoxEx();
+            this.txtDisclaimer = new RichTextBoxEx();
+            this.imgBackground = new PanelEx();
+            this.imgOptional = new PictureBoxEx();
             this.txtSmOptInY = new System.Windows.Forms.RadioButton();
             this.txtSmOptInN = new System.Windows.Forms.RadioButton();
-            this.txtSmOptIn = new DotSetup.RichTextBoxEx();
-            this.imgSmOpInBg = new DotSetup.PictureBoxEx();
+            this.txtSmOptIn = new RichTextBoxEx();
+            this.imgSmOpInBg = new PictureBoxEx();
             this.txtOptIn = new System.Windows.Forms.CheckBox();
             this.pnlDarkenOverlay = new System.Windows.Forms.Panel();
-            this.txtTitle = new DotSetup.RichTextBoxEx();
-            this.txtDescription = new DotSetup.RichTextBoxEx();
+            this.txtTitle = new RichTextBoxEx();
+            this.txtDescription = new RichTextBoxEx();
             this.pnlLayout.SuspendLayout();
             this.imgBackground.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imgOptional)).BeginInit();
@@ -73,7 +74,7 @@ namespace DotSetup
             this.txtDisclaimer.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtDisclaimer.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.txtDisclaimer.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.txtDisclaimer.Font = new System.Drawing.Font("Ariel", 8F);
+            this.txtDisclaimer.Font = new System.Drawing.Font("Segoe UI", 8F);
             this.txtDisclaimer.ForeColor = System.Drawing.Color.White;
             this.txtDisclaimer.LineSpacing = 210;
             this.txtDisclaimer.Location = new System.Drawing.Point(0, 263);
@@ -233,7 +234,7 @@ namespace DotSetup
 
         private System.Windows.Forms.Panel pnlLayout;
         private PanelEx imgBackground;
-        private DotSetup.RichTextBoxEx txtDisclaimer;
+        private RichTextBoxEx txtDisclaimer;
         private RichTextBoxEx txtDescription;
         private System.Windows.Forms.CheckBox txtOptIn;
         private PictureBoxEx imgSmOpInBg;

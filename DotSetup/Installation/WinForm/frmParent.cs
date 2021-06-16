@@ -5,8 +5,10 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using DotSetup.Infrastructure;
+using DotSetup.UILayouts.UIComponents;
 
-namespace DotSetup
+namespace DotSetup.Installation.WinForm
 {
     public partial class FrmParent : Form
     {

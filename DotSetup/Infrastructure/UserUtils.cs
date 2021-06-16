@@ -9,7 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public class UserUtils
     {
@@ -101,7 +101,8 @@ namespace DotSetup
         /// execution in the first place(session user). If not it means that the process
         /// was executed via login - either during Elevation or RunAs.
         /// </summary>
-        public static bool IsSessionUser() { 
+        public static bool IsSessionUser()
+        {
             int sessionId = System.Diagnostics.Process.GetCurrentProcess().SessionId;
             WTSQuerySessionInformationW(IntPtr.Zero, sessionId, WTS_INFO_CLASS.WTSUserName, out IntPtr buffer, out _);
             string sessionUserName = Marshal.PtrToStringUni(buffer);

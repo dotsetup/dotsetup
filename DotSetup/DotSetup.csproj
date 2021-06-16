@@ -140,11 +140,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\AssemblyUtils.cs" />
     <Compile Include="Infrastructure\CommunicationUtils.cs" />
     <Compile Include="Infrastructure\ControlUtils.cs" />
+    <Compile Include="Infrastructure\DateTimeUtils.cs" />
     <Compile Include="Infrastructure\DockingHelper.cs" />
+    <Compile Include="Infrastructure\GraphicsUtils.cs" />
     <Compile Include="Infrastructure\ProcessUtils.cs" />
-    <Compile Include="Infrastructure\XmlProcessor.cs" />    
+    <Compile Include="Infrastructure\XmlProcessor.cs" />
+    <Compile Include="Installation\Configuration\ProductSettings.cs" />
+    <Compile Include="Installation\Configuration\SessionData.cs" />
+    <Compile Include="Installation\Packages\EventTrigger.cs" />
     <Compile Include="Installation\Configuration\SessionDataConsts.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderBits.cs" />
     <Compile Include="Installation\Packages\PackageDownloaderWebClient.cs" />
@@ -206,7 +212,19 @@
     <Compile Include="UILayouts\ProductLayouts\Templates\ProductLayout2.Designer.cs">
       <DependentUpon>ProductLayout2.cs</DependentUpon>
     </Compile>
+    <Compile Include="UILayouts\UIComponents\ButtonEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\CheckBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\Divider.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="UILayouts\UIComponents\PanelEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UILayouts\UIComponents\ProgressBarEx.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="UILayouts\UIComponents\RoundButton.cs">

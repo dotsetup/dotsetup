@@ -5,7 +5,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace DotSetup.UIComponents
+namespace DotSetup.UILayouts.UIComponents
 {
     public partial class SimplePageIndicator : UserControl
     {

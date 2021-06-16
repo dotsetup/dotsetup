@@ -1,4 +1,5 @@
 ﻿using DotSetup;
+using DotSetup.UILayouts.UIComponents;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DotSetup_UnitTest

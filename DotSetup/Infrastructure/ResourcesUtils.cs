@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public class ResourcesUtils
     {

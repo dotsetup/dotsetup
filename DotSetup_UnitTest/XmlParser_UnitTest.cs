@@ -1,4 +1,5 @@
 ﻿using DotSetup;
+using DotSetup.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;

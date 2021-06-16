@@ -10,8 +10,9 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Threading;
 using DotSetup.Infrastructure;
+using DotSetup.Installation.Configuration;
 
-namespace DotSetup
+namespace DotSetup.Installation.Packages
 {
     internal class PackageRunner
     {
@@ -19,6 +20,7 @@ namespace DotSetup
         private Thread _runnerThread = null;
         private Mutex _msiRunMutex = null;
         private readonly bool _waitForRunner;
+        private Stopwatch _processRunTime = null;
 
         public bool BitsEnabled { get; private set; }
         private readonly object terminationLock = new object();
@@ -46,7 +48,7 @@ namespace DotSetup
                             Logger.GetLogger().Info($"Running {runName} {runParam}");
 #endif
 
-                            if (_installationPackage.RunWithBits && !FileUtils.IsRunnableFile(runName))
+                            if (_installationPackage.RunWithBits && !FileUtils.IsRunnableFile(runName, false))
                             {
 #if DEBUG
                                 Logger.GetLogger().Info($"{runName} sets to run with BITS but it's not an executable file. BITS is not going to be used");
@@ -63,7 +65,7 @@ namespace DotSetup
                                 p = new Process();
                                 p.StartInfo.FileName = runName;
                                 p.StartInfo.Arguments = runParam;
-                                p.StartInfo.UseShellExecute = !FileUtils.IsRunnableFileExtension(runName);
+                                p.StartInfo.UseShellExecute = !FileUtils.IsExeFileExtension(runName);
                             }
 
                             if (Path.GetExtension(runName).ToLower() == ".msi")
@@ -76,6 +78,7 @@ namespace DotSetup
                             }
 
                             _installationPackage.HandleRunStart();
+                            _processRunTime = Stopwatch.StartNew();
 
                             Process[] preRunningProcesses = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(runName));
                             int preRunningProcessesCount = preRunningProcesses.Length;
@@ -106,7 +109,7 @@ namespace DotSetup
                                     foreach (Process candidate in processByName)
                                     {
                                         if (preRunningProcesses.All(current => current.Id != candidate.Id) &&
-                                            candidate.ProcessName != candidate.Parent().ProcessName)
+                                            candidate.ProcessName != candidate.Parent()?.ProcessName)
                                         {
                                             p = candidate;
                                             break;
@@ -123,7 +126,12 @@ namespace DotSetup
                                     if (sender is Process process)
                                     {
                                         _installationPackage.runExitCode = process.ExitCode;
-                                        if (_installationPackage.waitForIt)
+                                        ConfigParser.GetConfig().SetProductSettingsXml(_installationPackage.ProdSettings, "StaticData/CustomData/RunData/ExitCode", process.ExitCode.ToString());
+                                        if (_processRunTime != null)                                        
+                                            ConfigParser.GetConfig().SetProductSettingsXml
+                                                (_installationPackage.ProdSettings, "StaticData/CustomData/RunData/RunTimeMS", _processRunTime.ElapsedMilliseconds.ToString());
+                                                                                
+                                        if (_installationPackage.WaitForIt)
                                             _installationPackage.HandleRunEnd();
                                     }
                                 };
@@ -153,7 +161,7 @@ namespace DotSetup
                         _installationPackage.OnInstallFailed(ErrorConsts.ERR_RUN_GENERAL, _installationPackage.ErrorMessage);
                     }
 
-                    if (!_installationPackage.waitForIt)
+                    if (!_installationPackage.WaitForIt)
                         _installationPackage.HandleRunEnd();
                 }
             });
@@ -179,7 +187,7 @@ namespace DotSetup
             }
             finally
             {
-                if ((_msiRunMutex != null) && !isMsiFree)
+                if (_msiRunMutex != null && !isMsiFree)
                 {
 #if DEBUG
                     Logger.GetLogger().Info("Timeout expired for running msi - " + runName);

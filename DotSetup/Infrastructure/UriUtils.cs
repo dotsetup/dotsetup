@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public sealed class UriUtils
     {
@@ -54,7 +54,7 @@ namespace DotSetup
                 return null;
 
             string edgeexepath = WinDir + EdgeAppFileName;
-            return (File.Exists(edgeexepath) ? edgeexepath : null);
+            return File.Exists(edgeexepath) ? edgeexepath : null;
         }
 
 
@@ -62,49 +62,47 @@ namespace DotSetup
         {
             try
             {
-                string[] arg = new string[2];
-                string subKey = "\\Software\\Opera Software";
-                string OperaExePath = "";
+                string operaExePath;
+                const string operaRegBase = "HKCU\\Software\\Opera Software";
+                string regKeyValue = RegistryUtils.Instance.GetRegKeyValue(operaRegBase, "Last Stable Install Path");
 
-                arg[0] = "HKCU" + subKey;
-                arg[1] = "Last Stable Install Path";
+                if (!string.IsNullOrEmpty(regKeyValue))
+                {
+                    operaExePath = regKeyValue + "launcher.exe";
+                    if (File.Exists(operaExePath))
+                        return operaExePath;
 
-                OperaExePath = RegistryUtils.Instance.GetRegKeyValue(arg) + "launcher.exe";
-                if (File.Exists(OperaExePath) && !OperaExePath.Equals("launcher.exe"))
-                    return OperaExePath;
+                    operaExePath = regKeyValue + "opera.exe";
+                    if (File.Exists(operaExePath))
+                        return operaExePath;
+                }
 
-                OperaExePath = RegistryUtils.Instance.GetRegKeyValue(arg) + "opera.exe";
-                if (File.Exists(OperaExePath) && !OperaExePath.Equals("opera.exe"))
-                    return OperaExePath;
+                regKeyValue = RegistryUtils.Instance.GetRegKeyValue(operaRegBase, "Last Directory3");
+                operaExePath = regKeyValue + "opera.exe";
+                if (!string.IsNullOrEmpty(regKeyValue) && File.Exists(operaExePath))
+                    return operaExePath;
 
-                arg[1] = "Last Directory3";
-                OperaExePath = RegistryUtils.Instance.GetRegKeyValue(arg) + "opera.exe";
-                if (File.Exists(OperaExePath) && !OperaExePath.Equals("opera.exe"))
-                    return OperaExePath;
+                regKeyValue = RegistryUtils.Instance.GetRegKeyValue(operaRegBase, "Last CommandLine");
+                if (!string.IsNullOrEmpty(regKeyValue) && File.Exists(regKeyValue))
+                    return regKeyValue;
 
-                arg[1] = "Last CommandLine";
-                OperaExePath = RegistryUtils.Instance.GetRegKeyValue(arg);
-                if (File.Exists(OperaExePath))
-                    return OperaExePath;
-
-                arg[1] = "Last CommandLine v2";
-                OperaExePath = RegistryUtils.Instance.GetRegKeyValue(arg);
-                if ((OperaExePath != null) && File.Exists(OperaExePath.TrimStart()))
-                    return OperaExePath;
+                regKeyValue = RegistryUtils.Instance.GetRegKeyValue(operaRegBase, "Last CommandLine v2");
+                if (!string.IsNullOrEmpty(regKeyValue) && File.Exists(regKeyValue.TrimStart()))
+                    return regKeyValue;
 
 
                 if (!string.IsNullOrEmpty(programFiles))
                 {
-                    OperaExePath = programFiles.ToString() + "\\Opera\\opera.exe";
-                    if (File.Exists(OperaExePath))
-                        return OperaExePath;
+                    operaExePath = programFiles + "\\Opera\\opera.exe";
+                    if (File.Exists(operaExePath))
+                        return operaExePath;
                 }
 
                 if (!string.IsNullOrEmpty(programFilesX86))
                 {
-                    OperaExePath = programFilesX86.ToString() + "\\Opera\\opera.exe";
-                    if (File.Exists(OperaExePath))
-                        return OperaExePath;
+                    operaExePath = programFilesX86 + "\\Opera\\opera.exe";
+                    if (File.Exists(operaExePath))
+                        return operaExePath;
                 }
             }
 #if DEBUG
@@ -117,32 +115,95 @@ namespace DotSetup
                 Logger.GetLogger().Warning("GetOperaEXE failed: " + e.Message);
 #endif
             }
-            finally
-            {
-            }
+
             return null;
         }
 
         public string GetChromeExe()
         {
+            // Reads a string value from the specified product's registry key. Returns true
+            // if the value is present and successfully read.
+            string GetClientStateValue(bool userLevel, string appGuid, string valueName)
+            {
+                string installationRegKey = "Software\\Google\\Update\\ClientState";
+                if (!string.IsNullOrEmpty(appGuid))
+                    installationRegKey = $"{installationRegKey}\\{appGuid}";
+
+                return RegistryUtils.Instance.GetRegKeyValue(userLevel ? "HKCU" : "HKLM", installationRegKey, valueName, Microsoft.Win32.RegistryView.Registry32);
+            }
+
+            // Reads the path to setup.exe from the value "UninstallString" within the
+            // specified product's registry key. Returns an empty string if an error
+            // occurs or the product is not installed at the specified level.
+            string GetSetupExeFromRegistry(bool userLevel, string appGuid)
+            {
+                string setupExePath = GetClientStateValue(userLevel, appGuid, "UninstallString");
+                if (!File.Exists(setupExePath))
+                    return string.Empty;
+                return setupExePath;
+            }
+
+            // Returns the path to an existing setup.exe at the specified level, if it can
+            // be found via the registry.
+            string GetSetupExeForInstallationLevel(bool userLevel)
+            {
+                // Look in the registry for Chrome Binaries first.
+                string setupExePath = GetSetupExeFromRegistry(userLevel, "{4DC8B4CA-1BDA-483e-B5FA-D3C12E15B62D}");
+                // If the above fails, look in the registry for Chrome next.
+                if (string.IsNullOrEmpty(setupExePath))
+                    setupExePath = GetSetupExeFromRegistry(userLevel, "{8A69D345-D564-463c-AFF1-A69D9E530F96}");
+                // If we fail again, then setupExePath would be empty.
+                return setupExePath;
+            }
+
+            // Returns the path to an installed |exeFile| (e.g. chrome.exe) at the
+            // specified level, given |setupExePath| from the registry.  Returns empty
+            // string if none found, or if |setupExePath| is empty.
+            string FindExeRelativeToSetupExe(string setupExePath, string exeFile)
+            {
+                if (string.IsNullOrEmpty(setupExePath))
+                    return string.Empty;
+
+                // The uninstall path contains the path to setup.exe, which is two levels
+                // down from |exeFile|. Move up two levels (plus one to drop the file
+                // name) and look for chrome.exe from there.
+                string exePath = Path.Combine(Directory.GetParent(Directory.GetParent(Path.GetDirectoryName(setupExePath)).ToString()).ToString(), exeFile);
+                if (File.Exists(exePath))
+                    return exePath;
+
+                // By way of mild future proofing, look up one to see if there's a
+                // |exeFile| in the version directory
+                exePath = Path.Combine(Directory.GetParent(Path.GetDirectoryName(setupExePath)).ToString(), exeFile);
+                if (File.Exists(exePath))
+                    return exePath;
+
+                return string.Empty;
+            }
+
+            string GetChromePathForInstallationLevel(bool userLevel) => FindExeRelativeToSetupExe(GetSetupExeForInstallationLevel(userLevel), "chrome.exe");
+
+            string path = GetChromePathForInstallationLevel(false);
+            if (string.IsNullOrWhiteSpace(path))
+                path = GetChromePathForInstallationLevel(true);
+
+            if (File.Exists(path))
+                return path;
+
+            //if we didn't manage to locate Chrome with the official algorithm, let's try again with unofficial algorithm
             try
             {
-                string[] arg = new string[1];
+                const string subKey = "\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe\\";
+                const string partialExePath = "\\Google\\Chrome\\Application\\chrome.exe";
 
-                string subKey = "\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe\\";
-                string partialExePath = "\\Google\\Chrome\\Application\\chrome.exe";
+                string regKeyValue = RegistryUtils.Instance.GetRegKeyValue("HKLM" + subKey);
+                if (File.Exists(regKeyValue))
+                    return regKeyValue;
 
-                arg[0] = "HKLM" + subKey;
-                string ChromeExePath = RegistryUtils.Instance.GetRegKeyValue(arg);
-                if (File.Exists(ChromeExePath))
-                    return ChromeExePath;
+                regKeyValue = RegistryUtils.Instance.GetRegKeyValue("HKCU" + subKey);
+                if (File.Exists(regKeyValue))
+                    return regKeyValue;
 
-                arg[0] = "HKCU" + subKey;
-                ChromeExePath = RegistryUtils.Instance.GetRegKeyValue(arg);
-                if (File.Exists(ChromeExePath))
-                    return ChromeExePath;
-
-                ChromeExePath = programFiles + partialExePath;
+                string ChromeExePath = programFiles + partialExePath;
                 if (File.Exists(ChromeExePath))
                     return ChromeExePath;
 
@@ -161,28 +222,8 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("GetChromeEXE failed: " + e.Message);
+                Logger.GetLogger().Warning($"GetChromeEXE failed: {e}");
 #endif
-            }
-            finally
-            {
-            }
-            return null;
-        }
-
-        private string ReadLocationFromRegistry(string rootKey)
-        {
-            string[] arg = new string[2];
-            string subKey = "\\SOFTWARE\\Mozilla\\Mozilla Firefox";
-
-            arg[0] = rootKey + subKey;
-            arg[1] = "CurrentVersion";
-            string wst = RegistryUtils.Instance.GetRegKeyValue(arg);
-            if (!string.IsNullOrEmpty(wst))
-            {
-                arg[0] = arg[0] + "\\" + wst + "\\Main";
-                arg[1] = "PathToExe";
-                return RegistryUtils.Instance.GetRegKeyValue(arg);
             }
 
             return null;
@@ -190,18 +231,28 @@ namespace DotSetup
 
         public string GetFirefoxExe()
         {
+            static string ReadLocationFromRegistry(string rootKey)
+            {
+                string subKey = rootKey + "\\SOFTWARE\\Mozilla\\Mozilla Firefox";
+                string regKeyValue = RegistryUtils.Instance.GetRegKeyValue(subKey, "CurrentVersion");
+                
+                if (!string.IsNullOrEmpty(regKeyValue))
+                {
+                    return RegistryUtils.Instance.GetRegKeyValue(subKey + "\\" + regKeyValue + "\\Main", "PathToExe");
+                }
+
+                return null;
+            };
+
             try
             {
-                string[] arg = new string[1];
                 string subKey = "\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\firefox.exe\\";
 
-                arg[0] = "HKLM" + subKey;
-                string FirefoxExePath = RegistryUtils.Instance.GetRegKeyValue(arg);
+                string FirefoxExePath = RegistryUtils.Instance.GetRegKeyValue("HKLM" + subKey);
                 if (File.Exists(FirefoxExePath))
                     return FirefoxExePath;
 
-                arg[0] = "HKCU" + subKey;
-                FirefoxExePath = RegistryUtils.Instance.GetRegKeyValue(arg);
+                FirefoxExePath = RegistryUtils.Instance.GetRegKeyValue("HKCU" + subKey);
                 if (File.Exists(FirefoxExePath))
                     return FirefoxExePath;
 
@@ -220,11 +271,8 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("GetFirefoxEXE failed: " + e.Message);
+                Logger.GetLogger().Warning($"GetFirefoxEXE failed: {e}");
 #endif
-            }
-            finally
-            {
             }
 
             return null;
@@ -235,17 +283,14 @@ namespace DotSetup
         {
             try
             {
-                string[] arg = new string[1];
-                string subKey = "\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe\\";
+                const string subKey = "\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe\\";
 
-                arg[0] = "HKLM" + subKey;
-                string IEExe = RegistryUtils.Instance.GetRegKeyValue(arg);
+                string IEExe = RegistryUtils.Instance.GetRegKeyValue("HKLM" + subKey);
 
                 if (File.Exists(IEExe))
                     return IEExe;
 
-                arg[0] = "HKCU" + subKey;
-                IEExe = RegistryUtils.Instance.GetRegKeyValue(arg);
+                IEExe = RegistryUtils.Instance.GetRegKeyValue("HKCU" + subKey);
                 if (File.Exists(IEExe))
                     return IEExe;
             }
@@ -256,11 +301,8 @@ namespace DotSetup
 #endif
             {
 #if DEBUG
-                Logger.GetLogger().Warning("GetIEEXE failed: " + e.Message);
+                Logger.GetLogger().Warning($"GetIEEXE failed: {e}");
 #endif
-            }
-            finally
-            {
             }
 
             return null;
@@ -340,6 +382,6 @@ namespace DotSetup
         }
 
         public static bool CheckURLValid(string url) => Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-    }    
+    }
 }
 

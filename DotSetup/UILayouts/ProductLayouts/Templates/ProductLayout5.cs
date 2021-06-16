@@ -6,8 +6,11 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using DotSetup.Installation.Configuration;
+using DotSetup.UILayouts.ControlLayout;
+using DotSetup.UILayouts.ProductLayouts;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ControlLayout.Templates
 {
     public partial class ProductLayout5 : ProductControl
     {

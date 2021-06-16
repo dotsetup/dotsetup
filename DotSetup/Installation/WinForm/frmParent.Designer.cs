@@ -1,4 +1,6 @@
-﻿namespace DotSetup
+﻿using DotSetup.UILayouts.UIComponents;
+
+namespace DotSetup.Installation.WinForm
 {
     partial class FrmParent
     {

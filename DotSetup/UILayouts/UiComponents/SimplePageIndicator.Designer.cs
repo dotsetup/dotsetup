@@ -1,4 +1,4 @@
-﻿namespace DotSetup.UIComponents
+﻿namespace DotSetup.UILayouts.UIComponents
 {
     partial class SimplePageIndicator
     {

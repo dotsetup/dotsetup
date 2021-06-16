@@ -5,7 +5,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ProductLayouts
 {
     public class ProductControl : UserControl
     {

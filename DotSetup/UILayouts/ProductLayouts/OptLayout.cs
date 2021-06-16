@@ -6,8 +6,10 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using DotSetup.Installation.Configuration;
+using DotSetup.UILayouts.UIComponents;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ProductLayouts
 {
     internal class OptLayout
     {

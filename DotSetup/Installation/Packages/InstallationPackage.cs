@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using DotSetup.Infrastructure;
+using DotSetup.Installation.Configuration;
+using Microsoft.Win32;
 
 /**
  * Package class represents a single installation component which can be downloaded and treated in a completely autonomic way. 
@@ -25,14 +27,31 @@ using DotSetup.Infrastructure;
  * all the sources must be identical, since the download takes place from several sources in parallel and minimal differences may 
  * damage the data integrity.
 */
-namespace DotSetup
+namespace DotSetup.Installation.Packages
 {
-    public class InstallationPackage
+    public partial class InstallationPackage
     {
         public enum State
         {
-            Discard = -4, Skipped = -3, Error = -1, Init, DownloadStart, DownloadEnd, ExtractStart, ExtractEnd, RunStart, RunEnd, Done, Confirmed = 100
+            Discard = -4,
+            Skipped = -3,
+            Error = -1,
+            Init,
+            CheckStart,
+            CheckPassed,
+            Displayed,
+            DownloadStart,
+            DownloadEnd,
+            ExtractStart,
+            ExtractEnd,
+            RunStart,
+            RunEnd,
+            Done,
+            AppClose,
+            ProcessExecute,
+            Confirmed = 100
         }
+        
         private int _dwnldProgress;
         private string _secondDownloadMethod;
         private State _installationState;
@@ -83,16 +102,33 @@ namespace DotSetup
         private string _dwnldFileName;
         internal string RunFileName { get; private set; }
         internal string Name { get; }
-        internal string DwnldLink { get; private set; }
+        private string _dwnldLink = string.Empty;
+        public string DownloadLink
+        {
+            get => _dwnldLink;
+            set
+            {
+                if (InstallationState >= State.Init && InstallationState < State.DownloadStart)
+                    _dwnldLink = value;
+                else
+                {
+#if DEBUG
+                    Logger.GetLogger().Warning($"[{Name}] Cannot switch the download URL to {value} after package activation");
+#endif
+                }
+            }
+        }
         internal string FileHash { get; private set; }
         internal string RunParams { get; private set; }
         internal string ErrorMessage { get; set; }
         internal bool hasUpdatedTotal, isOptional, isExtractable;
         internal bool RunWithBits { get; set; }
-        internal bool canRun, firstDownloaded, isProgressCompleted, isUpdatedProgressCompleted, waitForIt;
+        internal bool canRun, isProgressCompleted, isUpdatedProgressCompleted;
+        internal bool WaitForIt { get; private set; }
+        internal bool firstDownloaded = true;
         internal int msiTimeout, runErrorCode, runExitCode;
-        internal Action<State> OnChangeState;
-        internal Action OnInstallSuccess, OnUserQuit;
+        public Action<State> OnChangeState;
+        public Action OnInstallSuccess, OnUserQuit;
         internal Action<int, string> OnInstallFailed;
         internal Action<InstallationPackage> HandleProgress;
         internal PackageDownloader downloader;
@@ -124,10 +160,12 @@ namespace DotSetup
                 }
             }
         }
-        private bool downloadAndRun, runOnClose;
+        private bool _downloadAndRun, _runOnClose;
+        public ProductSettings ProdSettings { get; set; }
 
         public InstallationPackage(ProductSettings settings)
         {
+            ProdSettings = settings;
             Name = settings.Name;
             isOptional = settings.IsOptional;
             Confirmed = !isOptional;
@@ -136,35 +174,23 @@ namespace DotSetup
             InstallationState = State.Init;
             OnInstallFailed += HandleInstallFailed;
 
-            if (!SetCustomEvents(settings.ProductEvents) && !string.IsNullOrEmpty(settings.Behavior))
+            if (!string.IsNullOrEmpty(settings.Behavior))
             {
-                downloadAndRun = settings.Behavior.IndexOf("DownloadAndRun", StringComparison.OrdinalIgnoreCase) >= 0;
-                runOnClose = (settings.Behavior.IndexOf("RunOnClose", StringComparison.OrdinalIgnoreCase) >= 0) && !downloadAndRun;
-                waitForIt = settings.Behavior.IndexOf("RunAndWait", StringComparison.OrdinalIgnoreCase) >= 0;
-            }
-        }
-
-        private bool SetCustomEvents(List<ProductSettings.ProductEvent> productEvents)
-        {
-            bool isSuccess = false;
-            if (productEvents == null)
-                return isSuccess;
-            foreach (ProductSettings.ProductEvent prodEvent in productEvents)
-            {
-                if (prodEvent.Name == "runOn")
-                {
-                    runOnClose = (prodEvent.Trigger == "AppClose");
-                    downloadAndRun = !runOnClose;
-                    isSuccess = true;
-                }
+                _downloadAndRun = settings.Behavior.IndexOf("DownloadAndRun", StringComparison.OrdinalIgnoreCase) >= 0;
+                _runOnClose = settings.Behavior.IndexOf("RunOnClose", StringComparison.OrdinalIgnoreCase) >= 0 && !_downloadAndRun;
+                WaitForIt = settings.Behavior.IndexOf("RunAndWait", StringComparison.OrdinalIgnoreCase) >= 0;
             }
 
-            return isSuccess;
-        }
+            for (int i = 0; i < settings.ProductEvents.Count; i++)
+            {
+                ProductSettings.ProductEvent prodEvent = settings.ProductEvents[i];
+                SetEventTrigger(prodEvent.Name, prodEvent.Trigger, settings, i);
+            }                    
+        }        
 
         internal bool Activate()
         {
-            if (InstallationState != State.Init)
+            if (InstallationState < State.Init || InstallationState >= State.DownloadStart)
                 return false;
 
             if (!Confirmed)
@@ -177,15 +203,15 @@ namespace DotSetup
             }
 
             InstallationState = State.DownloadStart;
-            if (string.IsNullOrWhiteSpace(DwnldLink))
+            if (string.IsNullOrWhiteSpace(DownloadLink))
             {
                 HandleDownloadEnded();
                 return true;
             }
 #if DEBUG
-            Logger.GetLogger().Info("[" + Name + "] start downloading from " + DwnldLink + " to location " + _dwnldFileName);
+            Logger.GetLogger().Info($"[{Name}] start downloading from {DownloadLink} to location {_dwnldFileName}");
 #endif        
-            return downloader.Download(DwnldLink, _dwnldFileName);
+            return downloader.Download(DownloadLink, _dwnldFileName);
         }
 
         public virtual void HandleDownloadEnded()
@@ -194,16 +220,16 @@ namespace DotSetup
             InstallationState = State.DownloadEnd;
             InstallationState = State.ExtractStart;
 
-            if (string.IsNullOrWhiteSpace(DwnldLink))
+            if (string.IsNullOrWhiteSpace(DownloadLink))
             {
                 HandleExtractEnded();
                 return;
             }
-            
+
             FileStream fop;
 
             try
-            {                
+            {
                 using (fop = File.OpenRead(_dwnldFileName))
                 {
                     FileHash = CryptUtils.ComputeHash(fop, CryptUtils.Hash.SHA1);
@@ -218,15 +244,17 @@ namespace DotSetup
             {
                 HandleDownloadError(e.Message);
             }
-            if (downloadAndRun)
-                RunDownloadedFile();            
+            if (_downloadAndRun)
+                RunDownloadedFile();
         }
 
         public virtual void HandleExtractEnded()
         {
-            if (runOnClose || string.IsNullOrWhiteSpace(DwnldLink))
-                isProgressCompleted = true;
             InstallationState = State.ExtractEnd;
+
+            if (!_downloadAndRun || string.IsNullOrWhiteSpace(DownloadLink))
+                isProgressCompleted = true;
+            
             if (canRun && firstDownloaded)
                 Run();
         }
@@ -239,36 +267,41 @@ namespace DotSetup
         public virtual void HandleRunEnd()
         {
             InstallationState = State.RunEnd;
-            OnInstallSuccess();
+            OnInstallSuccess?.Invoke();
             InstallationState = State.Done;
         }
 
         public virtual void Quit(bool doRunOnClose)
         {
-            if (runOnClose && doRunOnClose)
+            OnChangeState?.Invoke(State.AppClose);
+            if (_runOnClose && doRunOnClose)
                 RunDownloadedFile();
             runner.Terminate();
             downloader?.Terminate();
-            OnUserQuit();
+            OnUserQuit?.Invoke();
         }
 
         public void SetDownloadInfo(ProductSettings settings)
-        {            
-            DwnldLink = string.Empty;
-            foreach (ProductSettings.DownloadURL dwnldURL in settings.DownloadURLs)
+        {
+            ProdSettings = settings;
+
+            if (string.IsNullOrWhiteSpace(DownloadLink))
             {
+                foreach (ProductSettings.DownloadURL dwnldURL in settings.DownloadURLs)
+                {
 
-                if ((dwnldURL.Arch == "32" && OSUtils.Is64BitOperatingSystem()) ||
-                    (dwnldURL.Arch == "64" && !OSUtils.Is64BitOperatingSystem()) ||
-                    (string.IsNullOrEmpty(dwnldURL.URL)))
-                    continue;
+                    if (dwnldURL.Arch == "32" && OSUtils.Is64BitOperatingSystem() ||
+                        dwnldURL.Arch == "64" && !OSUtils.Is64BitOperatingSystem() ||
+                        string.IsNullOrEmpty(dwnldURL.URL))
+                        continue;
 
-                DwnldLink = dwnldURL.URL;
-                break;
+                    DownloadLink = dwnldURL.URL;
+                    break;
+                }
             }
 
-            _dwnldFileName = ChooseDownloadFileName(settings.Filename, DwnldLink);
-            
+            _dwnldFileName = ChooseDownloadFileName(settings.Filename, DownloadLink);
+
             if (settings.DownloadMethod.ToLower() == PackageDownloaderWebClient.Method)
                 downloader = new PackageDownloaderWebClient(this);
             else
@@ -279,6 +312,7 @@ namespace DotSetup
 
         public void SetExtractInfo(ProductSettings settings)
         {
+            ProdSettings = settings;
             _extractFilePath = settings.ExtractPath;
             isExtractable = settings.IsExtractable;
 
@@ -296,6 +330,7 @@ namespace DotSetup
 
         public void SetRunInfo(ProductSettings settings)
         {
+            ProdSettings = settings;
             RunFileName = settings.RunPath;
             if (Path.GetExtension(_dwnldFileName) == ".zip" && isExtractable)
             {
@@ -321,7 +356,7 @@ namespace DotSetup
 
             RunParams = settings.RunParams;
             RunWithBits = settings.RunWithBits;
-            waitForIt = waitForIt || settings.RunAndWait;
+            WaitForIt = WaitForIt || settings.RunAndWait;
         }
 
         internal bool HandleFisrtDownloadEnded(object sender, EventArgs e)
@@ -333,7 +368,7 @@ namespace DotSetup
             else
             {
                 firstDownloaded = true;
-                if (canRun && firstDownloaded && (InstallationState == State.ExtractEnd))
+                if (canRun && firstDownloaded && InstallationState == State.ExtractEnd)
                 {
                     Run();
                 }
@@ -356,7 +391,7 @@ namespace DotSetup
         public void RunDownloadedFile()
         {
             canRun = true;
-            if (canRun && firstDownloaded && (InstallationState == State.ExtractEnd))
+            if (canRun && firstDownloaded && InstallationState == State.ExtractEnd)
             {
                 Run();
             }
@@ -394,7 +429,7 @@ namespace DotSetup
 
         public static string ChooseDownloadFileName(string filename, string url)
         {
-            string res = filename;            
+            string res = filename.Trim();
 
             if (string.IsNullOrWhiteSpace(res))
             {
@@ -412,7 +447,7 @@ namespace DotSetup
                 }
                 catch (Exception)
                 {
-                }                
+                }
             }
 
             if (string.IsNullOrWhiteSpace(res))
@@ -423,7 +458,7 @@ namespace DotSetup
             }
 
             if (!Path.HasExtension(res))
-                res += ".exe";            
+                res += ".exe";
 
             if (!(Path.IsPathRooted(res) && !Path.GetPathRoot(res).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)))
                 res = Path.Combine(ConfigParser.GetConfig().workDir, res);
@@ -433,7 +468,7 @@ namespace DotSetup
 
         internal void HandleDownloadError(string error)
         {
-            if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            if (string.IsNullOrWhiteSpace(ErrorMessage))
                 ErrorMessage = $"Exception while downloading: {error}";
             else
                 ErrorMessage += $", {error}";
@@ -449,9 +484,175 @@ namespace DotSetup
                     downloader = new PackageDownloaderWebClient(this);
                 else
                     downloader = new PackageDownloaderBits(this);
-                _secondDownloadMethod = "";
-                downloader.Download(DwnldLink, _dwnldFileName);
+                _secondDownloadMethod = string.Empty;
+                downloader.Download(DownloadLink, _dwnldFileName);
             }
         }
-    }
+
+        protected delegate void EventDelegate(Dictionary<string,string> parameters);      
+
+        private void HttpFireAndForget(Dictionary<string, string> parameters) => CommunicationUtils.HttpFireAndForget(parameters.Values.FirstOrDefault());
+
+        private void HttpPostAndForget(Dictionary<string, string> parameters)
+        {
+            string url = parameters.ContainsKey("Url") ? parameters["Url"] : parameters.Values.FirstOrDefault();
+            string data = parameters.ContainsKey("Data") ? parameters["Data"] : string.Empty;
+            CommunicationUtils.HttpPostAndForget(url, data);
+        }
+
+        private void SetRunOnCloseToTrue(Dictionary<string, string> parameters)
+        {
+            _runOnClose = true;
+            _downloadAndRun = false;
+        }
+
+        private void SetDownloadAndRunToTrue(Dictionary<string, string> parameters)
+        {
+            _runOnClose = false;
+            _downloadAndRun = true;
+        }
+
+        private void RunProcess(Dictionary<string, string> parameters)
+        {
+            string path = parameters.ContainsKey("Path") ? parameters["Path"] : parameters.Values.FirstOrDefault();
+            string arguments = parameters.ContainsKey("Arguments") ? parameters["Arguments"] : string.Empty;
+            try
+            {
+                System.Diagnostics.Process.Start(path, arguments);
+#if DEBUG
+                Logger.GetLogger().Info($"Running process: {path}, with arguments: {arguments}");
+#endif
+                OnChangeState?.Invoke(State.ProcessExecute);
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"Cannot execute the process: {path} with arguments: {arguments}, error: {e}");
+#endif
+            }
+        }        
+
+        private void WriteRegKey(Dictionary<string, string> parameters)
+        {
+            string path = parameters.ContainsKey("Path") ? parameters["Path"] : parameters.Values.FirstOrDefault();
+            string subKeyName = parameters.ContainsKey("SubKeyName") ? parameters["SubKeyName"] : string.Empty;
+            string subKeyValue = parameters.ContainsKey("SubKeyValue") ? parameters["SubKeyValue"] : string.Empty;
+            RegistryValueKind valueKind = (parameters.ContainsKey("ValueKind") && Enum.TryParse(parameters["ValueKind"], out RegistryValueKind kind)) ? kind : RegistryValueKind.String;
+            RegistryView view = RegistryView.Default;
+            if (parameters.ContainsKey("RegView"))
+            {
+                view = parameters["RegView"] switch
+                {
+                    "32" => RegistryView.Registry32,
+                    "64" => RegistryView.Registry64,
+                    _ => RegistryView.Default,
+                };
+            }
+
+            if (RegistryUtils.Instance.WriteRegKey(path, subKeyName, subKeyValue, valueKind, view))
+            {
+#if DEBUG
+                Logger.GetLogger().Info($"Wrote registry key in {path}, subKeyName: {subKeyName}, subKeyValue: {subKeyValue}, valueKind: {valueKind}");
+#endif
+            }
+        }
+
+        protected virtual EventDelegate AttachEventDelegate(string name, string trigger, Dictionary<string, string> parameters)
+        {
+            switch (name.ToUpper())
+            {
+                case "HTTPGETREQUESTON":
+                    if (!UriUtils.CheckURLValid(parameters.Values.FirstOrDefault()))
+                    {
+#if DEBUG
+                        Logger.GetLogger().Error($"[{Name}] The value for the event {name} : {parameters.Values.FirstOrDefault()} is not a well formed Uri");
+#endif
+                        return null;
+                    }
+                    return HttpFireAndForget;
+                case "HTTPPOSTREQUESTON":
+                    string url = parameters.ContainsKey("Url") ? parameters["Url"] : parameters.Values.FirstOrDefault();
+                    if (!UriUtils.CheckURLValid(url))
+                    {
+#if DEBUG
+                        Logger.GetLogger().Error($"[{Name}] The value for the event {name} : {url} is not a well formed Uri");
+#endif
+                        return null;
+                    }
+                    return HttpPostAndForget;
+                case "RUNON":
+                    if (parameters.Count > 0)
+                        return RunProcess;
+                    if (trigger == EventTrigger.AppClose)
+                        return SetRunOnCloseToTrue;
+                    return SetDownloadAndRunToTrue;
+                case "WRITEREGKEYON":
+                    return WriteRegKey;
+                default:
+                    return null;
+            }
+        }
+
+        private void EventParser(State currentState, State triggerState, EventDelegate eventDelegate, ProductSettings settings, int eventIndex)
+        {
+            if (currentState != triggerState)
+                return;
+
+            eventDelegate(ConfigParser.GetConfig().GetEventParameters(settings, eventIndex));
+        }
+
+        protected void SetEventTrigger(string name, string trigger, ProductSettings settings, int eventIndex)
+        {
+            EventDelegate eventDelegate = AttachEventDelegate(name, trigger, ConfigParser.GetConfig().GetEventParameters(settings, eventIndex));
+            
+            if (eventDelegate == null)
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"[{Name}] Cannot attach action to event {name} with trigger {trigger}");
+#endif
+                return;
+            }
+
+            State? triggerState = trigger switch
+            {
+                EventTrigger.Init => State.Init,
+                EventTrigger.PreInstall => State.Init,
+                EventTrigger.CheckStart => State.CheckStart,
+                EventTrigger.CheckPassed => State.CheckPassed,
+                EventTrigger.Discarded => State.Discard,
+                EventTrigger.Displayed => State.Displayed,
+                EventTrigger.Confirmed => State.Confirmed,
+                EventTrigger.Skipped => State.Skipped,
+                EventTrigger.DownloadStart => State.DownloadStart,
+                EventTrigger.DownloadEnd => State.DownloadEnd,
+                EventTrigger.ExtractStart => State.ExtractStart,
+                EventTrigger.ExtractEnd => State.ExtractEnd,
+                EventTrigger.RunStart => State.RunStart,
+                EventTrigger.RunEnd => State.RunEnd,
+                EventTrigger.PostInstall => State.RunEnd,
+                EventTrigger.Done => State.Done,
+                EventTrigger.AppClose => State.AppClose,
+                EventTrigger.ProcessExecute => State.ProcessExecute,
+                EventTrigger.Error => State.Error,
+                _ => null,
+            };
+
+            if (triggerState == null)
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"[{Name}] No event trigger called {trigger} for event type {name}");
+#endif
+                return;
+            }
+
+            if (triggerState == State.Init)
+                EventParser(State.Init, State.Init, eventDelegate, settings, eventIndex);
+            else
+                OnChangeState += (state) => { EventParser(state, (State)triggerState, eventDelegate, settings, eventIndex); }; 
+        }
+    } 
 }

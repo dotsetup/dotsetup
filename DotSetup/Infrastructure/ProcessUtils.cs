@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public static class ProcessUtils
     {
@@ -36,18 +36,18 @@ namespace DotSetup
 
             public interface IEntry
             {
-                bool TryMoveNext(Toolhelp32.Snapshot snap, out IEntry entry);
+                bool TryMoveNext(Snapshot snap, out IEntry entry);
             }
 
             public struct Snapshot : IDisposable
             {
                 void IDisposable.Dispose()
                 {
-                    Toolhelp32.CloseHandle(m_handle);
+                    CloseHandle(m_handle);
                 }
                 public Snapshot(uint flags, int processId)
                 {
-                    m_handle = Toolhelp32.CreateToolhelp32Snapshot(flags, processId);
+                    m_handle = CreateToolhelp32Snapshot(flags, processId);
                 }
 
                 private readonly IntPtr m_handle;
@@ -84,9 +84,16 @@ namespace DotSetup
         }
         public static Process Parent(this Process p)
         {
-            var entries = Toolhelp32.TakeSnapshot<WinProcessEntry>(Toolhelp32.SnapAll, 0);
-            var parentid = entries.First(x => x.th32ProcessID == p.Id).th32ParentProcessID;
-            return Process.GetProcessById(parentid);
+            try
+            {
+                IEnumerable<WinProcessEntry> entries = Toolhelp32.TakeSnapshot<WinProcessEntry>(Toolhelp32.SnapAll, 0);
+                int parentid = entries.First(x => x.th32ProcessID == p.Id).th32ParentProcessID;
+                return Process.GetProcessById(parentid);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

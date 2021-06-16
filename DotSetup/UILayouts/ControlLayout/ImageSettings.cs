@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.Xml;
 using DotSetup.UILayouts.UIComponents;
 
-namespace DotSetup
+namespace DotSetup.UILayouts.ControlLayout
 {
     internal class ImageSettings : ControlSettings
     {
@@ -21,7 +21,7 @@ namespace DotSetup
         internal override void SetLayout(Control control)
         {
             base.SetLayout(control);
-            if ((control is PictureBoxEx pbx) && !(string.IsNullOrWhiteSpace(value)))
+            if (control is PictureBoxEx pbx && !string.IsNullOrWhiteSpace(value))
                 pbx.SetImage(value, decode);
             else if (control is PanelEx pnlx)
             {
@@ -37,11 +37,11 @@ namespace DotSetup
             IsReady = false;
             new Thread(() =>
             {
-                _backgroundImage = UICommon.PrepareImage(value, decode);                
+                _backgroundImage = UICommon.PrepareImage(value, decode);
                 if (_backgroundImage != null)
                     IsReady = true;
                 onReady?.Signal();
             }).Start();
-        }        
+        }
     }
 }

@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     internal enum RegWow64Options
     {
@@ -60,7 +61,7 @@ namespace DotSetup
             //Call the native function
             int subKeyHandle, result = RegOpenKeyEx(RegistryKeyHandle(hkey), subKeyName, 0, rights | (int)options, out subKeyHandle);
 
-            //If we errored, return null
+            //If we had an error, return null
             if (result != 0)
                 return null;
 
@@ -126,7 +127,7 @@ namespace DotSetup
                 typeof(Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid).Assembly.GetType("Microsoft.Win32.SafeHandles.SafeRegistryHandle");
             //Get the array of types matching the args of the ctor we want
             Type[] safeRegistryHandleCtorTypes = new Type[] { typeof(IntPtr), typeof(bool) };
-            //Get the constructorinfo for our object
+            //Get the constructor info for our object
             System.Reflection.ConstructorInfo safeRegistryHandleCtorInfo = safeRegistryHandleType.GetConstructor(
                 publicConstructors, null, safeRegistryHandleCtorTypes, null);
             //Get the SafeRegistryHandle
@@ -138,65 +139,70 @@ namespace DotSetup
             return resultKey;
         }
 
-        private RegistryKey GetHiveKey(string hiveKey)
+        private RegistryKey GetHiveKey(string hiveKey, RegistryView view = RegistryView.Default)
         {
-            RegistryKey rk = (hiveKey.ToLower()) switch
+            RegistryHive hive = hiveKey.ToUpper() switch
             {
-                "hkcu" => Registry.CurrentUser,
-                "hklm" => Registry.LocalMachine,
-                "hku" => Registry.Users,
-                "hkcc" => Registry.CurrentConfig,
-                "hkcr" => Registry.ClassesRoot,
+                "HKCU" => RegistryHive.CurrentUser,
+                "HKEY_CURRENT_USER" => RegistryHive.CurrentUser,
+                "HKLM" => RegistryHive.LocalMachine,
+                "HKEY_LOCAL_MACHINE" => RegistryHive.LocalMachine,
+                "HKU" => RegistryHive.Users,
+                "HKEY_USERS" => RegistryHive.Users,
+                "HKCC" => RegistryHive.CurrentConfig,
+                "HKEY_CURRENT_CONFIG" => RegistryHive.CurrentConfig,
+                "HKCR" => RegistryHive.ClassesRoot,
+                "HKEY_CLASSES_ROOT" => RegistryHive.ClassesRoot,
+                "HKEY_PERFORMANCE_DATA" => RegistryHive.PerformanceData,
                 _ => throw new ArgumentOutOfRangeException(),
             };
+
+            RegistryKey rk = RegistryKey.OpenBaseKey(hive, view);
             return rk;
         }
 
-        public RegistryKey GetRegKey(string hiveKey, string subKey)
+        public RegistryKey GetRegKey(string hiveKey, string subKey, RegistryView view = RegistryView.Default)
         {
-            RegistryKey rk = GetHiveKey(hiveKey);
+            using RegistryKey rk = GetHiveKey(hiveKey, view);
             RegistryKey rkRes = OpenSubKey(rk, subKey, RegWow64Options.KEY_WOW64_64KEY);
             if (rkRes == null)
             {
                 rkRes = OpenSubKey(rk, subKey, RegWow64Options.KEY_WOW64_32KEY);
             }
 
-            rk.Close();
             return rkRes;
         }
 
-        public bool IsRegKeyExists(string[] arg)
+        public bool IsRegKeyExists(string path, bool allowRegex = false)
         {
             string hive = string.Empty;
             string rootSubKey = string.Empty;
             string relativeSubKey = string.Empty;
-            string subKeyName = string.Empty;
 
-            ParseRegistryPath(arg, ref hive, ref rootSubKey, ref subKeyName, ref relativeSubKey);
+            ParseRegistryPath(path, ref hive, ref rootSubKey, ref relativeSubKey);
 
             RegistryKey regKey = GetRegKey(hive, rootSubKey);
             if (regKey == null)
                 return false;
-            return regKey.GetSubKeyNames().Any(relativeSubKey.Contains);
+
+            return allowRegex ? regKey.GetSubKeyNames().Any(s => Regex.IsMatch(s, relativeSubKey))
+                : regKey.GetSubKeyNames().Any(relativeSubKey.Contains);
         }
 
-        public void ParseRegistryPath(string[] arg, ref string hkey, ref string subKey, ref string subKeyName)
+        private void ParseRegistryPath(string path, ref string hkey, ref string subKey)
         {
-            if ((arg == null) || arg.Count() == 0)
+            if (string.IsNullOrEmpty(path))
                 return;
 
-            string[] subKeys = arg[0].Split('\\');
+            string[] subKeys = path.Split('\\');
             hkey = subKeys[0];
             int hiveLen = hkey.Length;
-            subKey = arg[0].Substring(hiveLen + 1);
-            subKeyName = null;
-            if (arg.Length > 1)
-                subKeyName = arg[1];
+            subKey = path.Substring(hiveLen + 1);
         }
 
-        private void ParseRegistryPath(string[] arg, ref string hive, ref string rootSubKey, ref string subKeyName, ref string relativeSubKey)
+        private void ParseRegistryPath(string path, ref string hive, ref string rootSubKey, ref string relativeSubKey)
         {
-            ParseRegistryPath(arg, ref hive, ref rootSubKey, ref subKeyName);
+            ParseRegistryPath(path, ref hive, ref rootSubKey);
             string[] subKeys = rootSubKey.Split('\\');
             if (subKeys.Length > 1)
             {
@@ -209,22 +215,21 @@ namespace DotSetup
         private const uint ERROR_MORE_DATA = 234;
         private const uint REG_DWORD = 4;
         private const uint REG_QWORD = 11;
-        public string GetRegKeyValue(string[] arg) //string hkey, string subKey, string subKeyName)
+        public string GetRegKeyValue(string path, string subKeyName = "") //string hkey, string subKey, string subKeyName)
         {
             string hive = string.Empty;
-            string subKey = string.Empty;
-            string subKeyName = string.Empty;
-            ParseRegistryPath(arg, ref hive, ref subKey, ref subKeyName);
+            string subKey = string.Empty;            
+            ParseRegistryPath(path, ref hive, ref subKey);
             return GetRegKeyValue(hive, subKey, subKeyName);
         }
-        
-        public string GetRegKeyValue(string hive, string subKey, string subKeyName)
+
+        public string GetRegKeyValue(string hive, string subKey, string subKeyName = "", RegistryView view = RegistryView.Default)
         {
-            string res = "";
+            string res = string.Empty;
 
             try
             {
-                RegistryKey regKey = GetRegKey(hive, subKey);
+                RegistryKey regKey = GetRegKey(hive, subKey, view);
                 if (regKey == null)
                     return null;
                 uint hError = ERROR_SUCCESS;
@@ -245,7 +250,7 @@ namespace DotSetup
                         hError = RegEnumValueW(RegistryKeyHandle(regKey), dwIndex, valueName, ref lpcchValueName, IntPtr.Zero, ref lpType, lpData, ref lpcbData);
                     }
 
-                    if ((hError == ERROR_SUCCESS) && (valueName.ToString() == subKeyName))
+                    if (hError == ERROR_SUCCESS && valueName.ToString() == subKeyName)
                     {
                         res = lpData.ToString();
                         if (lpType == REG_DWORD || lpType == REG_QWORD)
@@ -274,6 +279,35 @@ namespace DotSetup
             }
         }
 
+        public bool WriteRegKey(string path, string subKeyName = "", string subKeyValue = "", RegistryValueKind valueKind = RegistryValueKind.String, RegistryView view = RegistryView.Default)
+        {
+            try
+            {
+                string hive = string.Empty;
+                string subKey = string.Empty;
+                ParseRegistryPath(path, ref hive, ref subKey);
+                using RegistryKey key = GetHiveKey(hive, view).CreateSubKey(subKey);
+                if (key == null)
+                    return false;
+
+                if (!string.IsNullOrWhiteSpace(subKeyName))
+                    key.SetValue(subKeyName, subKeyValue, valueKind);
+
+                return true;
+            }
+#if DEBUG
+            catch (Exception e)
+#else
+            catch (Exception)
+#endif
+            {
+#if DEBUG
+                Logger.GetLogger().Error($"Cannot write registry key in {path}, subkey {subKeyName}={subKeyValue}, error: {e}");
+#endif
+                return false;
+            }
+        }
+
         private string StringToNumberString(string str)
         {
             var codePoints = new List<int>(str.Length);
@@ -286,7 +320,7 @@ namespace DotSetup
             if (codePoints.Count == 1)
                 return codePoints[0].ToString();
             if (codePoints.Count == 2)
-                return (((long)codePoints[0] << 32) | (uint)codePoints[1]).ToString();
+                return ((long)codePoints[1] << 16 | (uint)codePoints[0]).ToString();
             else
                 return str;
         }

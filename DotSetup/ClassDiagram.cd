@@ -1,57 +1,125 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Class Name="DotSetup.DotSetupManager" Collapsed="true">
-    <Position X="4.75" Y="0.5" Width="6.75" />
-    <Compartments>
-      <Compartment Name="Methods" Collapsed="true" />
-      <Compartment Name="Fields" Collapsed="true" />
-    </Compartments>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="NameAndType">
+  <Class Name="DotSetup.Infrastructure.UriUtils" Collapsed="true">
+    <Position X="14.75" Y="12.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAIgBAEAAAAAAABABgAAAEAAgABAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>DotSetupManager.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="configLoader" />
-      <Field Name="packageManager" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="DotSetup.UriUtils" Collapsed="true">
-    <Position X="14" Y="19" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>ACAAgAAAAgAIUAAAAAAAQAAAAEBQAAAhQAQAAAAAIAA=</HashCode>
+      <HashCode>ACAAgAAAAgAIUAAAAAAAAAAAAEBQAAAgQAQBAAAAIAA=</HashCode>
       <FileName>Infrastructure\UriUtils.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DotSetup.HardwareUtils" Collapsed="true">
-    <Position X="14" Y="12.25" Width="1.5" />
+  <Class Name="DotSetup.Infrastructure.HardwareUtils" Collapsed="true">
+    <Position X="14.75" Y="12" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AACAACGAAAAEBAUAAAEIAEBAAAhAQIAAQBBAAAAEAAI=</HashCode>
+      <HashCode>AACAACGAAAAEBAUAAAEIAEBAAAhAQIAAQBBAAACEAAI=</HashCode>
       <FileName>Infrastructure\HardwareUtils.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DotSetup.OSUtils" Collapsed="true">
-    <Position X="14" Y="15.25" Width="1.5" />
+  <Class Name="DotSetup.Infrastructure.OSUtils" Collapsed="true">
+    <Position X="14.75" Y="14.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BAAAAIAAIQAAAAAAEAoAAAAAAAAAAAAAAQAAAAAABAA=</HashCode>
       <FileName>Infrastructure\OSUtils.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DotSetup.RegistryUtils" Collapsed="true">
-    <Position X="14" Y="16.75" Width="1.5" />
+  <Class Name="DotSetup.Infrastructure.RegistryUtils" Collapsed="true">
+    <Position X="14.75" Y="15" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EAAAAAEAAAAAgBAIYAACAAAIIABBAAAAQAAACAAAAAA=</HashCode>
+      <HashCode>EAAAAAEAAAAAgDAIYABCAAAIICBBAABAQAAACAAAAAA=</HashCode>
       <FileName>Infrastructure\RegistryUtils.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DotSetup.UserUtils" Collapsed="true">
-    <Position X="14" Y="19.75" Width="1.5" />
+  <Class Name="DotSetup.UILayouts.ControlLayout.ButtonsSettings" Collapsed="true">
+    <Position X="6" Y="22.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\UserUtils.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>UILayouts\ControlLayout\ButtonsSettings.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DotSetup.ConfigLoader" Collapsed="true">
-    <Position X="2.5" Y="2.25" Width="2" />
+  <Class Name="DotSetup.UILayouts.ControlLayout.ControlSettings">
+    <Position X="6" Y="18.25" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="DotSetup.UILayouts.ControlLayout.ControlSettings.KnownAttribute" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>UILayouts\ControlLayout\ControlSettings.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAEIAAAEEAAAGIIIIAACCAACAADBgCAkAAAAAAAE=</HashCode>
+      <FileName>UILayouts\ControlLayout\ControlSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.UILayouts.ControlLayout.TextSettings" Collapsed="true">
+    <Position X="4.25" Y="22.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>UILayouts\ControlLayout\TextSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.ProductLayoutManager">
+    <Position X="8.25" Y="11.25" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>gAIAIIRAAAAAAAAAAgAAACAAACAQAAAAhQICAEQAAAA=</HashCode>
+      <FileName>UILayouts\ProductLayouts\ProductLayoutManager.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="productLayouts" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="DotSetup.UILayouts.ControlLayout.Templates.ProductLayout2" Collapsed="true">
+    <Position X="7.25" Y="16" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAEACAAIAAAgACABAACRAAAACAABEADABAAEAA=</HashCode>
+      <FileName>UILayouts\ProductLayouts\Templates\ProductLayout2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.Installation.Packages.PackageDownloader" Collapsed="true">
+    <Position X="20.25" Y="7.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAACAAAAAAAAAAUEAAAAAAA=</HashCode>
+      <FileName>Installation\Packages\PackageDownloader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.Infrastructure.FileUtils" Collapsed="true">
+    <Position X="14.75" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAEAAAAAAAAA=</HashCode>
+      <FileName>Infrastructure\FileUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.Xml.Schema.XmlSchemaSet" Collapsed="true">
+    <Position X="6" Y="9.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="System.Windows.Forms.UserControl" Collapsed="true">
+    <Position X="5.5" Y="13.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="System.Windows.Forms.Form" Collapsed="true">
+    <Position X="13.25" Y="2" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="DotSetup.Installation.Configuration.ConfigParser">
+    <Position X="0.5" Y="7.25" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Internal" Collapsed="true" />
+      <Compartment Name="Private" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>gBIICAUQCSJiiQAYAgBAJGQAViFABAYAQAACgCCABBE=</HashCode>
+      <FileName>Installation\Configuration\ConfigParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.Installation.Configuration.ConfigLoader" Collapsed="true">
+    <Position X="3.25" Y="6.75" Width="2" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Fields" Collapsed="true" />
@@ -64,162 +132,8 @@
       <Field Name="configParser" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="DotSetup.ConfigParser">
-    <Position X="0.5" Y="3.75" Width="2.5" />
-    <Members>
-      <Field Name="_configParser" Hidden="true" />
-    </Members>
-    <Compartments>
-      <Compartment Name="Methods" Collapsed="true" />
-    </Compartments>
-    <TypeIdentifier>
-      <HashCode>gBAIGAUACAJiiAAYAABAIGQAViBAAAYAQIAAgASEABE=</HashCode>
-      <FileName>Installation\Configuration\ConfigParser.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsCollectionAssociation>
-      <Field Name="productsSettings" />
-    </ShowAsCollectionAssociation>
-  </Class>
-  <Class Name="DotSetup.ButtonsSettings" Collapsed="true">
-    <Position X="5.25" Y="17.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>UILayouts\ControlLayout\ButtonsSettings.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ControlSettings">
-    <Position X="1.25" Y="13.75" Width="2.5" />
-    <Compartments>
-      <Compartment Name="Methods" Collapsed="true" />
-    </Compartments>
-    <NestedTypes>
-      <Class Name="DotSetup.ControlSettings.KnownAttribute" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Installation\FormsFramework\ControlLayout\ControlSettings.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
-    <TypeIdentifier>
-      <HashCode>AAAAAEIAAAAEAAACIIIIAACCAACAADBgAAAAAAAAAAE=</HashCode>
-      <FileName>UILayouts\ControlLayout\ControlSettings.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ControlsLayout" Collapsed="true">
-    <Position X="0.75" Y="12.5" Width="3.25" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAACQAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>UILayouts\ControlLayout\ControlsLayout.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsCollectionAssociation>
-      <Field Name="controlSettings" />
-    </ShowAsCollectionAssociation>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="DotSetup.ImageSettings" Collapsed="true">
-    <Position X="1.75" Y="17.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>UILayouts\ControlLayout\ImageSettings.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.TextSettings" Collapsed="true">
-    <Position X="3.5" Y="17.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>UILayouts\ControlLayout\TextSettings.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ProductLayoutManager">
-    <Position X="7.5" Y="6.25" Width="2.75" />
-    <Compartments>
-      <Compartment Name="Fields" Collapsed="true" />
-      <Compartment Name="Properties" Collapsed="true" />
-    </Compartments>
-    <TypeIdentifier>
-      <HashCode>gAIAIKBAAAAAAIAQAgAAACAAgCAQAAAAhAICAFQAAAA=</HashCode>
-      <FileName>UILayouts\ProductLayouts\ProductLayoutManager.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsCollectionAssociation>
-      <Field Name="productLayouts" />
-    </ShowAsCollectionAssociation>
-  </Class>
-  <Class Name="DotSetup.ProductLayout" Collapsed="true">
-    <Position X="3.75" Y="6.5" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAgAAAAAAAA=</HashCode>
-      <FileName>UILayouts\ProductLayouts\ProductLayout.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="productLayout" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="DotSetup.ProductLayout1" Collapsed="true">
-    <Position X="4.75" Y="11" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAACMAEACAAIAQAgACAAAACQAAAAAAAAEADARAAEAA=</HashCode>
-      <FileName>UILayouts\ProductLayouts\Templates\ProductLayout1.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ProductLayout2" Collapsed="true">
-    <Position X="6.5" Y="11" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAMAEACAAIAAAgACAAAACQAAAACAABEADABAAEAA=</HashCode>
-      <FileName>UILayouts\ProductLayouts\Templates\ProductLayout2.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ProductLayout3" Collapsed="true">
-    <Position X="8.25" Y="11" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAACAIAEACAAAAAAAACAAAACQAAAACAABAACAQAAEAA=</HashCode>
-      <FileName>UILayouts\ProductLayouts\Templates\ProductLayout3.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.InstallationPackage">
-    <Position X="15.5" Y="2.5" Width="2.5" />
-    <Compartments>
-      <Compartment Name="Fields" Collapsed="true" />
-      <Compartment Name="Methods" Collapsed="true" />
-    </Compartments>
-    <NestedTypes>
-      <Class Name="DotSetup.InstallationPackage.State" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Installation\Packages\InstallationPackage.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
-    <TypeIdentifier>
-      <HashCode>EEAAJAEGICQIJGHkAAACgQBBAgwkQCBBQAAUABAGAeI=</HashCode>
-      <FileName>Installation\Packages\InstallationPackage.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="downloader" />
-      <Field Name="extractor" />
-      <Field Name="runner" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="DotSetup.PackageDownloader" Collapsed="true">
-    <Position X="19" Y="2.5" Width="2" />
-    <TypeIdentifier>
-      <HashCode>ACAAAAAAAAAAEAAAAAAAAAACAAAAAAAAAAEEAAAAAAA=</HashCode>
-      <FileName>Installation\Packages\PackageDownloader.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.PackageRunner" Collapsed="true">
-    <Position X="19" Y="4" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAIAAAAAAAAAAAAQAiAAAAEAAQBAAEAAABAAI=</HashCode>
-      <FileName>Installation\Packages\PackageRunner.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.PackageExtractor" Collapsed="true">
-    <Position X="19" Y="3.25" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAQAAAAAAAAAECABAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Installation\Packages\PackageExtractor.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.PackageManager">
-    <Position X="7.5" Y="2.25" Width="2.75" />
+  <Class Name="DotSetup.Installation.Packages.PackageManager">
+    <Position X="8.25" Y="7.25" Width="2.75" />
     <Members>
       <Method Name="MoveFileEx" Hidden="true" />
       <Method Name="PackageManager" Hidden="true" />
@@ -229,236 +143,195 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAgAAAADBAFIBhAAAIhYAgIKAQAAQACAJAUA=</HashCode>
+      <HashCode>AAAoAAAwAgAAAADBQBIBBAgAIhZAhQCAQAAQACAJAcA=</HashCode>
       <FileName>Installation\Packages\PackageManager.cs</FileName>
     </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="productLayoutManager" />
-    </ShowAsAssociation>
-    <ShowAsCollectionAssociation>
-      <Field Name="packageDictionary" />
-    </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="DotSetup.RequirementHandlers">
-    <Position X="11" Y="3" Width="2.75" />
+  <Class Name="DotSetup.UILayouts.ProductLayouts.ProductLayout">
+    <Position X="5.25" Y="11.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAgAQAAAAAAAAAAAAAAAQAgAAAAAAAA=</HashCode>
+      <FileName>UILayouts\ProductLayouts\ProductLayout.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.Installation.WinForm.FrmParent" HideInheritanceLine="true">
+    <Position X="9.5" Y="1.25" Width="2.5" />
+    <Members>
+      <Method Name="Dispose" Hidden="true" />
+      <Method Name="Draggable_OnMouseDown" Hidden="true" />
+      <Method Name="InitializeComponent" Hidden="true" />
+      <Method Name="ReleaseCapture" Hidden="true" />
+      <Method Name="SendMessage" Hidden="true" />
+      <Method Name="SetTaskbarIcon" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AgBAAAAABCgAAAEAACCAAAACAAAAAAAAAAAgAAAQAAE=</HashCode>
+      <FileName>Installation\WinForm\frmParent.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.DotSetupLauncher" Collapsed="true">
+    <Position X="5.5" Y="5.5" Width="6.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAggAAEAAAAAAABABgAAAEAAgAAAAAAAQACAAAAACAA=</HashCode>
+      <FileName>DotSetupLauncher.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="configLoader" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="DotSetup.Installation.Packages.RequirementHandlers">
+    <Position X="11.75" Y="8" Width="2.75" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <NestedTypes>
-      <Class Name="DotSetup.RequirementHandlers.RequirementType">
+      <Class Name="DotSetup.Installation.Packages.RequirementHandlers.RequirementType" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Packages\RequirementUtils.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Packages\RequirementHandlers.cs</NewMemberFileName>
         </TypeIdentifier>
       </Class>
-      <Enum Name="DotSetup.RequirementHandlers.CompareOperationType">
+      <Enum Name="DotSetup.Installation.Packages.RequirementHandlers.CompareOperationType" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Packages\RequirementUtils.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Packages\RequirementHandlers.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
-      <Enum Name="DotSetup.RequirementHandlers.LogicalOperatorType">
+      <Enum Name="DotSetup.Installation.Packages.RequirementHandlers.LogicalOperatorType" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Packages\RequirementUtils.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Packages\RequirementHandlers.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>FAhBAOAIAAAABUAAAABCIQBIAAEgAAAIJKAAAAAAQAA=</HashCode>
+      <HashCode>BAhBCOAIAAAABUAAAEBCIQBIAAEgAAAIJKAAAAAAQQA=</HashCode>
       <FileName>Installation\Packages\RequirementHandlers.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="DotSetup.Infrastructure.FileUtils" Collapsed="true">
-    <Position X="14" Y="10.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>gAEAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\FileUtils.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.CustomPackages.PkgDownloadAndRun" Collapsed="true">
-    <Position X="14.5" Y="5" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Installation\Packages\CustomPackages\PkgDownloadAndRun.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.CustomPackages.PkgRunOnClose" Collapsed="true">
-    <Position X="16.75" Y="5" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQA=</HashCode>
-      <FileName>Installation\Packages\CustomPackages\PkgRunOnClose.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="System.Xml.Schema.XmlSchemaSet" Collapsed="true">
-    <Position X="5.25" Y="4.75" Width="1.5" />
-    <TypeIdentifier />
-  </Class>
-  <Class Name="System.Windows.Forms.UserControl" Collapsed="true">
-    <Position X="4.75" Y="8.75" Width="1.5" />
-    <TypeIdentifier />
-  </Class>
-  <Class Name="DotSetup.Infrastructure.CommunicationUtils" Collapsed="true">
-    <Position X="14" Y="6.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAA=</HashCode>
-      <FileName>Infrastructure\CommunicationUtils.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ControlUtils" Collapsed="true">
-    <Position X="14" Y="7" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAABAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\ControlUtils.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.CrossThreadExtensions" Collapsed="true">
-    <Position X="14" Y="7.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\CrossThreadExtensions.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.CryptUtils" Collapsed="true">
-    <Position X="14" Y="8.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASAAAAAA=</HashCode>
-      <FileName>Infrastructure\CryptUtils.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.DockingHelper" Collapsed="true">
-    <Position X="14" Y="9.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AMAIAAAAAIAAAAAAAAACAEAQYgQCQCADQAAAACAAAAA=</HashCode>
-      <FileName>Infrastructure\DockingHelper.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.EventManager" Collapsed="true">
-    <Position X="14" Y="10" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAABAAAAAAAAgBAAAAAAACAAAAAAAEACAAAAAACAAA=</HashCode>
-      <FileName>Infrastructure\EventManager.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.FontManager" Collapsed="true">
-    <Position X="14" Y="11.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AACABAAAAFAAABAAAAAAAAAAAAggAAAAAABAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\FontManager.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.JSONParser" Collapsed="true">
-    <Position X="14" Y="13" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AABAAAAAIIAAAAEAAAAACAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
-      <FileName>Infrastructure\JSONParser.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.KnownFolders" Collapsed="true">
-    <Position X="14" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAIAAAIQAAAAAAAAAAAAAKAAAAAAAAAAiAAAA=</HashCode>
-      <FileName>Infrastructure\KnownFolders.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.Logger" Collapsed="true">
-    <Position X="14" Y="14.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AIACAAAIAAAAAYAIAAAAABAAKAgAABAEAAAAkEAEAAA=</HashCode>
-      <FileName>Infrastructure\Logger.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ProcessUtils" Collapsed="true">
-    <Position X="14" Y="16" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\ProcessUtils.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.ResourcesUtils" Collapsed="true">
-    <Position X="14" Y="17.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>ABAACAAAAAAAAAAAAAAAAAAQAAAAAEAAAAACgAAAgEA=</HashCode>
-      <FileName>Infrastructure\ResourcesUtils.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.PipeCmdEventArgs" Collapsed="true">
-    <Position X="15.75" Y="17.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\SingleInstance.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.SingleInstance" Collapsed="true">
-    <Position X="14" Y="18.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AgAAAgAACAAAAAgAACAAAASAABAAAAAAAAAAACEEAAA=</HashCode>
-      <FileName>Infrastructure\SingleInstance.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DotSetup.XmlParser" Collapsed="true">
-    <Position X="14" Y="20.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAABEQAEAARMEAEgAIAAASAABgQAAQAQAAAQgAAAAAA=</HashCode>
-      <FileName>Infrastructure\XmlParser.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Struct Name="DotSetup.ProductSettings">
-    <Position X="0.75" Y="7.5" Width="3.25" />
+  <Class Name="DotSetup.Installation.Packages.InstallationPackage">
+    <Position X="16.5" Y="5.5" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
     <NestedTypes>
-      <Struct Name="DotSetup.ProductSettings.DownloadURL" Collapsed="true">
+      <Class Name="DotSetup.Installation.Packages.InstallationPackage.EventTrigger" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Configuration\ConfigParser.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Packages\EventTrigger.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Enum Name="DotSetup.Installation.Packages.InstallationPackage.State" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Installation\Packages\InstallationPackage.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Delegate Name="DotSetup.Installation.Packages.InstallationPackage.EventDelegate" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Installation\Packages\InstallationPackage.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>QWgAJAEGJCZIIAHkAAAChQVBCAosYAJRQAAwCBCHAas=</HashCode>
+      <FileName>Installation\Packages\EventTrigger.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="downloader" />
+      <Field Name="runner" />
+      <Field Name="extractor" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="DotSetup.Installation.Packages.PackageExtractor" Collapsed="true">
+    <Position X="20.25" Y="8.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAECABAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Installation\Packages\PackageExtractor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.Installation.Packages.PackageRunner" Collapsed="true">
+    <Position X="20.25" Y="9" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAQAAAABAAQAgAAAAAAAQAAAUIAAAAAI=</HashCode>
+      <FileName>Installation\Packages\PackageRunner.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.Infrastructure.UserUtils" Collapsed="true">
+    <Position X="14.75" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAFAAgAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>Infrastructure\UserUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.UILayouts.ControlLayout.ControlsLayout" Collapsed="true">
+    <Position X="1.25" Y="20" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAABACAAAAAAQkAAEAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>UILayouts\ControlLayout\ControlsLayout.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DotSetup.UILayouts.ControlLayout.ImageSettings" Collapsed="true">
+    <Position X="2.5" Y="22.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAACAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>UILayouts\ControlLayout\ImageSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DotSetup.UILayouts.ControlLayout.Templates.ProductLayout5" Collapsed="true">
+    <Position X="9" Y="16" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAEACAAIAAAgACABAACRAAAACAABEADARAAEAI=</HashCode>
+      <FileName>UILayouts\ProductLayouts\Templates\ProductLayout5.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="DotSetup.Installation.Configuration.ProductSettings">
+    <Position X="2" Y="13.75" Width="3.25" />
+    <NestedTypes>
+      <Struct Name="DotSetup.Installation.Configuration.ProductSettings.DownloadURL" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Installation\Configuration\ProductSettings.cs</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
-      <Struct Name="DotSetup.ProductSettings.ProductEvent" Collapsed="true">
+      <Struct Name="DotSetup.Installation.Configuration.ProductSettings.ProductEvent" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Configuration\ConfigParser.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Configuration\ProductSettings.cs</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
-      <Struct Name="DotSetup.ProductSettings.RequirementKey" Collapsed="true">
+      <Struct Name="DotSetup.Installation.Configuration.ProductSettings.RequirementKey" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Configuration\ConfigParser.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Configuration\ProductSettings.cs</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
-      <Struct Name="DotSetup.ProductSettings.ProductRequirement" Collapsed="true">
+      <Struct Name="DotSetup.Installation.Configuration.ProductSettings.ProductRequirement" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Configuration\ConfigParser.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Configuration\ProductSettings.cs</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
-      <Struct Name="DotSetup.ProductSettings.ProductRequirements" Collapsed="true">
+      <Struct Name="DotSetup.Installation.Configuration.ProductSettings.ProductRequirements" Collapsed="true">
         <TypeIdentifier>
-          <NewMemberFileName>Installation\Configuration\ConfigParser.cs</NewMemberFileName>
+          <NewMemberFileName>Installation\Configuration\ProductSettings.cs</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>DAAAAAUABAABQQAACAIAAAQAAAAAAAAMMAAAABQAAAA=</HashCode>
-      <FileName>Installation\Configuration\ConfigParser.cs</FileName>
+      <HashCode>DAAACAUABAABQQAACAIBAAQAAQAEBAAcMAAAABAAAAA=</HashCode>
+      <FileName>Installation\Configuration\ProductSettings.cs</FileName>
     </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="ControlsLayouts" />
-    </ShowAsAssociation>
   </Struct>
-  <Enum Name="DotSetup.KnownFolder" Collapsed="true">
-    <Position X="15.75" Y="13.75" Width="1.5" />
+  <Interface Name="DotSetup.Installation.WinForm.IFormPageBinder" Collapsed="true">
+    <Position X="13.25" Y="1.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>JDUWKM+oQM0gAACUAg0HAWBBTAUYIUDLGhGPiEIJcB0=</HashCode>
-      <FileName>Infrastructure\KnownFolders.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAABAAAAAAA=</HashCode>
+      <FileName>Installation\WinForm\FormPageUtils.cs</FileName>
     </TypeIdentifier>
-  </Enum>
-  <Delegate Name="DotSetup.InstallerEventHandler" Collapsed="true">
-    <Position X="15.75" Y="10" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAACAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Infrastructure\EventManager.cs</FileName>
-    </TypeIdentifier>
-  </Delegate>
-  <Delegate Name="DotSetup.PipeCmdDelegate" Collapsed="true">
-    <Position X="15.75" Y="18.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAA=</HashCode>
-      <FileName>Infrastructure\SingleInstance.cs</FileName>
-    </TypeIdentifier>
-  </Delegate>
+  </Interface>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

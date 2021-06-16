@@ -6,7 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace DotSetup
+namespace DotSetup.Infrastructure
 {
     public class DockingHelper
     {
@@ -80,8 +80,8 @@ namespace DotSetup
         private void PollWindowLocation()
         {
             RECT location = GetWindowLocation();
-            dockedControl.PerformSafely(() => dockedControl.Width += (location.Right - location.Left) - (lastKnownWindowLocation.Right - lastKnownWindowLocation.Left));
-            dockedControl.PerformSafely(() => dockedControl.Height += (location.Bottom - location.Top) - (lastKnownWindowLocation.Bottom - lastKnownWindowLocation.Top));
+            dockedControl.PerformSafely(() => dockedControl.Width += location.Right - location.Left - (lastKnownWindowLocation.Right - lastKnownWindowLocation.Left));
+            dockedControl.PerformSafely(() => dockedControl.Height += location.Bottom - location.Top - (lastKnownWindowLocation.Bottom - lastKnownWindowLocation.Top));
             lastKnownWindowLocation = location;
         }
 
