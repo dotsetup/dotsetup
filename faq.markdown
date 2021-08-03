@@ -5,6 +5,9 @@ permalink: /faq/
 nav_order: 5
 ---
 
+# FAQ
+
+
 ### Do you plan to support other OS’s than Windows?
 Currently dotSetup is a Windows Only installer. Although .NET framework is already available for many other Operating Systems, in our opinion it makes sense to support additional OS’s only when these frameworks are widely available or preinstalled on a majority of devices.
 

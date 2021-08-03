@@ -5,6 +5,7 @@ permalink: /download/
 nav_order: 2
 ---
 
+# Download
 For instructions on how to use dotSetup, please refer to our [FAQ](/faq.markdown) and [Wiki](https://github.com/dotsetup/dotsetup/wiki).
 
 ### Get latest dotSetup stable version:

@@ -5,6 +5,7 @@ permalink: /license/
 nav_order: 3
 ---
 
+# License
 dotSetup is licensed under the GPLv3. It is free for personal and commercial use according to the license terms.
 
 ```

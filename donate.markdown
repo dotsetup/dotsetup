@@ -5,6 +5,7 @@ permalink: /donate/
 nav_order: 6
 ---
 
+# Donate
 dotSetup is a free software, but it does cost to maintain it. If you wish to express your appreciation for the time and resources the developers invest in coding and supporting it, help defer the costs of running the web server, or just support the project - we do accept and appreciate donations.
 
 Click on the button below to donate using PayPal:
