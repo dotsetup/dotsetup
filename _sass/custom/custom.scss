@@ -1,0 +1,38 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css");
+
+
+.features {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 50px 0;
+
+  div {
+    box-sizing: border-box;
+    width: 33%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    i {
+      font-size: 30px;
+      height: 40px;
+    }
+
+    div {
+      text-align: center;
+      width: fit-content;
+      margin-bottom: 10px;
+    }
+
+    .features-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .features-description {
+      font-size: 12px;
+    }
+  }
+}
